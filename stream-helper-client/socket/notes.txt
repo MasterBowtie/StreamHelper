@@ -1,0 +1,8 @@
+event listeners 
+    "open"
+    "close"
+    "message"
+    "error"
+
+
+https://github.com/BarryCarlyon/twitch_misc/blob/main/eventsub/websockets/web/eventsub.js#L172
