@@ -131,3 +131,6 @@ dist
 
 # Https
 cert/
+
+#Assest
+stream-helper-client/src/assets/

@@ -32,3 +32,11 @@ img{
   left: 0px;
 
 }
+
+#bowtie {
+  height: 20%;
+  width: auto;
+  position:absolute;
+  top: 5%;
+  left: 5%;
+}
