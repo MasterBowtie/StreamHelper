@@ -1,12 +1,22 @@
 import Scripture from "./Scripture"
 import Chat from "./Chat"
+import Title from "./Title"
 
 function Start() {
+
+    // Need to find out how to detect video end in React
+    // let video = document.getElementById("introVideo");
+    // video.addEventListener("ended", (event) => {
+    //     //Have the Starting Soon Title appear
+    // })
+
     return (
         <>
             {/* <img className="container" src="src/assets/background_photo.png"></img> */}
-            <video className="container" autoPlay src="src/assets/Stream_Start_0.mp4" type="vidoe/mp4" loop></video>
+            <video id="introVideo" className="container" autoPlay src="src/assets/Foundation.mp4" loop type="video/mp4"></video>
+            {/* <h3>Starting Soon!</h3> */}
             <Scripture className={"glass"}/>
+            <Title title={"Starting Soon"}></Title>
             {/* <img id="bowtie" src="src/assets/Events.gif" type="image/gif"/> */}
         </>
     )

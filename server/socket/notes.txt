@@ -6,3 +6,12 @@ event listeners
 
 
 https://github.com/BarryCarlyon/twitch_misc/blob/main/eventsub/websockets/web/eventsub.js#L172
+
+https://github.com/instafluff/ComfyJS/blob/master/app.js#L469
+
+https://github.com/tmijs/tmi.js
+
+
+curl -X GET 'https://api.twitch.tv/helix/eventsub/subscriptions' \
+-H 'Authorization: Bearer 6c8c8b3bbeuc0zeftwz2eq7rcih3hv' \
+-H 'Client-Id: 6c8c8b3bbeuc0zeftwz2eq7rcih3hv'

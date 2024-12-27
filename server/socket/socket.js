@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+
+// Made by Barry Carlyon
+// https://github.com/BarryCarlyon/twitch_misc/blob/main/eventsub/websockets/web/eventsub.js
 export class initSocket {
     counter = 0
     closeCodes = {
@@ -191,23 +194,12 @@ export class initSocket {
     }
 }
 
-export function requestHooks(broadcaster_user_id, user_id, access_token, session_id) {
+export function requestHooks(user_id, access_token, session_id, topics) {
     console.log("requestHooks")
-    let topics = {
-        'channel.chat.clear': { version: "1", condition: { broadcaster_user_id, user_id } },
-        'channel.chat.clear_user_messages': { version: "1", condition: { broadcaster_user_id, user_id } },
-
-        'channel.chat.message_delete': { version: "1", condition: { broadcaster_user_id, user_id } },
-        'channel.chat.notification': { version: "1", condition: { broadcaster_user_id, user_id } },
-        'channel.chat.message': { version: "1", condition: { broadcaster_user_id, user_id } },
-
-        'channel.chat_settings.update': { version: "1", condition: { broadcaster_user_id, user_id } }
-    }
-
     console.log(`Spawn Topics for ${user_id}`);
 
     for (let type in topics) {
-        console.log(`Attempt create ${type} - ${broadcaster_user_id} via ${user_id}`);
+        console.log(`Attempt create ${type} - ${user_id}`);
         let { version, condition } = topics[type];
 
 

@@ -8,8 +8,8 @@
   height: fit-content;
   position: absolute;
   top: 30%;
-  left: 0px;
-  right:0px;
+  left: 200px;
+  /* right: 0px; */
   margin: auto;
   color: #f0f8ff;
 }
@@ -17,20 +17,11 @@
 .glass {
   background-color: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
-  text-align: center; 
+  text-align: left; 
 }
 
 p {
   margin: 0;
-}
-
-img{
-  height: 100%;
-  width: 100%;
-  position:absolute;
-  top: 0px;
-  left: 0px;
-
 }
 
 #bowtie {
@@ -39,4 +30,53 @@ img{
   position:absolute;
   top: 5%;
   left: 5%;
+}
+
+.title {
+  text-transform: uppercase;
+  font-size: 90px;
+  font-family:'Verdana';
+  font-weight: 900;
+  position: absolute;
+  top: 16%;
+  width: 100%;
+  text-align: center;
+  color: #f0f8ff;
+  
+}
+
+.title
+{
+  text-transform: uppercase;
+  background-image: linear-gradient(
+    -225deg,
+    #0400ff 0%,
+    #00560d 25%,
+    #fff800 50%,
+    #00560d 75%,
+    #0400ff 100%
+  );
+  background-size: auto auto;
+  background-clip: text;
+  background-size: 200% auto;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 3px rgb(0, 78, 4);
+  animation: textclip 4s linear infinite;
+  position: absolute;
+  font-size: 90px;
+  font-family:'Verdana';
+  font-weight: 900;
+  position: absolute;
+  top: 16%;
+  width: 100%;
+  text-align: center;
+}
+
+@keyframes textclip {
+  to {
+    background-position: 200% center;
+  }
 }
