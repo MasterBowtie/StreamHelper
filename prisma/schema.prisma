@@ -1,0 +1,16 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url = env("DATABASE_URL")
+}
+
+model House {
+    id          Int         @id @default(autoincrement())
+    wall        String      @db.VarChar(20)
+    roof        String      @db.VarChar(20)
+    style       String      @db VarChar(20)
+    used        Boolean     @default(false)
+}

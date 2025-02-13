@@ -4,12 +4,13 @@ import viteLogo from '/vite.svg'
 import Chat from './Chat'
 import FollowGoal from './FollowGoal'
 import Title from './Title'
+import { StyleHouse } from './HouseStyle'
 
 function App() {
   return (
     <>
       <p>Follow Testing</p>
-      <Title title={"Testing"}/>
+      <StyleHouse/>
     </>
   )
 }

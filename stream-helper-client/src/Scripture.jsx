@@ -2,10 +2,10 @@ function Scripture({className}) {
     return (
     <div className={`scripture ${className}`} style={{textAlign: "left"}}>
         <p>
-        7 Know ye not that there are more nations than one? Know ye not that I, the Lord your God, have created all men, and that I remember those who are upon the isles of the sea; and that I rule in the heavens above and in the earth beneath; and I bring forth my word unto the children of men, yea, even upon all the nations of the earth?
-        </p>
+        28 For which of you, intending to build a tower, sitteth not down first, and counteth the cost, whether he have sufficient to finish it?
+        </p><br/>
         <p>
-            - 2 Nephi 29:7
+            - Luke 14:28
         </p>
     </div>
     )

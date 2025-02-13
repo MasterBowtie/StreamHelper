@@ -21,7 +21,6 @@ import {initSocket, requestHooks} from "./server/socket/socket.js";
 import * as fs from "fs";
 import * as https from "node:https";
 import { Server } from "socket.io";
-import { profile } from "console";
 
 dotenv.config();
 
@@ -32,15 +31,6 @@ var privateKey  = fs.readFileSync('cert/cert.key', 'utf8');
 var certificate = fs.readFileSync('cert/cert.crt', 'utf8');
 var credentials = {key: privateKey, cert: certificate};
 
-// Setup memory variables
-var messages = [];
-var knownCheermotes;
-var badges;
-var topics = {
-  chat: false,
-}
-
-
 // Initialize Express and middlewares
 var app = express();
 const httpsServer = https.createServer(credentials, app);
@@ -49,9 +39,6 @@ app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 app.use(session({secret: process.env.SECRET, resave: false, saveUninitialized: false}));
-// app.use(express.static('public'));
-// app.use(passport.initialize());
-// app.use(passport.session());
 
 
 // WebHooks Start Here
@@ -105,186 +92,25 @@ passport.use('twitch', new OAuth2Strategy({
   },
   
   function(accessToken, refreshToken, profile, done) {
-    profile.accessToken = accessToken;
-    profile.refreshToken = refreshToken;
+    console.log(profile)
+    let broadcaster_id = profile.data[0].id;
+    console.log("Profile", profile.data[0].id);
 
-    // Securely store user profile in your DB
-    //User.findOrCreate(..., function(err, user) {
-    //  done(err, user);
-    //});
-    console.log(profile.data[0].id);
-    twitchSocket = new initSocket(true);
-
+    twitchSocket = new initSocket(true)
     twitchSocket.on("connect", (session) => {
       console.log("Connected WebSocket to Twitch!");
 
-      fetch('https://api.twitch.tv/helix/eventsub/subscriptions', {headers: {'Authorization': `Bearer ${profile.accessToken}`, 'Client-Id': process.env.TWITCH_CLIENT_ID}})
-      .then(res=> {
-        return res.json()
-      }).then(res => {
-        console.log("Total Cost:", res.total_cost);
+      let hooks = {
+        'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster_id, "user_id": broadcaster_id}}
+      }
+      requestHooks(broadcaster_id, accessToken, session, hooks)
+
+      twitchSocket.on("channel.chat.message", ({payload})=> {
+        console.log("Chat: ", payload)
       })
-
-      // io.on("connection", (socket) => {
-      //   console.log("SocketIO Connect");
-      //   socket.on("followers", () => {
-      //     if (!topics.follow) {
-
-      //       let broadcaster_id = profile.data[0].id;
-      //       let hooks = {
-      //         'channel:follow': {version: "2", condition: {"broadcaster_user_id":broadcaster_id, "moderator_user_id": broadcaster_id}}
-      //       }
-      //       requestHooks(profile.data[0].id, accessToken, session, hooks);
-      //       topics.follow = true;
-      //     }
-      //     // socket.emit('moderator:read:followers', data);
-      //   })
-
-      //   socket.on("chat", () => {
-      //     if (!topics.chat) {
-
-      //       let user_id = profile.data[0].id;
-      //       let broadcaster_user_id = user_id;
-      //       let hooks = {
-
-      //         // 'channel.chat.clear': { version: "1", condition: {broadcaster_user_id, user_id } },
-      //         // 'channel.chat.clear_user_messages': { version: "1", condition: {broadcaster_user_id, user_id } },
-              
-      //         // 'channel.chat.message_delete': { version: "1", condition: {broadcaster_user_id, user_id } },
-      //         // 'channel.chat.notification': { version: "1", condition: {broadcaster_user_id, user_id } },
-      //         // 'channel.chat.message': { version: "1", condition: {broadcaster_user_id, user_id } },
-              
-      //         // 'channel.chat_settings.update': { version: "1", condition: {broadcaster_user_id, user_id } }
-      //       }
-      //       requestHooks(profile.data[0].id, accessToken, session, hooks);
-      //       topics.chat = true;
-      //     }
-          
-      //     socket.emit("channel.chat.message", messages);
-      //     if (!knownCheermotes) {
-      //       knownCheermotes = {};
-      //       fetch(
-      //         `https://api.twitch.tv/helix/bits/cheermotes?broadcaster_id=${profile.data[0].id}`,
-      //         {
-      //           "headers": {
-      //             "Client-ID": process.env.TWITCH_CLIENT_ID,
-      //             "Authorization": `Bearer ${accessToken}`
-      //           }
-      //         }
-      //       )
-      //     .then(resp => resp.json())
-      //     .then(resp => {
-      //       let { data } = resp;
-      //       if (data) {
-      //         // iterate and merge
-      //         data.forEach(cheermote => {
-      //           let { prefix, tiers } = cheermote;
-      //                   if (tiers && tiers.length > 0) {
-      //                       knownCheermotes[prefix] = {};
-
-      //                       tiers.forEach(tier => {
-      //                           let { can_cheer, id, images } = tier;
-      //                           if (can_cheer) {
-      //                               let image = images.dark.animated["1.5"];
-      //                               knownCheermotes[prefix][id] = image;
-      //                           }
-      //                       });
-      //                   }
-      //                 });
-      //               }
-      //         })
-      //       .then(() => {
-      //         return fetch ("https://api.twitch.tv/helix/chat/emotes/global")
-      //       })
-      //       .then( resp => resp.json())
-      //       .then(resp => {
-      //         let { data } = resp;
-      //         if (data) {
-      //             // iterate and merge
-      //             data.forEach(cheermote => {
-      //                 let { prefix, tiers } = cheermote;
-      //                 if (tiers && tiers.length > 0) {
-      //                   knownCheermotes[prefix] = {};
-
-      //                     tiers.forEach(tier => {
-      //                         let { can_cheer, id, images } = tier;
-      //                         if (can_cheer) {
-      //                             let image = images.dark.animated["1.5"];
-      //                             knownCheermotes[prefix][id] = image;
-      //                         }
-      //                     });
-      //                 }
-      //               });
-      //             }
-      //             console.log("Cheers!")
-      //             socket.emit("cheerEmotes", knownCheermotes);
-      //           })
-      //       } else {
-      //         socket.emit("cheerEmotes", knownCheermotes);
-      //       }
-
-      //       if (!badges) {
-      //         badges = {};
-      //         fetch(`https://api.twitch.tv/helix/chat/badges/global`,
-      //           {  
-      //             "headers": {
-      //               "Client-ID": process.env.TWITCH_CLIENT_ID,
-      //               "Authorization": `Bearer ${accessToken}`
-      //             }
-      //           }
-      //         )
-      //         .then(resp => resp.json())
-      //         .then(resp => {
-      //         let { data } = resp;
-      //         if (data) {
-      //           data.forEach(set => {
-      //             badges[set.set_id] = {}
-      //             set.versions.forEach(ver => {
-      //               badges[set.set_id][ver.id] = ver.image_url_1x;
-      //             })
-      //           })
-      //         }
-      //         return fetch(`https://api.twitch.tv/helix/chat/badges?broadcaster_id=${profile.data[0].id}`,
-      //         {  
-      //           "headers": {
-      //             "Client-ID": process.env.TWITCH_CLIENT_ID,
-      //             "Authorization": `Bearer ${accessToken}`
-      //           }
-      //         })
-      //       })
-      //       .then(resp => resp.json())
-      //       .then(resp => {
-      //         let { data } = resp;
-      //         if (data) {
-      //           data.forEach(set => {
-      //             badges[set.set_id] = {}
-      //             set.versions.forEach(ver => {
-      //               badges[set.set_id][ver.id] = ver.image_url_1x;
-      //             })
-      //           })
-      //         }
-      //         console.log("Badges");
-      //         socket.emit("badges", badges)
-      //       })
-      //     } else {
-      //       socket.emit("badges", badges);
-      //    }
-      //  })
-      // })
-    })
-
-    twitchSocket.on("session-silenced", () => {
-      console.log('Session mystery died due to silence detected');
     })
     
-    twitchSocket.on('session_keepalive', () => {
-    //   console.log(new Date());
-    })
-
-    twitchSocket.on("moderator:read:followers", ({ payload })=> {
-      console.log(payload)
-    })
-
+    
     done(null, profile);
   }
 ));
@@ -313,16 +139,20 @@ if (!DEBUG) {
 }
 
 // Set route to start OAuth link, this is where you define scopes to request
-app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'user:read:chat' }));
+app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'channel:bot user:read:chat' }))
 
 // Set route for OAuth redirect
-app.get('/auth/twitch/callback', passport.authenticate('twitch', { successRedirect: '/', failureRedirect: '/' }));
+app.get('/auth/twitch/callback', passport.authenticate('twitch', {successRedirect: "/", failureRedirect: '/bad' }));
+
+app.get('/bad', (req, res) => {
+  console.error(res)
+})
 
 // If user has an authenticated session, display it, otherwise display link to authenticate
 app.get('/', function (req, res) {
 //   console.log(req.session);
   if(req.session 
-    //&& req.session.passport && req.session.passport.user
+    && req.session.passport && req.session.passport.user
     ) {
     res.render("index", {
         debug: DEBUG,
@@ -331,10 +161,9 @@ app.get('/', function (req, res) {
         assetUrl: process.env.ASSET_URL || "https://localhost:5173",
         layout: false
     })
+  } else {
+    res.redirect("/auth/twitch");
   }
-  // } else {
-  //   res.redirect("/auth/twitch");
-  // }
 });
 
 
