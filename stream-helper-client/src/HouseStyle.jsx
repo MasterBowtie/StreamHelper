@@ -1,24 +1,23 @@
 import { useState, useEffect } from "react"
+import { useApi } from "./utils/use_api";
 
 export function StyleHouse() {
     const [results, setResults] = useState();
+    const api = useApi();
 
+    function getRandom() {
+        const results = api.get("/random").then(res => {console.log(res)})
+    }
 
     return (
         <div>
             <div>
                 <h1>Get Random</h1>
                 <button onClick={(event) => {
-                    setResults("Get Results")
+                    getRandom()
                 }}>Request</button>
-                {(results)? <p>{results}</p>: <></>
-                }
-            </div>
-            <div style={{display: "block"}}>
-                <h1>Submit Style</h1>
-                <p>Style: <input></input></p>
-                <p>Wall: <input></input></p>
-                <p>Roof: <input></input></p>
+                {/* {(results)? <p>{results}</p>: <></>
+                } */}
             </div>
         </div>
     )

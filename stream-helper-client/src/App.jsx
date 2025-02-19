@@ -9,6 +9,7 @@ import { StyleHouse } from './HouseStyle'
 function App() {
   return (
     <>
+      <a href="/#/start">Start</a>
       <p>Follow Testing</p>
       <StyleHouse/>
     </>

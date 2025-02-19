@@ -11,6 +11,6 @@ model House {
     id          Int         @id @default(autoincrement())
     wall        String      @db.VarChar(20)
     roof        String      @db.VarChar(20)
-    style       String      @db VarChar(20)
+    style       String      @db.VarChar(20)
     used        Boolean     @default(false)
 }

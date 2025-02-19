@@ -9,23 +9,35 @@ or in the "license" file accompanying this file. This file is distributed on an 
 
 */
 
+// https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+
 // Define our dependencies
+import {fileURLToPath} from 'node:url';
 import { OAuth2Strategy } from "passport-oauth";
 import passport from "passport";
-import express from "express";
+import express, { Router } from "express";
 import { engine } from 'express-handlebars';
 import dotenv from "dotenv";
 import session from "express-session";
+import bodyParser from "body-parser";
 import request from "request";
+import { PrismaClient } from "@prisma/client";
 import {initSocket, requestHooks} from "./server/socket/socket.js";
 import * as fs from "fs";
 import * as https from "node:https";
 import { Server } from "socket.io";
 
+// import { test } from './server/controllers/house_controller.js';
+import { HouseRepository } from "./server/repositories/house_repository.js";
+import { buildHouseController } from './server/controllers/house_controller.js';
+import { buildHomeController } from './server/controllers/home_controller.js';
+
 dotenv.config();
 
-const DEBUG = process.env.NODE_ENV !== "production";
-const MANIFEST = DEBUG ? {} : JSON.parse(fs.readFileSync("static/.vite/manifest.json").toString())
+export const DEBUG = process.env.NODE_ENV !== "production";
+export const MANIFEST = DEBUG ? {} : JSON.parse(fs.readFileSync("static/.vite/manifest.json").toString())
+const db = new PrismaClient();
+const house_repository = HouseRepository.getInstance(db);
 
 var privateKey  = fs.readFileSync('cert/cert.key', 'utf8');
 var certificate = fs.readFileSync('cert/cert.crt', 'utf8');
@@ -45,6 +57,16 @@ app.use(session({secret: process.env.SECRET, resave: false, saveUninitialized: f
 
 var twitchSocket = undefined;
 const io = new Server(httpsServer);
+
+io.on("connection", (socket) => {
+  console.log("Connected new socket")
+
+  socket.on("disconnect", () => {
+    console.log("Disconnected Socket")
+  })
+})
+
+
 
 // Override passport profile function to get user profile from Twitch API
 OAuth2Strategy.prototype.userProfile = function(accessToken, done) {
@@ -92,21 +114,23 @@ passport.use('twitch', new OAuth2Strategy({
   },
   
   function(accessToken, refreshToken, profile, done) {
-    console.log(profile)
+    // console.log(profile)
     let broadcaster_id = profile.data[0].id;
-    console.log("Profile", profile.data[0].id);
+    // console.log("Profile", profile.data[0].id);
 
     twitchSocket = new initSocket(true)
     twitchSocket.on("connect", (session) => {
       console.log("Connected WebSocket to Twitch!");
 
       let hooks = {
-        'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster_id, "user_id": broadcaster_id}}
+        'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster_id, "user_id": broadcaster_id}},
+        'channel.chat.message_delete': {version: "1", condition: {"broadcaster_user_id": broadcaster_id, "user_id": broadcaster_id}},
+        'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster_id, "moderator_user_id": broadcaster_id}}
       }
       requestHooks(broadcaster_id, accessToken, session, hooks)
 
       twitchSocket.on("channel.chat.message", ({payload})=> {
-        console.log("Chat: ", payload)
+        // console.log("Chat: ", payload)
       })
     })
     
@@ -114,23 +138,27 @@ passport.use('twitch', new OAuth2Strategy({
     done(null, profile);
   }
 ));
+
+app.use(bodyParser.json());
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`)
   next()
 });
 
 
+//Serve static assests
 if (!DEBUG) {
   app.use(express.static('static'));
 } else {
   app.use((req, res, next) => {
     if (req.url.includes(".")) {
-      let lookup = decodeURI(`${process.env.ASSET_URL}${req.url}`);
-      let file = lookup.substring(1, lookup.length);
+      // let lookup = decodeURI(`${process.env.ASSET_URL}${req.url}`);
+      // let file = lookup.substring(1, lookup.length);
       
-      fs.access(file, fs.constants.R_OK, function (err) {
-        console.log(err ? `${lookup} doesn't exist` : `${lookup} ' is there`);
-      });
+      // fs.access(file, fs.constants.R_OK, function (err) {
+      //   console.log(err ? `${lookup} doesn't exist` : `${lookup} ' is there`);
+      // });
+      // console.log("Redirect")
       res.redirect(`${process.env.ASSET_URL}${req.url}`)
     } else {
       next();
@@ -138,36 +166,25 @@ if (!DEBUG) {
   });
 }
 
-// Set route to start OAuth link, this is where you define scopes to request
-app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'channel:bot user:read:chat' }))
 
-// Set route for OAuth redirect
-app.get('/auth/twitch/callback', passport.authenticate('twitch', {successRedirect: "/", failureRedirect: '/bad' }));
 
 app.get('/bad', (req, res) => {
   console.error(res)
 })
 
 // If user has an authenticated session, display it, otherwise display link to authenticate
-app.get('/', function (req, res) {
-//   console.log(req.session);
-  if(req.session 
-    && req.session.passport && req.session.passport.user
-    ) {
-    res.render("index", {
-        debug: DEBUG,
-        jsBundle: DEBUG ? "" : MANIFEST["src/main.jsx"]["file"],
-        cssBundle: DEBUG ? "" : MANIFEST["src/main.jsx"]["css"][0],
-        assetUrl: process.env.ASSET_URL || "https://localhost:5173",
-        layout: false
-    })
-  } else {
-    res.redirect("/auth/twitch");
-  }
-});
+app.use('/', buildHomeController());
+
+app.use("/random", buildHouseController());
+
+
+// Set route to start OAuth link, this is where you define scopes to request
+app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'channel:bot user:read:chat moderator:manage:announcements moderator:read:followers' }))
+
+// Set route for OAuth redirect
+app.get('/auth/twitch/callback', passport.authenticate('twitch', {successRedirect: "/", failureRedirect: '/bad' }));
 
 
 httpsServer.listen(process.env.S_PORT || 3141, () => {
   console.log(`Secure listening on port ${process.env.S_PORT || 3141}...`);
-
 });
