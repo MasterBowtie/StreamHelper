@@ -1,16 +1,24 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "mysql"
-    url = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
-model House {
-    id          Int         @id @default(autoincrement())
-    wall        String      @db.VarChar(20)
-    roof        String      @db.VarChar(20)
-    style       String      @db.VarChar(20)
-    used        Boolean     @default(false)
+model house {
+  id    Int      @id @default(autoincrement())
+  wall  String?  @db.VarChar(10)
+  roof  String?  @db.VarChar(10)
+  style String?  @db.VarChar(10)
+  used  Boolean? @default(false)
+}
+
+model user {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique(map: "name") @db.VarChar(20)
+  token     String? @db.VarChar(100)
+  client_id String  @unique(map: "client_id") @db.VarChar(50)
+  user_id   String? @db.VarChar(20)
 }

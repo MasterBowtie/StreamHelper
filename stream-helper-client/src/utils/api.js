@@ -35,11 +35,11 @@ export class Api {
         return this.makeRequest(uri, "GET")
     }
 
-    post(uri) {
+    post(uri, body) {
         return this.makeRequest(uri, "POST", body)
     }
 
-    put (uri) {
+    put (uri, body) {
         return this.makeRequest(uri, "PUT", body) 
     }
 

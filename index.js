@@ -31,6 +31,7 @@ import { Server } from "socket.io";
 import { HouseRepository } from "./server/repositories/house_repository.js";
 import { buildHouseController } from './server/controllers/house_controller.js';
 import { buildHomeController } from './server/controllers/home_controller.js';
+import { UserRepository } from './server/repositories/user_repository.js';
 
 dotenv.config();
 
@@ -38,6 +39,8 @@ export const DEBUG = process.env.NODE_ENV !== "production";
 export const MANIFEST = DEBUG ? {} : JSON.parse(fs.readFileSync("static/.vite/manifest.json").toString())
 const db = new PrismaClient();
 const house_repository = HouseRepository.getInstance(db);
+const user_repository = UserRepository.getInstance(db);
+var twitchToken;
 
 var privateKey  = fs.readFileSync('cert/cert.key', 'utf8');
 var certificate = fs.readFileSync('cert/cert.crt', 'utf8');
@@ -69,7 +72,7 @@ io.on("connection", (socket) => {
 
 
 // Override passport profile function to get user profile from Twitch API
-OAuth2Strategy.prototype.userProfile = function(accessToken, done) {
+OAuth2Strategy.prototype.userProfile = async function(accessToken, done) {
   var options = {
     url: 'https://api.twitch.tv/helix/users',
     method: 'GET',
@@ -82,10 +85,8 @@ OAuth2Strategy.prototype.userProfile = function(accessToken, done) {
   
   request(options, function (error, response, body) {
     if (response && response.statusCode == 200) {
-      // console.log(response)
       done(null, JSON.parse(body));
     } else {
-        // console.log(body)
       done(JSON.parse(body));
     }
   });
@@ -114,9 +115,10 @@ passport.use('twitch', new OAuth2Strategy({
   },
   
   function(accessToken, refreshToken, profile, done) {
-    // console.log(profile)
+    user_repository.createUser(process.env.CHANNEL_USER_ID, process.env.TWITCH_CLIENT_ID);
+    user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, profile.data[0].id);
     let broadcaster_id = profile.data[0].id;
-    // console.log("Profile", profile.data[0].id);
+    console.log("Profile", profile.data[0].id);
 
     twitchSocket = new initSocket(true)
     twitchSocket.on("connect", (session) => {
@@ -169,13 +171,14 @@ if (!DEBUG) {
 
 
 app.get('/bad', (req, res) => {
-  console.error(res)
+  console.log("it broke!")
+  // console.error(res)
 })
 
-// If user has an authenticated session, display it, otherwise display link to authenticate
-app.use('/', buildHomeController());
 
-app.use("/random", buildHouseController());
+app.use('/', buildHomeController(user_repository));
+
+app.use("/house", buildHouseController(house_repository));
 
 
 // Set route to start OAuth link, this is where you define scopes to request

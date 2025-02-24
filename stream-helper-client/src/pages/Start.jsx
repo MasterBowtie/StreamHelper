@@ -1,6 +1,6 @@
-import Scripture from "./Scripture"
-import Chat from "./Chat"
-import Title from "./Title"
+import Scripture from "../components/Scripture"
+import Chat from "../components/Chat"
+import Title from "../components/Title"
 
 function Start() {
 
