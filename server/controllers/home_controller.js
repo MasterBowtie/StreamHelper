@@ -22,7 +22,9 @@ function buildHomeController(UserRepository) {
                 res.json({total: 0})
             }
         }).then(data => {
-            res.json({total: data.total})
+            res.json({
+                data
+            })
         })
 
     })

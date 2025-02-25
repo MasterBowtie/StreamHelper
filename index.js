@@ -134,6 +134,10 @@ passport.use('twitch', new OAuth2Strategy({
       twitchSocket.on("channel.chat.message", ({payload})=> {
         // console.log("Chat: ", payload)
       })
+
+      twitchSocket.on("channel.follow", ({payload}) => {
+        
+      })
     })
     
     
