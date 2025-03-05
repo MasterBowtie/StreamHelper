@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { useApi } from "../utils/use_api";
-import '../css/house.css';
 
 export function StyleHouse() {
     const [wall, setWall] = useState("");
@@ -77,7 +76,7 @@ export function StyleHouse() {
     }
 
     return (
-        <div className="houseStyle">
+        <div className="widget">
             <h1 style={{margin: "0"}}>House Style Tool</h1>
             <form onSubmit={submitRequest}>
             <br/>

@@ -31,6 +31,7 @@ import { Server } from "socket.io";
 import { HouseRepository } from "./server/repositories/house_repository.js";
 import { buildHouseController } from './server/controllers/house_controller.js';
 import { buildHomeController } from './server/controllers/home_controller.js';
+import { buildTwitchController } from './server/controllers/twitch_controller.js';
 import { UserRepository } from './server/repositories/user_repository.js';
 
 dotenv.config();
@@ -45,6 +46,7 @@ var twitchToken;
 var privateKey  = fs.readFileSync('cert/cert.key', 'utf8');
 var certificate = fs.readFileSync('cert/cert.crt', 'utf8');
 var credentials = {key: privateKey, cert: certificate};
+var chat = []
 
 // Initialize Express and middlewares
 var app = express();
@@ -58,11 +60,13 @@ app.use(session({secret: process.env.SECRET, resave: false, saveUninitialized: f
 
 // WebHooks Start Here
 
-var twitchSocket = undefined;
+var twitchSocket = {};
 const io = new Server(httpsServer);
 
 io.on("connection", (socket) => {
   console.log("Connected new socket")
+
+  socket.emit("channel.chat.message", chat);
 
   socket.on("disconnect", () => {
     console.log("Disconnected Socket")
@@ -115,27 +119,45 @@ passport.use('twitch', new OAuth2Strategy({
   },
   
   function(accessToken, refreshToken, profile, done) {
-    user_repository.createUser(process.env.CHANNEL_USER_ID, process.env.TWITCH_CLIENT_ID);
+    // console.log(profile.data[0]);
+    user_repository.createUser(profile.data[0].login, profile.data[0].id);
     user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, profile.data[0].id);
     let broadcaster_id = profile.data[0].id;
-    console.log("Profile", profile.data[0].id);
+    // console.log("Profile", profile.data[0].id);
 
-    twitchSocket = new initSocket(true)
-    twitchSocket.on("connect", (session) => {
-      console.log("Connected WebSocket to Twitch!");
+    twitchSocket[profile.data[0].login] = new initSocket(true)
+    twitchSocket[profile.data[0].login].on("connect", (session) => {
+      console.log(`Connected WebSocket to Twitch for: ${profile.data[0].login}`);
 
       let hooks = {
         'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster_id, "user_id": broadcaster_id}},
         'channel.chat.message_delete': {version: "1", condition: {"broadcaster_user_id": broadcaster_id, "user_id": broadcaster_id}},
         'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster_id, "moderator_user_id": broadcaster_id}}
       }
-      requestHooks(broadcaster_id, accessToken, session, hooks)
+      requestHooks(profile.data[0].login, accessToken, session, hooks)
 
-      twitchSocket.on("channel.chat.message", ({payload})=> {
-        // console.log("Chat: ", payload)
+      twitchSocket[profile.data[0].login].on("channel.chat.message", ({payload})=> {
+        // console.log("Chat: ", payload.event);
+        
+        if (!payload.event.message.text.startsWith("!")) {
+          chat.push(
+            {key: payload.event.message_id,
+              message: payload.event.message, 
+              username: payload.event.chatter_user_name,
+              color: payload.event.color});
+          
+          io.emit("channel.chat.message", chat);
+        } else {
+            let type = payload.event.message.text.split(" ")[0];
+            if (type === "!vote") {
+              io.emit("channel.chat.vote", {vote: payload.event.message.text, user: payload.event.chatter_user_login});
+            }
+            
+        }
+        
       })
 
-      twitchSocket.on("channel.follow", ({payload}) => {
+      twitchSocket[profile.data[0].login].on("channel.follow", ({payload}) => {
         
       })
     })
@@ -173,16 +195,9 @@ if (!DEBUG) {
 }
 
 
-
-app.get('/bad', (req, res) => {
-  console.log("it broke!")
-  // console.error(res)
-})
-
-
-app.use('/', buildHomeController(user_repository));
-
+app.use('/', buildHomeController());
 app.use("/house", buildHouseController(house_repository));
+app.use("/twitch", buildTwitchController(user_repository));
 
 
 // Set route to start OAuth link, this is where you define scopes to request

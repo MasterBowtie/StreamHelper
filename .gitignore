@@ -132,5 +132,5 @@ dist
 # Https
 cert/
 
-#Assest
-stream-helper-client/src/assets/
+#Assets
+client/src/assets

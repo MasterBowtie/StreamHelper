@@ -5,9 +5,10 @@ import Scripture from './components/Scripture.jsx'
 import Start from './pages/Start.jsx'
 import Chat from './components/Chat.jsx'
 import "./css/index.css"
-import { RouterProvider, createHashRouter } from 'react-router-dom'
+import { Route, RouterProvider, createHashRouter } from 'react-router-dom'
 import { StyleHouse } from './components/HouseStyle.jsx'
 import FollowGoal from './components/FollowGoal.jsx'
+import { Vote } from './components/Vote.jsx'
 
 
 const router = createHashRouter([
@@ -17,9 +18,10 @@ const router = createHashRouter([
   {path: "chat", element: <Chat/>},
   {path: "house", element: <StyleHouse/>},
   {path: "goal", element: <FollowGoal/>},
+  {path: "vote", element: <Vote/>},
 
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <RouterProvider router={router} />
+      <RouterProvider router={router}/>
 )

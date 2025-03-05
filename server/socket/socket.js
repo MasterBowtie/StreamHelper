@@ -42,7 +42,7 @@ export class initSocket {
 
         this.eventsub.addEventListener('open', () => {
             // log(`Opened Connection to Twitch`);
-            console.log("Opened Connection to Twitch")
+            // console.log("Opened Connection to Twitch")
         });
         // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event
         // https://github.com/Luka967/websocket-close-codes
@@ -195,11 +195,11 @@ export class initSocket {
 }
 
 export function requestHooks(user_id, access_token, session_id, topics) {
-    console.log("requestHooks")
+    // console.log("requestHooks")
     console.log(`Spawn Topics for ${user_id}`);
 
     for (let type in topics) {
-        console.log(`Attempt create ${type} - ${user_id}`);
+        // console.log(`Attempt create ${type} - ${user_id}`);
         let { version, condition } = topics[type];
 
 
