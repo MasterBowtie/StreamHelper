@@ -1,11 +1,12 @@
-function Scripture({className}) {
+function Scripture({className, style}) {
+    console.log(style);
     return (
-    <div className={`scripture ${className}`} style={{textAlign: "left"}}>
+    <div className={`scripture ${className}`} style={style}>
         <p>
-        15 Wherefore, lift up your hearts and rejoice, and gird up your loins, and take upon you my whole armor, that ye may be able to withstand the evil day, having done all, that ye may be able to stand.
+        11 Go your way whithersoever I will, and it shall be given you by the Comforter what you shall do and whither you shall go.
         </p><br/>
         <p>
-            - Doctrine & Covenants 27:15
+            D&C 31:11
         </p>
     </div>
     )

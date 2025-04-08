@@ -1,7 +1,11 @@
 function Title({title, className}) {
     return (
-        <div>
-            <p className={`title`}>{title}</p>
+        <div className="title">
+            {title.map(data => {
+                return (
+                    <p>{data}</p>
+                )
+            })}
         </div>
     )
 }

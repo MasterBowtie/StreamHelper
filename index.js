@@ -125,8 +125,8 @@ passport.use('twitch', new OAuth2Strategy({
     let broadcaster_id = profile.data[0].id;
     // console.log("Profile", profile.data[0].id);
 
-    twitchSocket[profile.data[0].login] = new initSocket(true)
-    twitchSocket[profile.data[0].login].on("connect", (session) => {
+    twitchSocket = new initSocket(true)
+    twitchSocket.on("connect", (session) => {
       console.log(`Connected WebSocket to Twitch for: ${profile.data[0].login}`);
 
       let hooks = {
@@ -136,7 +136,7 @@ passport.use('twitch', new OAuth2Strategy({
       }
       requestHooks(profile.data[0].login, accessToken, session, hooks)
 
-      twitchSocket[profile.data[0].login].on("channel.chat.message", ({payload})=> {
+      twitchSocket.on("channel.chat.message", ({payload})=> {
         // console.log("Chat: ", payload.event);
         
         if (!payload.event.message.text.startsWith("!")) {
@@ -157,7 +157,7 @@ passport.use('twitch', new OAuth2Strategy({
         
       })
 
-      twitchSocket[profile.data[0].login].on("channel.follow", ({payload}) => {
+      twitchSocket.on("channel.follow", ({payload}) => {
         
       })
     })
@@ -174,7 +174,7 @@ app.use((req, res, next) => {
 });
 
 
-//Serve static assests
+//Serve static assets
 if (!DEBUG) {
   app.use(express.static('static'));
 } else {

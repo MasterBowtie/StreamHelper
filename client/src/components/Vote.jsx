@@ -76,6 +76,8 @@ function Vote() {
             if (endTime < currentTime && !(endTime + 60000 < currentTime)) {
                 announce.removeAttribute("hidden");
             } else if (endTime + 60000 < currentTime) {
+                socket.disconnect();
+                setSocket(undefined);
                 announce.hidden = true;
                 reset.removeAttribute("hidden");
                 setEnd(undefined);
@@ -111,8 +113,7 @@ function Vote() {
     
     function reset(event) {
         setVotes({});
-        socket.disconnect();
-        setSocket(undefined);
+
         setEnd(undefined);
         setOptions([]);
         let headers = Array.from(document.getElementsByClassName("vote_title"));

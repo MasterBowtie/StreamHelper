@@ -52,7 +52,7 @@ export class initSocket {
             // log(`${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Connection Closed: ${close.code} Reason - ${this.closeCodes[close.code]}`);
 
             if (!this.eventsub.is_reconnecting) {
-                // log(`${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Is not reconnecting, auto reconnect`);
+                console.log(`${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Is not reconnecting, auto reconnect`);
                 // new initSocket();
                 this.connect();
             }
