@@ -1,4 +1,4 @@
-var js_path = './scripts/';
+var js_path = 'scripts/avatars/';
 var debug_all = true
 
 function loadScripts(array, callback) {
@@ -20,5 +20,9 @@ function loadScripts(array, callback) {
 }
 
 window.onload = loadScripts([
+    `${js_path}graphics.js`,
     `${js_path}driver.js`
-]) 
+], () => { 
+    debug_all && console.log("All scripts have been loaded")
+    // MyCanvas.main();
+}) 

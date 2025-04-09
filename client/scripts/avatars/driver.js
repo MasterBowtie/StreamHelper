@@ -1,12 +1,14 @@
-MyCanvas.main = (function() {
+MyCanvas.main = (function(graphics, users) {
     var prevTime = 0;
-    
+    var test = {x: 200, y: 200, h: 70, w: 100, r: 255, g: 150, b: 150}
+    // document.body.appendChild(img);
 
     function update(elapsedTime) {
-        debug_all && console.log(`Elapsed Time: ${elapsedTime}`)
+        // console.log(`Elapsed Time: ${elapsedTime}`)
     }
 
     function render(elapsedTime) {
+        graphics.drawImage(test);
 
     }
 
@@ -22,4 +24,4 @@ MyCanvas.main = (function() {
 
     console.log("Initializiong Canvas...")
     requestAnimationFrame(animationLoop);
-})
+}(MyCanvas.graphics))
