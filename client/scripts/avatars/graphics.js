@@ -25,8 +25,10 @@ MyCanvas.graphics = (function() {
     img.onload = ()=> {
         offscreen = new OffscreenCanvas(img.width, img.height);
         offContext = offscreen.getContext("2d");
-        console.log(img.width, img.height);
+        // console.log(img.width, img.height);
     }
+
+    console.log("Graphics Initialized...")
 
     function clear() {
         context.save();
@@ -47,6 +49,7 @@ MyCanvas.graphics = (function() {
         if (!offContext) {
             return
         }
+        clearOffscreen();
         offContext.drawImage(img, 0, 0);
 
         r = r/255;
@@ -54,8 +57,6 @@ MyCanvas.graphics = (function() {
         b = b/255;
 
         let imageData = offContext.getImageData(0, 0, img.width, img.height);
-        // console.log(imageData.data);
-        // console.log(b);
 
         for (let i = 0; i < imageData.data.length; i+= 4) {
             imageData.data[i+0] *= r; //red
@@ -64,7 +65,6 @@ MyCanvas.graphics = (function() {
         }
 
         offContext.putImageData(imageData, 0, 0);
-
         return offscreen;
     }
 
@@ -78,7 +78,8 @@ MyCanvas.graphics = (function() {
         if (!newImage) {
             return;
         }
-        
+        // console.log(img.width * .12, img.height * .12);
+
         context.drawImage(newImage, element.x, element.y, img.width * .12, img.height * .12);
     }
 

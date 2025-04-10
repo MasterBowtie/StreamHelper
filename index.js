@@ -152,7 +152,9 @@ passport.use('twitch', new OAuth2Strategy({
             if (type === "!vote") {
               io.emit("channel.chat.vote", {vote: payload.event.message.text, user: payload.event.chatter_user_login});
             }
-            
+            if (type === "!avatar") {
+              io.emit("channel.chat.avatar", {text: payload.event.message.text, user: payload.event.chatter_user_name});
+            }
         }
         
       })

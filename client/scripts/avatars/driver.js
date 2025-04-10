@@ -1,6 +1,6 @@
 MyCanvas.main = (function(graphics, users) {
     var prevTime = 0;
-    var test = {x: 200, y: 200, h: 70, w: 100, r: 255, g: 150, b: 150}
+    // var test = {x: 200, y: 200, r: 255, g: 150, b: 150}
     // document.body.appendChild(img);
 
     function update(elapsedTime) {
@@ -8,8 +8,10 @@ MyCanvas.main = (function(graphics, users) {
     }
 
     function render(elapsedTime) {
-        graphics.drawImage(test);
-
+        graphics.clear();
+        for (u of users.get()) {
+            graphics.drawImage(u);
+        }
     }
 
     function animationLoop(time) {
@@ -24,4 +26,4 @@ MyCanvas.main = (function(graphics, users) {
 
     console.log("Initializiong Canvas...")
     requestAnimationFrame(animationLoop);
-}(MyCanvas.graphics))
+}(MyCanvas.graphics, MyCanvas.users))

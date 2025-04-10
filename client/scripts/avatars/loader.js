@@ -21,8 +21,8 @@ function loadScripts(array, callback) {
 
 window.onload = loadScripts([
     `${js_path}graphics.js`,
-    `${js_path}driver.js`
+    `${js_path}users.js`,
+    `${js_path}driver.js`,
 ], () => { 
     debug_all && console.log("All scripts have been loaded")
-    // MyCanvas.main();
 }) 
