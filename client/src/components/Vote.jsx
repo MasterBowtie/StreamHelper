@@ -23,43 +23,6 @@ function Vote() {
                 }
             }
             setVotes(newVotes);
-            
-            let counts = []
-            let total = 0;
-            let maxVote = 0;
-            let maxIndex = [0];
-            for (let o of options) {
-                counts.push(0);
-            }
-            for (let v of Object.keys(newVotes)) {
-                counts[newVotes[v]]++;
-                total++;
-            }
-            for (let i = 0; i < counts.length; i++) {
-                if (counts[i] > maxVote) {
-                    maxVote = counts[i];
-                    maxIndex = [i];
-                } else if (counts[i] == maxVote) {
-                    maxIndex.push(i);
-                }
-            }
-
-            for (let o in options) {
-                let bar = document.getElementById(`p_${o}`)
-
-                let width = `${Math.max(Math.round(counts[o]/total * 100), 10)}%`;
-                bar.style.width = width;
-                
-                if (maxIndex.indexOf(parseInt(o)) >= 0 && maxIndex.length === 1) {
-                    bar.style.backgroundColor = "rgb(0, 133, 0)";
-                } else if (maxIndex.indexOf(parseInt(o)) >= 0 && maxIndex.length > 1) {
-                    bar.style.backgroundColor = "rgb(254, 241, 0)";
-                } else {
-                    bar.style.backgroundColor = "rgb(254, 0, 0)";
-                }
-                
-            }
-            
         })
         
     },[socket])
@@ -73,12 +36,50 @@ function Vote() {
         if (endTime) {
             let reset = document.getElementById("reset_button");
             let announce = document.getElementById("announce")
-            if (endTime < currentTime && !(endTime + 60000 < currentTime)) {
+            if (endTime < currentTime && !(endTime + 10000 < currentTime)) {
                 announce.removeAttribute("hidden");
-            } else if (endTime + 60000 < currentTime) {
+            } else if (endTime + 10000 < currentTime) {
                 announce.hidden = true;
                 reset.removeAttribute("hidden");
                 setEnd(undefined);
+                socket.disconnect();
+                // setSocket(undefined);
+
+                let counts = []
+                let total = 0;
+                let maxVote = 0;
+                let maxIndex = [0];
+                for (let o of options) {
+                    counts.push(0);
+                }
+                for (let v of Object.keys(votes)) {
+                    counts[votes[v]]++;
+                    total++;
+                }
+                for (let i = 0; i < counts.length; i++) {
+                    if (counts[i] > maxVote) {
+                        maxVote = counts[i];
+                        maxIndex = [i];
+                    } else if (counts[i] == maxVote) {
+                        maxIndex.push(i);
+                    }
+                }            
+
+                for (let o in options) {
+                    let bar = document.getElementById(`p_${o}`)
+    
+                    let width = `${Math.max(Math.round(counts[o]/total * 100), 10)}%`;
+                    bar.style.width = width;
+                    
+                    if (maxIndex.indexOf(parseInt(o)) >= 0 && maxIndex.length === 1) {
+                        bar.style.backgroundColor = "rgb(0, 133, 0)";
+                    } else if (maxIndex.indexOf(parseInt(o)) >= 0 && maxIndex.length > 1) {
+                        bar.style.backgroundColor = "rgb(254, 241, 0)";
+                    } else {
+                        bar.style.backgroundColor = "rgb(254, 0, 0)";
+                    }
+                    
+                }
             }
         }
 
