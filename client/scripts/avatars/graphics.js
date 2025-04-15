@@ -12,21 +12,24 @@
  * @key float  b
  * 
  */
-
-MyCanvas.graphics = (function() {
+function canvasGraphics() {
     var canvas = document.getElementById("canvas-main");
     var context = canvas.getContext("2d");
     var offscreen;
     var offContext;
 
-    var img = document.createElement("img")
-    img.src = "src/assets/bowtie_gray.png";
-    img.crossOrigin = "anonymous";
-    img.onload = ()=> {
-        offscreen = new OffscreenCanvas(img.width, img.height);
-        offContext = offscreen.getContext("2d");
-        // console.log(img.width, img.height);
-    }
+    // var img = document.createElement("img")
+    // img.src = "src/assets/bowtie_gray.png";
+    // img.crossOrigin = "anonymous";
+    // img.onload = ()=> {
+    //     offscreen = new OffscreenCanvas(img.width, img.height);
+    //     offContext = offscreen.getContext("2d");
+    //     // console.log(img.width, img.height);
+    // }
+
+    // var basic = document.createElement("img")
+    // img.src = "src/assets/bowtie_gray.png";
+    // img.crossOrigin = "anonymous";
 
     console.log("Graphics Initialized...")
 
@@ -73,14 +76,14 @@ MyCanvas.graphics = (function() {
         // let imageElement = document.createElement("img");
         // imageElement.src = element.image;
         // imageElement.style.filter = "hue-rotate(90deg)"
-        let newImage = colorize(element.r, element.g, element.b);
+        // let newImage = colorize(element.r, element.g, element.b);
 
-        if (!newImage) {
-            return;
-        }
+        // if (!newImage) {
+        //     return;
+        // }
         // console.log(img.width * .12, img.height * .12);
 
-        context.drawImage(newImage, element.x, element.y, img.width * .12, img.height * .12);
+        // context.drawImage(newImage, element.x, element.y, img.width * .12, img.height * .12);
     }
 
     let api = {
@@ -88,4 +91,6 @@ MyCanvas.graphics = (function() {
         drawImage: drawImage
     }
     return api;
-}())
+}
+
+export { canvasGraphics }

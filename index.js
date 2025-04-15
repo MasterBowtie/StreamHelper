@@ -181,6 +181,7 @@ if (!DEBUG) {
   app.use(express.static('static'));
 } else {
   app.use((req, res, next) => {
+    console.log(req.url.includes("."));
     if (req.url.includes(".")) {
       // let lookup = decodeURI(`${process.env.ASSET_URL}${req.url}`);
       // let file = lookup.substring(1, lookup.length);

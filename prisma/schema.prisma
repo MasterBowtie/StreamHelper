@@ -22,3 +22,9 @@ model user {
   client_id String  @unique(map: "client_id") @db.VarChar(50)
   user_id   String? @db.VarChar(20)
 }
+
+model avatar {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique(map: "name") @db.VarChar(20)
+  
+}

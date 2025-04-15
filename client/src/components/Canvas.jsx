@@ -1,27 +1,27 @@
 import { useEffect, useState } from "react"
 import { io } from "socket.io-client";
+import { canvasGraphics } from "../../scripts/avatars/graphics";
 
 function Canvas() {
     const [socket, setSocket] = useState();
-    // const MyCanvas = {};
+    const [prevTime, setPreviousTime] = useState();
+    const [graphics, setGraphics] = useState();
 
     useEffect(() => {
-        // Add script element here
-
-        let script = document.createElement('script');
-        script.innerHTML = "MyCanvas = {}";
-        document.body.appendChild(script);
+        setPreviousTime(Date.now());
+        setGraphics(canvasGraphics());
         
-        script = document.createElement('script');
-        script.src = "scripts/avatars/loader.js";
-        document.body.appendChild(script);
-
         let s = io();
         setSocket(s);
+
         return () => {
             s.disconnect();
         }
     }, [])
+
+    useEffect(() => {
+        requestAnimationFrame(animationLoop);
+    }, [graphics]);
 
     // Add to db
 
@@ -34,17 +34,36 @@ function Canvas() {
 
         socket.on("channel.chat.avatar", (data)=> {
 
-            // Need to get info to Canvas Element
-            script = document.getElementById("innerScript");
-            // script.innerHTML(`MyCanvas.users.add(${data})`);
         })
     }, [socket])
+
+    function update(gameTime) {
+
+    }
+
+    function render(gameTime) {
+        if (!graphics) {
+            return;
+        }
+        let test = {x: 200, y: 200, r: 255, g: 0, b: 0}
+
+        graphics.drawImage(test);
+    }
+
+    function animationLoop(time) {
+        var gameTime = time - prevTime; 
+
+        update(gameTime);
+        render(gameTime);
+
+        setPreviousTime(time);
+        requestAnimationFrame(animationLoop);
+    }
 
 
     return (
     <div>
         <canvas id="canvas-main" height="400" width="1920" style={{backgroundColor: "white"}}></canvas>
-        <script id="innerScript"></script>
     </div>
     )
 }
