@@ -1,4 +1,10 @@
 .scripture{
+  
+  @font-face {
+    font-family: "Agency";
+    src: local("AGENCYB"), url("../assets/fonts/AGENCYB.TTF") format('truetype');
+  }
+
   width: fit-content;
   padding: 20px;
   border-radius: 10px;
@@ -47,7 +53,6 @@ p {
   width: 100%;
   text-align: center;
   color: #f0f8ff;
-  
 }
 
 .title
@@ -78,6 +83,10 @@ p {
   top: 16%;
   width: 100%;
   text-align: center;
+}
+
+.timer {
+  top: 28%;
 }
 
 @keyframes textclip {

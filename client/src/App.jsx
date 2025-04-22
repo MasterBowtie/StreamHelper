@@ -7,6 +7,8 @@ import Title from './components/Title'
 import { StyleHouse } from './components/HouseStyle'
 import { Spinner } from './components/Spinner'
 import { Vote } from './components/Vote'
+import { Timer } from './components/Timer'
+
 
 function App() {
   return (
@@ -18,6 +20,7 @@ function App() {
       <br></br><a href="/#/chat">Chat</a>
       <div>Testing Area 
         {/* <Vote/> */}
+        <Timer/>
       </div>
     </>
   )
