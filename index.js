@@ -15,12 +15,12 @@ or in the "license" file accompanying this file. This file is distributed on an 
 import {fileURLToPath} from 'node:url';
 import { OAuth2Strategy } from "passport-oauth";
 import passport from "passport";
+// var twitchStrategy = require("passport-twitch").Strategy;
 import express, { Router } from "express";
 import { engine } from 'express-handlebars';
 import dotenv from "dotenv";
 import session from "express-session";
 import bodyParser from "body-parser";
-import request from "request";
 import { PrismaClient } from "@prisma/client";
 import {initSocket, requestHooks} from "./server/socket/socket.js";
 import * as fs from "fs";
@@ -33,6 +33,7 @@ import { buildHouseController } from './server/controllers/house_controller.js';
 import { buildHomeController } from './server/controllers/home_controller.js';
 import { buildTwitchController } from './server/controllers/twitch_controller.js';
 import { UserRepository } from './server/repositories/user_repository.js';
+import { access } from 'node:fs';
 
 dotenv.config();
 
@@ -74,35 +75,33 @@ io.on("connection", (socket) => {
 })
 
 
-
 // Override passport profile function to get user profile from Twitch API
-OAuth2Strategy.prototype.userProfile = async function(accessToken, done) {
-  var options = {
-    url: 'https://api.twitch.tv/helix/users',
+OAuth2Strategy.prototype.userProfile = async (accessToken, done )=>  {
+  fetch('https://api.twitch.tv/helix/users', {
     method: 'GET',
     headers: {
       'Client-ID': process.env.TWITCH_CLIENT_ID,
       'Accept': 'application/vnd.twitchtv.v5+json',
       'Authorization': 'Bearer ' + accessToken
     }
-  };
-  
-  request(options, function (error, response, body) {
-    if (response && response.statusCode == 200) {
-      done(null, JSON.parse(body));
-    } else {
-      done(JSON.parse(body));
+  })
+  .then(res => {
+    if (res.ok) {
+      return res.json()
     }
-  });
+    else {
+      done(JSON.parse(data))
+    }
+  }).then(data => {
+    done(null, data);
+  })
 }
 
 passport.serializeUser(function(user, done) {
-    // console.log(user);
-    done(null, user);
+    done(null, user)
 });
 
 passport.deserializeUser(function(user, done) {
-    // console.log(user);
     done(null, user);
 });
 
@@ -119,7 +118,7 @@ passport.use('twitch', new OAuth2Strategy({
   },
   
   function(accessToken, refreshToken, profile, done) {
-    // console.log(profile.data[0]);
+    console.log(profile.data[0]);
     user_repository.createUser(profile.data[0].login, profile.data[0].id);
     user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, profile.data[0].id);
     let broadcaster_id = profile.data[0].id;
