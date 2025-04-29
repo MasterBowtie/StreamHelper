@@ -90,7 +90,7 @@ function Vote() {
         let s = io()
         setSocket(s);
 
-        setEnd(Date.now() + (60000 * 2));
+        setEnd(Date.now() + (60000 * 5));
         let headers = Array.from(document.getElementsByClassName("vote_title"));
         let deletes = Array.from(document.getElementsByClassName("del_button"));
         let add_div = document.getElementById("add_div");
@@ -139,6 +139,16 @@ function Vote() {
         start.removeAttribute("hidden");
     }
 
+    function resize(event) {
+        let input = event.target;
+        let height = parseInt(input.style.height.replace("px", ""));
+        
+        console.log(input, height, input.scrollHeight);
+        if (input.scrollHeight - 14 > height || isNaN(height)) {
+            input.style.height = `${input.scrollHeight}px`;
+        }
+    }
+
     return (
         <div className="widget vote" >
             <h2 style={{margin: "0"}}>Timer: {
@@ -146,7 +156,7 @@ function Vote() {
             {endTime && endTime > currentTime? (Math.floor((endTime - currentTime)/1000)%60 < 10? `0${Math.floor((endTime - currentTime)/1000)%60}`: Math.floor((endTime - currentTime)/1000)%60): "00"
             }</h2>
             <h2 id="announce" hidden disabled style={{margin: "0"}}>Getting Results{".".repeat(Math.floor(currentTime / 1000)%4)}</h2>
-            <input id='vote_title' placeholder='Question Here'/>
+            <textarea id='vote_title' placeholder='Question Here' onInput={resize} />
             <div className='vote_options_container'>
               {options.map((option, index)=> {
                 return (

@@ -2,10 +2,10 @@ function Scripture({className}) {
     return (
     <div className={`scripture ${className}`} style={{textAlign: "left"}}>
         <p>
-        15 Wherefore, lift up your hearts and rejoice, and gird up your loins, and take upon you my whole armor, that ye may be able to withstand the evil day, having done all, that ye may be able to stand.
+        41 And moreover, I would desire that ye should consider on the blessed and happy state of those that keep the commandments of God. For behold, they are blessed in all things, both temporal and spiritual; and if they hold out faithful to the end they are received into heaven, that thereby they may dwell with God in a state of never-ending happiness. O remember, remember that these things are true; for the Lord God hath spoken it.
         </p><br/>
         <p>
-            - Doctrine & Covenants 27:15
+            - Mosiah 2:41
         </p>
     </div>
     )

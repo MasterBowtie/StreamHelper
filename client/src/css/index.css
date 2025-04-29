@@ -143,6 +143,7 @@ label {
   background-color: lightgray;
   border-width: 0;
   padding: 7px;
+  resize: none;
 }
 
 #vote_title:disabled {
