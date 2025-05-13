@@ -118,11 +118,12 @@ passport.use('twitch', new OAuth2Strategy({
   },
   
   function(accessToken, refreshToken, profile, done) {
-    console.log(profile.data[0]);
+    // console.log("Profile", profile.data[0].id);
+    // console.log("Profile: ", profile.data[0]);
+
     user_repository.createUser(profile.data[0].login, profile.data[0].id);
     user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, profile.data[0].id);
     let broadcaster_id = profile.data[0].id;
-    // console.log("Profile", profile.data[0].id);
 
     twitchSocket[profile.data[0].login] = new initSocket(true)
     twitchSocket[profile.data[0].login].on("connect", (session) => {
@@ -133,8 +134,11 @@ passport.use('twitch', new OAuth2Strategy({
         'channel.chat.message_delete': {version: "1", condition: {"broadcaster_user_id": broadcaster_id, "user_id": broadcaster_id}},
         'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster_id, "moderator_user_id": broadcaster_id}}
       }
-      requestHooks(profile.data[0].login, accessToken, session, hooks)
+      let test = requestHooks(profile.data[0].login, accessToken, session, hooks)
+      console.log("Testing RequestHooks", test);
+      if (!test) {
 
+      }
       twitchSocket[profile.data[0].login].on("channel.chat.message", ({payload})=> {
         // console.log("Chat: ", payload.event);
         
@@ -157,7 +161,7 @@ passport.use('twitch', new OAuth2Strategy({
       })
 
       twitchSocket[profile.data[0].login].on("channel.follow", ({payload}) => {
-        
+        io.emit("follow");
       })
     })
     
@@ -173,7 +177,7 @@ app.use((req, res, next) => {
 });
 
 
-//Serve static assests
+//Serve static assets
 if (!DEBUG) {
   app.use(express.static('static'));
 } else {

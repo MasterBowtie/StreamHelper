@@ -227,6 +227,7 @@ export function requestHooks(user_id, access_token, session_id, topics) {
             .then(resp => {
                 if (resp.error) {
                     console.log(`Error with eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
+                    return false;
                 } else {
                     console.log(`Created ${type}`);
                 }
@@ -236,4 +237,5 @@ export function requestHooks(user_id, access_token, session_id, topics) {
                 // log(`Error with eventsub Call ${type} Call: ${err.message ? err.message : ''}`);
             });
     }
+    return true;
 }
