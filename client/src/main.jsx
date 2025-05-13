@@ -9,6 +9,7 @@ import { Route, RouterProvider, createHashRouter } from 'react-router-dom'
 import { StyleHouse } from './components/HouseStyle.jsx'
 import FollowGoal from './components/FollowGoal.jsx'
 import { Vote } from './components/Vote.jsx'
+import Intermission from './pages/Intermission.jsx'
 
 
 const router = createHashRouter([
@@ -19,6 +20,7 @@ const router = createHashRouter([
   {path: "house", element: <StyleHouse/>},
   {path: "goal", element: <FollowGoal/>},
   {path: "vote", element: <Vote/>},
+  {path: "intermission", element: <Intermission/>},
 
 ]);
 
