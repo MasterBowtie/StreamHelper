@@ -17,7 +17,7 @@ function Start() {
             <video id="introVideo" className="container" autoPlay src="src/assets/Baptistry.mp4" loop type="video/mp4"></video>
             {/* <h3>Starting Soon!</h3> */}
             <Scripture className={"glass"}/>
-            <Title title={"Stream Starts in: "}/>
+            <Title title={["Stream Starts in: "]}/>
             <Timer/>
             {/* <img id="bowtie" src="src/assets/Events.gif" type="image/gif"/> */}
         </>
