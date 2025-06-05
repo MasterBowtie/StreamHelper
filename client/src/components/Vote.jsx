@@ -90,7 +90,7 @@ function Vote() {
         let s = io()
         setSocket(s);
 
-        setEnd(Date.now() + (60000 * 2));
+        setEnd(Date.now() + (60000 * .1));
         let headers = Array.from(document.getElementsByClassName("vote_title"));
         let deletes = Array.from(document.getElementsByClassName("del_button"));
         let add_div = document.getElementById("add_div");

@@ -67,8 +67,12 @@ const io = new Server(httpsServer);
 
 io.on("connection", (socket) => {
   console.log("Connected new socket")
-  console.log(twitchSocket)
+  // console.log(twitchSocket)
   if (!twitchSocket) {
+    if (!broadcaster) {
+      console.error("No broadcaster...")
+      return;
+    }
     twitchSocket = new initSocket(true)
     twitchSocket.on("connect", (session) => {
       console.log(`Connected WebSocket to Twitch for: ${broadcaster.login}`);
@@ -78,7 +82,7 @@ io.on("connection", (socket) => {
         'channel.chat.message_delete': {version: "1", condition: {"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}},
         'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}}
       }
-      requestHooks(broadcaster.login, accessToken, session, hooks)
+      requestHooks(broadcaster.login, twitchToken, session, hooks)
       
       twitchSocket.on("channel.chat.message", ({payload})=> {
         // console.log("Chat: ", payload.event);
@@ -112,10 +116,11 @@ io.on("connection", (socket) => {
         socket.on("disconnect", async () => {
           let sockets = await io.fetchSockets();
           console.log(sockets);
-          // if (await io.fetchSockets())
-          // {
-
-          // }
+          if (sockets.length < 1)
+          {
+            twitchSocket.close()
+            twitchSocket = undefined;
+          }
           console.log("Disconnected Socket")
           })
       })
@@ -169,6 +174,7 @@ passport.use('twitch', new OAuth2Strategy({
 
     user_repository.createUser(profile.data[0].login, profile.data[0].id);
     user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, profile.data[0].id);
+    twitchToken = accessToken;
     broadcaster = profile.data[0];
     done(null, profile);
   }
