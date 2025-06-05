@@ -19,7 +19,9 @@ export default function FollowGoal() {
         setFollowers(res.data.total)
         setRecent(res.data.data[0])
       })
-      return s.disconnect()
+      return () => {
+        s.disconnect();
+      }
     }, [])
 
     useEffect(() => {
@@ -27,14 +29,13 @@ export default function FollowGoal() {
         return;
       }
       socket.on("follow", () => {
-        api.get("/followers").then(res => {
-          setSocket(s)
-          setFollowers(res.data.total)
-          setRecent(res.data.data[0])
+        api.get("twitch/followers").then(res => {
+          setFollowers(res.data.total);
+          setRecent(res.data.data[0]);
         })
       })
     } ,[socket])
-
+    
     useEffect(() => {
       let per = Math.floor(followers/goal * 100);
       setPercent(`${per}%`)

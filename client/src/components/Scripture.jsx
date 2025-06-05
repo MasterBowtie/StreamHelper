@@ -1,15 +1,15 @@
 function Scripture({className, style}) {
-    console.log(style);
     return (
     <div className={`scripture ${className}`} style={style}>
         <p>
-        17 And behold, I tell you these things that ye may learn wisdom; that ye may learn that when ye are in the service of your fellow beings ye are only in the service of your God.
+        7 But ye are commanded in all things to ask of God, who giveth liberally; and that which the Spirit testifies unto you even so I would that ye should do in all holiness of heart, walking uprightly before me, considering the end of your salvation, doing all things with prayer and thanksgiving, that ye may not be seduced by evil spirits, or doctrines of devils, or the commandments of men; for some are of men, and others of devils.
         </p><br/>
         <p>
-            Mosiah 2:17
+            - D&C 46:7
         </p>
     </div>
     )
 }
 
 export default Scripture
+

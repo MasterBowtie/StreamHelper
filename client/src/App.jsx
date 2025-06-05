@@ -7,7 +7,8 @@ import Title from './components/Title'
 import { StyleHouse } from './components/HouseStyle'
 import { Spinner } from './components/Spinner'
 import { Vote } from './components/Vote'
-import { Canvas } from './components/Canvas'
+import { Timer } from './components/Timer'
+
 
 function App() {
   return (
@@ -19,7 +20,8 @@ function App() {
       <br></br><a href="/#/vote">Vote</a>
       <br></br><a href="/#/chat">Chat</a>
       <div>Testing Area 
-        <Canvas/>
+        {/* <Vote/> */}
+        <Timer/>
       </div>
     </>
   )

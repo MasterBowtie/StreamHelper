@@ -23,43 +23,6 @@ function Vote() {
                 }
             }
             setVotes(newVotes);
-            
-            let counts = []
-            let total = 0;
-            let maxVote = 0;
-            let maxIndex = [0];
-            for (let o of options) {
-                counts.push(0);
-            }
-            for (let v of Object.keys(newVotes)) {
-                counts[newVotes[v]]++;
-                total++;
-            }
-            for (let i = 0; i < counts.length; i++) {
-                if (counts[i] > maxVote) {
-                    maxVote = counts[i];
-                    maxIndex = [i];
-                } else if (counts[i] == maxVote) {
-                    maxIndex.push(i);
-                }
-            }
-
-            for (let o in options) {
-                let bar = document.getElementById(`p_${o}`)
-
-                let width = `${Math.max(Math.round(counts[o]/total * 100), 10)}%`;
-                bar.style.width = width;
-                
-                if (maxIndex.indexOf(parseInt(o)) >= 0 && maxIndex.length === 1) {
-                    bar.style.backgroundColor = "rgb(0, 133, 0)";
-                } else if (maxIndex.indexOf(parseInt(o)) >= 0 && maxIndex.length > 1) {
-                    bar.style.backgroundColor = "rgb(254, 241, 0)";
-                } else {
-                    bar.style.backgroundColor = "rgb(254, 0, 0)";
-                }
-                
-            }
-            
         })
         
     },[socket])
@@ -73,14 +36,50 @@ function Vote() {
         if (endTime) {
             let reset = document.getElementById("reset_button");
             let announce = document.getElementById("announce")
-            if (endTime < currentTime && !(endTime + 60000 < currentTime)) {
+            if (endTime < currentTime && !(endTime + 10000 < currentTime)) {
                 announce.removeAttribute("hidden");
-            } else if (endTime + 60000 < currentTime) {
-                socket.disconnect();
-                setSocket(undefined);
+            } else if (endTime + 10000 < currentTime) {
                 announce.hidden = true;
                 reset.removeAttribute("hidden");
                 setEnd(undefined);
+                socket.disconnect();
+                // setSocket(undefined);
+
+                let counts = []
+                let total = 0;
+                let maxVote = 0;
+                let maxIndex = [0];
+                for (let o of options) {
+                    counts.push(0);
+                }
+                for (let v of Object.keys(votes)) {
+                    counts[votes[v]]++;
+                    total++;
+                }
+                for (let i = 0; i < counts.length; i++) {
+                    if (counts[i] > maxVote) {
+                        maxVote = counts[i];
+                        maxIndex = [i];
+                    } else if (counts[i] == maxVote) {
+                        maxIndex.push(i);
+                    }
+                }            
+
+                for (let o in options) {
+                    let bar = document.getElementById(`p_${o}`)
+    
+                    let width = `${Math.max(Math.round(counts[o]/total * 100), 10)}%`;
+                    bar.style.width = width;
+                    
+                    if (maxIndex.indexOf(parseInt(o)) >= 0 && maxIndex.length === 1) {
+                        bar.style.backgroundColor = "rgb(0, 133, 0)";
+                    } else if (maxIndex.indexOf(parseInt(o)) >= 0 && maxIndex.length > 1) {
+                        bar.style.backgroundColor = "rgb(254, 241, 0)";
+                    } else {
+                        bar.style.backgroundColor = "rgb(254, 0, 0)";
+                    }
+                    
+                }
             }
         }
 
@@ -139,6 +138,16 @@ function Vote() {
         start.removeAttribute("hidden");
     }
 
+    function resize(event) {
+        let input = event.target;
+        let height = parseInt(input.style.height.replace("px", ""));
+        
+        console.log(input, height, input.scrollHeight);
+        if (input.scrollHeight - 14 > height || isNaN(height)) {
+            input.style.height = `${input.scrollHeight}px`;
+        }
+    }
+
     return (
         <div className="widget vote" >
             <h2 style={{margin: "0"}}>Timer: {
@@ -146,7 +155,7 @@ function Vote() {
             {endTime && endTime > currentTime? (Math.floor((endTime - currentTime)/1000)%60 < 10? `0${Math.floor((endTime - currentTime)/1000)%60}`: Math.floor((endTime - currentTime)/1000)%60): "00"
             }</h2>
             <h2 id="announce" hidden disabled style={{margin: "0"}}>Getting Results{".".repeat(Math.floor(currentTime / 1000)%4)}</h2>
-            <input id='vote_title' placeholder='Question Here'/>
+            <textarea id='vote_title' placeholder='Question Here' onInput={resize} />
             <div className='vote_options_container'>
               {options.map((option, index)=> {
                 return (

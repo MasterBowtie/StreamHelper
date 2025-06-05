@@ -13,7 +13,7 @@ function Intermission() {
     return (
         <>
             {/* <img className="container" src="src/assets/background_photo.png"></img> */}
-            <video id="introVideo" className="container" autoPlay src="src/assets/Temple_Timelapse_1.mp4" loop type="video/mp4"></video>
+            <video id="introVideo" className="container" autoPlay src="src/assets/Baptistry.mp4" loop type="video/mp4"></video>
             {/* <h3>Starting Soon!</h3> */}
             <Title title={["Please Hold","Madness Happening"]}/>
             <Scripture style={{top: "45%"}}className={"glass"}/>
