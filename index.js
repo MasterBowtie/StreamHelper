@@ -43,6 +43,7 @@ const db = new PrismaClient();
 const house_repository = HouseRepository.getInstance(db);
 const user_repository = UserRepository.getInstance(db);
 var twitchToken;
+var broadcaster;
 
 var privateKey  = fs.readFileSync('cert/cert.key', 'utf8');
 var certificate = fs.readFileSync('cert/cert.crt', 'utf8');
@@ -61,21 +62,66 @@ app.use(session({secret: process.env.SECRET, resave: false, saveUninitialized: f
 
 // WebHooks Start Here
 
-var twitchSocket = {};
+var twitchSocket;
 const io = new Server(httpsServer);
 
 io.on("connection", (socket) => {
   console.log("Connected new socket")
+  console.log(twitchSocket)
+  if (!twitchSocket) {
+    twitchSocket = new initSocket(true)
+    twitchSocket.on("connect", (session) => {
+      console.log(`Connected WebSocket to Twitch for: ${broadcaster.login}`);
+      
+      let hooks = {
+        'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}},
+        'channel.chat.message_delete': {version: "1", condition: {"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}},
+        'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}}
+      }
+      requestHooks(broadcaster.login, accessToken, session, hooks)
+      
+      twitchSocket.on("channel.chat.message", ({payload})=> {
+        // console.log("Chat: ", payload.event);
+        
+        if (!payload.event.message.text.startsWith("!")) {
+          chat.push(
+            {key: payload.event.message_id,
+              message: payload.event.message, 
+              username: payload.event.chatter_user_name,
+              color: payload.event.color});
+              
+              io.emit("channel.chat.message", chat);
+            } else {
+              let type = payload.event.message.text.split(" ")[0];
+              if (type === "!vote") {
+                io.emit("channel.chat.vote", {vote: payload.event.message.text, user: payload.event.chatter_user_login});
+              }
+              if (type === "!avatar") {
+                io.emit("channel.chat.avatar", {text: payload.event.message.text, user: payload.event.chatter_user_name});
+              }
+            }
+            
+          })
+          
+          twitchSocket.on("channel.follow", ({payload}) => {
+            
+          })
+        })
+        
+      }
+        socket.on("disconnect", async () => {
+          let sockets = await io.fetchSockets();
+          console.log(sockets);
+          // if (await io.fetchSockets())
+          // {
 
-  socket.emit("channel.chat.message", chat);
-
-  socket.on("disconnect", () => {
-    console.log("Disconnected Socket")
-  })
-})
-
-
-// Override passport profile function to get user profile from Twitch API
+          // }
+          console.log("Disconnected Socket")
+          })
+      })
+      
+      
+      // Override passport profile function to get user profile from Twitch API
 OAuth2Strategy.prototype.userProfile = async (accessToken, done )=>  {
   fetch('https://api.twitch.tv/helix/users', {
     method: 'GET',
@@ -123,49 +169,7 @@ passport.use('twitch', new OAuth2Strategy({
 
     user_repository.createUser(profile.data[0].login, profile.data[0].id);
     user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, profile.data[0].id);
-    let broadcaster_id = profile.data[0].id;
-
-    twitchSocket[profile.data[0].login] = new initSocket(true)
-    twitchSocket[profile.data[0].login].on("connect", (session) => {
-      console.log(`Connected WebSocket to Twitch for: ${profile.data[0].login}`);
-
-      let hooks = {
-        'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster_id, "user_id": broadcaster_id}},
-        'channel.chat.message_delete': {version: "1", condition: {"broadcaster_user_id": broadcaster_id, "user_id": broadcaster_id}},
-        'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster_id, "moderator_user_id": broadcaster_id}}
-      }
-      let test = requestHooks(profile.data[0].login, accessToken, session, hooks)
-      console.log("Testing RequestHooks", test);
-      if (!test) {
-
-      }
-      twitchSocket[profile.data[0].login].on("channel.chat.message", ({payload})=> {
-        // console.log("Chat: ", payload.event);
-        
-        if (!payload.event.message.text.startsWith("!")) {
-          chat.push(
-            {key: payload.event.message_id,
-              message: payload.event.message, 
-              username: payload.event.chatter_user_name,
-              color: payload.event.color});
-          
-          io.emit("channel.chat.message", chat);
-        } else {
-            let type = payload.event.message.text.split(" ")[0];
-            if (type === "!vote") {
-              io.emit("channel.chat.vote", {vote: payload.event.message.text, user: payload.event.chatter_user_login});
-            }
-            
-        }
-        
-      })
-
-      twitchSocket[profile.data[0].login].on("channel.follow", ({payload}) => {
-        io.emit("follow");
-      })
-    })
-    
-    
+    broadcaster = profile.data[0];
     done(null, profile);
   }
 ));
