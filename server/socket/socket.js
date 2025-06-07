@@ -195,9 +195,37 @@ export class initSocket {
     }
 }
 
-export function requestHooks(user_id, access_token, topics){
+
+var cachedAppToken;
+var tokenExpires = 0;
+async function getAppAccessToken() {
+    if (cachedAppToken && Date.now() < tokenExpires){
+        return cachedAppToken;
+    }
+    let res = await fetch("https://id.twitch.tv/oauth2/token", {
+        method: "POST",
+        headers: {
+            "Content-Type": 'application/x-www-form-urlencoded' 
+        },
+        body: new URLSearchParams({
+            client_id: process.env.TWITCH_CLIENT_ID,
+            client_secret: process.env.TWITCH_SECRET,
+            grant_type: 'client_credentials'
+        })
+    }).then((data) => {
+        return data.json()
+    }).then((json) => {
+        cachedAppToken = json.access_token;
+        tokenExpires = Date.now() + json.expires_in * 1000 - 60000;
+    })
+    return cachedAppToken;
+}
+
+
+export async function requestAppHooks(user_id, topics){
+    let access_token = await getAppAccessToken();
     for (let type in topics) {
-        // console.log(`Attempt create ${type} - ${user_id}`);
+        console.log(`Attempt create ${type} - ${user_id}`);
         let { version, condition} = topics[type];
                 fetch(
             'https://api.twitch.tv/helix/eventsub/subscriptions',
@@ -214,7 +242,7 @@ export function requestHooks(user_id, access_token, topics){
                     condition,
                     transport: {
                         method: "webhook",
-                        callback: process.env.CALLBACK_URL,
+                        callback: `${process.env.CALLBACK_URL}:443/webhook`,
                         secret: process.env.TWITCH_SECRET
                     }
                 })
@@ -226,7 +254,7 @@ export function requestHooks(user_id, access_token, topics){
                     console.log(`Error with eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
                     return false;
                 } else {
-                    console.log(`Subscription Successful`, resp.data);
+                    // console.log(`Subscription Successful`, resp.data);
                     console.log(`Created ${type}`);
                 }
             })
@@ -238,7 +266,7 @@ export function requestHooks(user_id, access_token, topics){
     return true;
 }
 
-export function requestSockets(user_id, access_token, session_id, topics) {
+export function requestUserHooks(user_id, access_token, session_id, topics) {
     // console.log("requestHooks")
     console.log(`Spawn Socket Topics for ${user_id}`);
 

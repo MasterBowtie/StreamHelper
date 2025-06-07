@@ -22,7 +22,7 @@ import dotenv from "dotenv";
 import session from "express-session";
 import bodyParser from "body-parser";
 import { PrismaClient } from "@prisma/client";
-import {initSocket, requestHooks, requestSockets} from "./server/socket/socket.js";
+import {initSocket, requestAppHooks, requestUserHooks} from "./server/socket/socket.js";
 import * as fs from "fs";
 import * as https from "node:https";
 import { Server } from "socket.io";
@@ -53,6 +53,7 @@ var chat = []
 // Initialize Express and middlewares
 var app = express();
 const httpsServer = https.createServer(credentials, app);
+const hookServer = https.createServer(credentials, app);
 
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
@@ -111,11 +112,11 @@ passport.use('twitch', new OAuth2Strategy({
     clientID: process.env.TWITCH_CLIENT_ID,
     clientSecret: process.env.TWITCH_SECRET,
     grant_type: "client_credentials",
-    callbackURL: process.env.CALLBACK_URL,
+    callbackURL: `${process.env.CALLBACK_URL}:${process.env.S_PORT}/auth/twitch/callback`,
     state: true
   },
   
-  function(accessToken, refreshToken, profile, done) {
+  async function(accessToken, refreshToken, profile, done) {
     // console.log("Profile", profile.data[0].id);
     // console.log("Profile: ", profile.data[0]);
 
@@ -123,10 +124,20 @@ passport.use('twitch', new OAuth2Strategy({
     user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, profile.data[0].id);
     twitchToken = accessToken;
     broadcaster = profile.data[0];
-    let topics = null;
 
-    requestHooks(profile.data[0].id, accessToken, )
-
+    try {
+        let userHooks = {
+          "channel.chat.message": {version: "1", condition: {"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}}
+        }
+        let appHooks = {
+        'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}},
+        'channel.subscribe': {version: "1", condition:{"broadcaster_user_id": broadcaster.id}},
+      }
+        await requestAppHooks(profile.data[0].id, hooks)
+        // await requestUserHooks(profile.data[0].id, accessToken,)
+      } catch (err) {
+        console.error(err);
+      }
 
     done(null, profile);
   }
@@ -147,12 +158,18 @@ app.post('/webhook', (req, res) => {
     return res.sendStatus("403");
   }
 
+  console.log("Event Type: ", req.body.subscription.type);
   if (req.body.subscription.type == 'channel.subscribe') {
 
   }
   if (req.body.subscription.type == 'channel.follow') {
     console.log("Follow Event: ", req.body.event);
     // io.emit("channel.follow", )
+  }
+
+  if (req.body.subscription.type == "channel.chat.message") {
+    console.log(req.body.event.chatter_user_name, req.body.event.message.text);
+    io.emit("channel.chat.message", req.body.event);
   }
 })
 
@@ -190,12 +207,18 @@ app.use("/twitch", buildTwitchController(user_repository));
 
 
 // Set route to start OAuth link, this is where you define scopes to request
-app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'channel:bot user:read:chat moderator:manage:announcements moderator:read:followers' }))
+app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'moderator:read:chat_messages moderator:read:followers channel:read:subscriptions' }))
 
 // Set route for OAuth redirect
-app.get('/auth/twitch/callback', passport.authenticate('twitch', {successRedirect: "/", failureRedirect: '/bad' }));
+app.get('/auth/twitch/callback', 
+  passport.authenticate('twitch', {successRedirect: "/", failureRedirect: '/bad' }
+  ));
 
 
 httpsServer.listen(process.env.S_PORT || 3141, () => {
   console.log(`Secure listening on port ${process.env.S_PORT || 3141}...`);
 });
+
+hookServer.listen(443, ()=> {
+  console.log(`Webhook listening on port 443...`);
+})
