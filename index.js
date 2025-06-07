@@ -22,10 +22,11 @@ import dotenv from "dotenv";
 import session from "express-session";
 import bodyParser from "body-parser";
 import { PrismaClient } from "@prisma/client";
-import {initSocket, requestHooks} from "./server/socket/socket.js";
+import {initSocket, requestHooks, requestSockets} from "./server/socket/socket.js";
 import * as fs from "fs";
 import * as https from "node:https";
 import { Server } from "socket.io";
+import { createHmac } from 'node:crypto';
 
 // import { test } from './server/controllers/house_controller.js';
 import { HouseRepository } from "./server/repositories/house_repository.js";
@@ -33,7 +34,6 @@ import { buildHouseController } from './server/controllers/house_controller.js';
 import { buildHomeController } from './server/controllers/home_controller.js';
 import { buildTwitchController } from './server/controllers/twitch_controller.js';
 import { UserRepository } from './server/repositories/user_repository.js';
-import { access } from 'node:fs';
 
 dotenv.config();
 
@@ -67,63 +67,10 @@ const io = new Server(httpsServer);
 
 io.on("connection", (socket) => {
   console.log("Connected new socket")
-  // console.log(twitchSocket)
-  if (!twitchSocket) {
-    if (!broadcaster) {
-      console.error("No broadcaster...")
-      return;
-    }
-    twitchSocket = new initSocket(true)
-    twitchSocket.on("connect", (session) => {
-      console.log(`Connected WebSocket to Twitch for: ${broadcaster.login}`);
-      
-      let hooks = {
-        'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}},
-        'channel.chat.message_delete': {version: "1", condition: {"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}},
-        'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}}
-      }
-      requestHooks(broadcaster.login, twitchToken, session, hooks)
-      
-      twitchSocket.on("channel.chat.message", ({payload})=> {
-        // console.log("Chat: ", payload.event);
-        
-        if (!payload.event.message.text.startsWith("!")) {
-          chat.push(
-            {key: payload.event.message_id,
-              message: payload.event.message, 
-              username: payload.event.chatter_user_name,
-              color: payload.event.color});
-              
-              io.emit("channel.chat.message", chat);
-            } else {
-              let type = payload.event.message.text.split(" ")[0];
-              if (type === "!vote") {
-                io.emit("channel.chat.vote", {vote: payload.event.message.text, user: payload.event.chatter_user_login});
-              }
-              if (type === "!avatar") {
-                io.emit("channel.chat.avatar", {text: payload.event.message.text, user: payload.event.chatter_user_name});
-              }
-            }
-            
-          })
-          
-          twitchSocket.on("channel.follow", ({payload}) => {
-            
-          })
-        })
-        
-      }
-        socket.on("disconnect", async () => {
-          let sockets = await io.fetchSockets();
-          console.log(sockets);
-          if (sockets.length < 1)
-          {
-            twitchSocket.close()
-            twitchSocket = undefined;
-          }
-          console.log("Disconnected Socket")
-          })
-      })
+  socket.on("disconnect", () => {
+    console.log("Disconnected Socket")
+  })
+})
       
       
       // Override passport profile function to get user profile from Twitch API
@@ -176,9 +123,38 @@ passport.use('twitch', new OAuth2Strategy({
     user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, profile.data[0].id);
     twitchToken = accessToken;
     broadcaster = profile.data[0];
+    let topics = null;
+
+    requestHooks(profile.data[0].id, accessToken, )
+
+
     done(null, profile);
   }
 ));
+
+// Webhook Handlers
+app.post('/webhook', (req, res) => {
+  var message = req.headers['twitch-eventsub-message-type'];
+  if (message === 'webhook_callback_verification') {
+    return res.send(req.body.challenge);
+  }
+  
+  var hmac = createHmac('sha256', process.env.TWITCH_SECRET)
+    .update(req.headers['twitch-eventsub-message-id'] + req.headers['twitch-eventsub-message-timestamp'] + body)
+    .digest('hex');
+  
+  if (`sha256=${hmac}` !== req.headers['twitch-eventsub-message-signature']) {
+    return res.sendStatus("403");
+  }
+
+  if (req.body.subscription.type == 'channel.subscribe') {
+
+  }
+  if (req.body.subscription.type == 'channel.follow') {
+    console.log("Follow Event: ", req.body.event);
+    // io.emit("channel.follow", )
+  }
+})
 
 app.use(bodyParser.json());
 app.use((req, res, next) => {

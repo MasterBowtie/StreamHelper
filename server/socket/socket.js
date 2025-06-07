@@ -1,5 +1,6 @@
 import { WebSocket } from 'ws';
 import dotenv from "dotenv";
+import { callbackify } from 'node:util';
 
 dotenv.config();
 
@@ -194,13 +195,56 @@ export class initSocket {
     }
 }
 
-export function requestHooks(user_id, access_token, session_id, topics) {
+export function requestHooks(user_id, access_token, topics){
+    for (let type in topics) {
+        // console.log(`Attempt create ${type} - ${user_id}`);
+        let { version, condition} = topics[type];
+                fetch(
+            'https://api.twitch.tv/helix/eventsub/subscriptions',
+            {
+                "method": "POST",
+                "headers": {
+                    "Client-ID": process.env.TWITCH_CLIENT_ID,
+                    "Authorization": `Bearer ${access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                "body": JSON.stringify({
+                    type,
+                    version,
+                    condition,
+                    transport: {
+                        method: "webhook",
+                        callback: process.env.CALLBACK_URL,
+                        secret: process.env.TWITCH_SECRET
+                    }
+                })
+            }
+        )
+            .then(resp => resp.json())
+            .then(resp => {
+                if (resp.error) {
+                    console.log(`Error with eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
+                    return false;
+                } else {
+                    console.log(`Subscription Successful`, resp.data);
+                    console.log(`Created ${type}`);
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                // log(`Error with eventsub Call ${type} Call: ${err.message ? err.message : ''}`);
+            });
+    }
+    return true;
+}
+
+export function requestSockets(user_id, access_token, session_id, topics) {
     // console.log("requestHooks")
-    console.log(`Spawn Topics for ${user_id}`);
+    console.log(`Spawn Socket Topics for ${user_id}`);
 
     for (let type in topics) {
         // console.log(`Attempt create ${type} - ${user_id}`);
-        let { version, condition } = topics[type];
+        let { version, condition} = topics[type];
 
 
         fetch(
