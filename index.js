@@ -68,6 +68,9 @@ const io = new Server(httpsServer);
 
 io.on("connection", (socket) => {
   console.log("Connected new socket")
+  if (twitchSocket) {
+    twitchSocket.connect();
+  }
   socket.on("disconnect", () => {
     console.log("Disconnected Socket")
   })
@@ -126,19 +129,44 @@ passport.use('twitch', new OAuth2Strategy({
     broadcaster = profile.data[0];
 
     try {
-        let userHooks = {
-          "channel.chat.message": {version: "1", condition: {"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}}
+        let socketHooks = {
+          'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}}
         }
         let appHooks = {
         'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}},
         'channel.subscribe': {version: "1", condition:{"broadcaster_user_id": broadcaster.id}},
-      }
-        await requestAppHooks(profile.data[0].id, hooks)
-        // await requestUserHooks(profile.data[0].id, accessToken,)
-      } catch (err) {
-        console.error(err);
-      }
+        }
+        await requestAppHooks(profile.data[0].id, appHooks);
 
+        twitchSocket = new initSocket(true)
+        twitchSocket.on("connect", (session) => {
+        console.log(`Connected WebSocket to Twitch for: ${broadcaster.login}`);
+        
+        requestUserHooks(broadcaster.login, twitchToken, session, socketHooks)
+        
+        twitchSocket.on("channel.chat.message", ({payload})=> {
+          // console.log("Chat: ", payload.event);
+
+          if (!payload.event.message.text.startsWith("!")) {
+            chat.push(
+              {key: payload.event.message_id,
+                message: payload.event.message, 
+                username: payload.event.chatter_user_name,
+                color: payload.event.color});
+
+            io.emit("channel.chat.message", chat);
+          } else {
+            let type = payload.event.message.text.split(" ")[0];
+            if (type === "!vote") {
+              io.emit("channel.chat.vote", {vote: payload.event.message.text, user: payload.event.chatter_user_login});
+            }
+          }
+
+            })
+          })
+        } catch (err) {
+          console.error(err);
+        }
     done(null, profile);
   }
 ));
@@ -165,11 +193,6 @@ app.post('/webhook', (req, res) => {
   if (req.body.subscription.type == 'channel.follow') {
     console.log("Follow Event: ", req.body.event);
     // io.emit("channel.follow", )
-  }
-
-  if (req.body.subscription.type == "channel.chat.message") {
-    console.log(req.body.event.chatter_user_name, req.body.event.message.text);
-    io.emit("channel.chat.message", req.body.event);
   }
 })
 
@@ -207,7 +230,7 @@ app.use("/twitch", buildTwitchController(user_repository));
 
 
 // Set route to start OAuth link, this is where you define scopes to request
-app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'moderator:read:chat_messages moderator:read:followers channel:read:subscriptions' }))
+app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'user:read:chat moderator:read:followers channel:read:subscriptions' }))
 
 // Set route for OAuth redirect
 app.get('/auth/twitch/callback', 
