@@ -10,6 +10,7 @@ import { StyleHouse } from './components/HouseStyle.jsx'
 import FollowGoal from './components/FollowGoal.jsx'
 import { Vote } from './components/Vote.jsx'
 import Intermission from './pages/Intermission.jsx'
+import AdBreak from './pages/AdBreak.jsx'
 
 
 const router = createHashRouter([
@@ -21,6 +22,7 @@ const router = createHashRouter([
   {path: "goal", element: <FollowGoal/>},
   {path: "vote", element: <Vote/>},
   {path: "intermission", element: <Intermission/>},
+  {path: "ad", element: <AdBreak/>}
 
 ]);
 

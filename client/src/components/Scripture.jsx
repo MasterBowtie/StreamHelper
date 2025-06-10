@@ -2,10 +2,10 @@ function Scripture({className, style}) {
     return (
     <div className={`scripture ${className}`} style={style}>
         <p>
-        7 But ye are commanded in all things to ask of God, who giveth liberally; and that which the Spirit testifies unto you even so I would that ye should do in all holiness of heart, walking uprightly before me, considering the end of your salvation, doing all things with prayer and thanksgiving, that ye may not be seduced by evil spirits, or doctrines of devils, or the commandments of men; for some are of men, and others of devils.
+        6 In my distress I called upon the Lord, and cried unto my God: he heard my voice out of his temple, and my cry came before him, even into his ears.
         </p><br/>
         <p>
-            - D&C 46:7
+            - Psalm 18:6
         </p>
     </div>
     )

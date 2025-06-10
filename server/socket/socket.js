@@ -221,93 +221,173 @@ async function getAppAccessToken() {
     return cachedAppToken;
 }
 
+// TODO: Check subscriptions first, as to not fill my subscription maximum.
+
+async function getAppSubs(access_token) {
+    // 'https://api.twitch.tv/helix/eventsub/subscriptions' \
+// -H 'Authorization: Bearer 2gbdx6oar67tqtcmt49t3wpcgycthx' \
+// -H 'Client-Id: wbmytr93xzw8zbg0p1izqyzzc5mbiz'
+    var total = fetch('https://api.twitch.tv/helix/eventsub/subscriptions',{
+        'method': "GET",
+        'headers': {
+            "Client-ID": process.env.TWITCH_CLIENT_ID,
+            "Authorization": access_token? `Bearer ${access_token}`: ""
+        }
+    }).then((res) => {
+        if (res.ok) {
+            return res.json();
+        } else {
+            console.error("Failed to get Subscriptions")
+            return {"total": 0, "data": {}};
+        }
+    }).then((data) => {
+        // console.log(data);
+        return data;
+    })
+
+    return total;
+}
+
+async function getAppHook(access_token, type, topic)
+{
+    let { version, condition} = topic;
+    await fetch(
+        'https://api.twitch.tv/helix/eventsub/subscriptions',
+        {
+            "method": "POST",
+            "headers": {
+                "Client-ID": process.env.TWITCH_CLIENT_ID,
+                "Authorization": `Bearer ${access_token}`,
+                'Content-Type': 'application/json'
+            },
+            "body": JSON.stringify({
+                type,
+                version,
+                condition,
+                transport: {
+                    method: "webhook",
+                    callback: `${process.env.CALLBACK_URL}:443/webhook`,
+                    secret: process.env.TWITCH_SECRET
+                }   
+            })
+        }
+    )
+    .then(resp => resp.json())
+    .then(resp => {
+        if (resp.error) {
+            console.log(`Error with webhook eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
+            return false;
+        } else {
+            // console.log(`Subscription Successful`, resp.data);
+            console.log(`Created ${type}`);
+        }
+    })
+    .catch(err => {
+        console.log(`Error with webhook eventsub Call ${type} Call: ${err.message ? err.message : ''}`);
+    });
+    return true;
+}
 
 export async function requestAppHooks(user_id, topics){
     let access_token = await getAppAccessToken();
-    for (let type in topics) {
-        console.log(`Attempt create ${type} - ${user_id}`);
-        let { version, condition} = topics[type];
-                fetch(
-            'https://api.twitch.tv/helix/eventsub/subscriptions',
-            {
-                "method": "POST",
-                "headers": {
+    let subscriptions = await getAppSubs(access_token);
+    if (subscriptions.total > Object.keys(topics).length) {
+        for (var subs of subscriptions.data) {
+            console.log("Delete Id:", subs.id);
+            fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?id=${subs.id}`,{
+                'method': "DELETE",
+                'headers': {
                     "Client-ID": process.env.TWITCH_CLIENT_ID,
-                    "Authorization": `Bearer ${access_token}`,
-                    'Content-Type': 'application/json'
-                },
-                "body": JSON.stringify({
-                    type,
-                    version,
-                    condition,
-                    transport: {
-                        method: "webhook",
-                        callback: `${process.env.CALLBACK_URL}:443/webhook`,
-                        secret: process.env.TWITCH_SECRET
-                    }
-                })
-            }
-        )
-            .then(resp => resp.json())
-            .then(resp => {
-                if (resp.error) {
-                    console.log(`Error with eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
-                    return false;
-                } else {
-                    // console.log(`Subscription Successful`, resp.data);
-                    console.log(`Created ${type}`);
+                "Authorization": `Bearer ${access_token}`
+            }});
+        }
+    }
+
+    subscriptions = await getAppSubs(access_token);
+    if (subscriptions.total > 0) {
+        for (let type in topics) {
+            for (var subs of subscriptions.data) {
+                if (type !== subs.type){
+                    getAppHook(access_token, type, topics[type]);
                 }
-            })
-            .catch(err => {
-                console.log(err);
-                // log(`Error with eventsub Call ${type} Call: ${err.message ? err.message : ''}`);
-            });
+            }
+        } 
+    } else {
+        for (let type in topics) {
+            getAppHook(access_token, type, topics[type]);
+        }
     }
     return true;
 }
 
-export function requestUserHooks(user_id, access_token, session_id, topics) {
-    // console.log("requestHooks")
-    console.log(`Spawn Socket Topics for ${user_id}`);
-
-    for (let type in topics) {
-        // console.log(`Attempt create ${type} - ${user_id}`);
-        let { version, condition} = topics[type];
-
-
-        fetch(
-            'https://api.twitch.tv/helix/eventsub/subscriptions',
-            {
-                "method": "POST",
-                "headers": {
-                    "Client-ID": process.env.TWITCH_CLIENT_ID,
-                    "Authorization": `Bearer ${access_token}`,
-                    'Content-Type': 'application/json'
-                },
-                "body": JSON.stringify({
-                    type,
-                    version,
-                    condition,
-                    transport: {
-                        method: "websocket",
-                        session_id
-                    }
-                })
-            }
-        )
-            .then(resp => resp.json())
-            .then(resp => {
-                if (resp.error) {
-                    console.log(`Error with eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
-                    return false;
-                } else {
-                    console.log(`Created ${type}`);
+function getSocketHook(access_token, session_id, type, topic) {
+    let { version, condition} = topic;
+    fetch(
+        'https://api.twitch.tv/helix/eventsub/subscriptions',
+        {
+            "method": "POST",
+            "headers": {
+                "Client-ID": process.env.TWITCH_CLIENT_ID,
+                "Authorization": `Bearer ${access_token}`,
+                'Content-Type': 'application/json'
+            },
+            "body": JSON.stringify({
+                type,
+                version,
+                condition,
+                transport: {
+                    method: "websocket",
+                    session_id
                 }
             })
-            .catch(err => {
-                console.log(err);
-                // log(`Error with eventsub Call ${type} Call: ${err.message ? err.message : ''}`);
-            });
+        }
+    )
+    .then(resp => resp.json())
+    .then(resp => {
+        if (resp.error) {
+            console.log(`Error with socket eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
+            return false;
+        } else {
+            console.log(`Created ${type}`);
+        }
+    })
+    .catch(err => {
+        console.log(`Error with socket eventsub Call ${type} Call: ${err.message ? err.message : ''}`);
+    });
+    return true;
+}
+
+export async function requestUserHooks(user_id, access_token, session_id, topics) {
+    // console.log("requestHooks")
+    console.log(`Spawn Socket Topics for ${user_id}`);
+    let subscriptions = await getAppSubs(access_token);
+    if (subscriptions.total > 0) {
+        for (var subs of subscriptions.data) {
+            console.log("Delete Id:", subs.id);
+            fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?id=${subs.id}`,{
+                'method': "DELETE",
+                'headers': {
+                    "Client-ID": process.env.TWITCH_CLIENT_ID,
+                "Authorization": `Bearer ${access_token}`
+            }});
+        }
+    }
+
+    subscriptions = await getAppSubs(access_token);
+    console.log("Socket Subs", subscriptions);
+    if (subscriptions.total > 0) {
+        for (let type in topics) {
+            for (var subs of subscriptions.data) {
+                if (type !== subs.type) {
+                    getSocketHook(access_token, session_id, type, topics[type]);
+                }
+            }
+        } 
+    } else {
+        for (let type in topics) {
+            console.log(type);
+            getSocketHook(access_token, session_id, type, topics[type]);
+        }
     }
     return true;
 }

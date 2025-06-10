@@ -89,8 +89,9 @@ function Vote() {
         setVotes({});
         let s = io()
         setSocket(s);
+        s.emit("create", "socket");
 
-        setEnd(Date.now() + (60000 * .1));
+        setEnd(Date.now() + (60000 * 2));
         let headers = Array.from(document.getElementsByClassName("vote_title"));
         let deletes = Array.from(document.getElementsByClassName("del_button"));
         let add_div = document.getElementById("add_div");

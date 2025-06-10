@@ -14,6 +14,7 @@ export default function FollowGoal() {
 
     useEffect(()=> {
       let s = io();
+      s.emit("create", "webhook");
       api.get("/twitch/followers").then(res => {
         setSocket(s)
         setFollowers(res.data.total)
@@ -28,7 +29,8 @@ export default function FollowGoal() {
       if (!socket) {
         return;
       }
-      socket.on("follow", () => {
+      socket.on("channel.follow", (data) => {
+        console.log("Follow: ", data);
         api.get("twitch/followers").then(res => {
           setFollowers(res.data.total);
           setRecent(res.data.data[0]);

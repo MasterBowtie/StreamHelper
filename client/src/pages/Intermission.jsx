@@ -20,17 +20,5 @@ function Intermission() {
             {/* <img id="bowtie" src="src/assets/Events.gif" type="image/gif"/> */}
         </>
     )
-
-
-
-
-
-
-
-
-
-
-
-
 }
 export default Intermission

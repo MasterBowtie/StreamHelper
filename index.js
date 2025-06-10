@@ -67,15 +67,22 @@ var twitchSocket;
 const io = new Server(httpsServer);
 
 io.on("connection", (socket) => {
-  console.log("Connected new socket")
-  if (twitchSocket) {
-    twitchSocket.connect();
-  }
+  
+  socket.on("create", (data) => {
+    if (data === "socket" && twitchSocket) {
+      console.log("Connected new socket");
+      socket.join("socket");
+      twitchSocket.connect();
+    } else if (data === "webhook") {
+      socket.join("webhook");
+      console.log("Connected socket for webhook");
+    }
+  })
+
   socket.on("disconnect", () => {
     console.log("Disconnected Socket")
   })
 })
-      
       
       // Override passport profile function to get user profile from Twitch API
 OAuth2Strategy.prototype.userProfile = async (accessToken, done )=>  {
@@ -135,6 +142,7 @@ passport.use('twitch', new OAuth2Strategy({
         let appHooks = {
         'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}},
         'channel.subscribe': {version: "1", condition:{"broadcaster_user_id": broadcaster.id}},
+        'channel.ad_break.begin': {version: "1", condition: {"broadcaster_user_id": broadcaster.id}},
         }
         await requestAppHooks(profile.data[0].id, appHooks);
 
@@ -154,11 +162,11 @@ passport.use('twitch', new OAuth2Strategy({
                 username: payload.event.chatter_user_name,
                 color: payload.event.color});
 
-            io.emit("channel.chat.message", chat);
+            io.to("socket").emit("channel.chat.message", chat);
           } else {
             let type = payload.event.message.text.split(" ")[0];
             if (type === "!vote") {
-              io.emit("channel.chat.vote", {vote: payload.event.message.text, user: payload.event.chatter_user_login});
+              io.to("socket").emit("channel.chat.vote", {vote: payload.event.message.text, user: payload.event.chatter_user_login});
             }
           }
 
@@ -188,11 +196,17 @@ app.post('/webhook', (req, res) => {
 
   console.log("Event Type: ", req.body.subscription.type);
   if (req.body.subscription.type == 'channel.subscribe') {
-
+    io.to("webhook").emit("channel.subscribe", req.body.event);
   }
+
+  if (req.body.subscription.type == "channel.ad_break.begin")
+  {
+    io.to("webhook").emit("channel.ad_break.begin", req.body.event.duration_seconds);
+  }
+
   if (req.body.subscription.type == 'channel.follow') {
     console.log("Follow Event: ", req.body.event);
-    // io.emit("channel.follow", )
+    io.to("webhook").emit("channel.follow", req.body.event);
   }
 })
 
@@ -230,7 +244,7 @@ app.use("/twitch", buildTwitchController(user_repository));
 
 
 // Set route to start OAuth link, this is where you define scopes to request
-app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'user:read:chat moderator:read:followers channel:read:subscriptions' }))
+app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'user:read:chat moderator:read:followers channel:read:subscriptions channel:read:ads' }))
 
 // Set route for OAuth redirect
 app.get('/auth/twitch/callback', 

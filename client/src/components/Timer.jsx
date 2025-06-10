@@ -11,12 +11,11 @@ function Timer() {
             }, 1000);
     },[currentTime])
 
-
     return(
-        <h2 className="title timer" style={{top: "20%"}} onClick={()=>{setEnd(Date.now() + 5 * 60000)}}>{
-            endTime && endTime > currentTime? Math.floor((endTime - currentTime)/60000): "0"}:
-            {endTime && endTime > currentTime? (Math.floor((endTime - currentTime)/1000)%60 < 10? `0${Math.floor((endTime - currentTime)/1000)%60}`: Math.floor((endTime - currentTime)/1000)%60): "00"
-            }</h2>
+        <h2 className="title timer" style={{top: "20%"}} onClick={()=>{setEnd(Date.now() + 5 * 60000)}}>
+            {endTime && endTime > currentTime? Math.floor((endTime - currentTime)/60000): "0"}:
+            {endTime && endTime > currentTime? (Math.floor((endTime - currentTime)/1000)%60 < 10? `0${Math.floor((endTime - currentTime)/1000)%60}`: Math.floor((endTime - currentTime)/1000)%60): "00"}
+        </h2>
     )
 }
 
