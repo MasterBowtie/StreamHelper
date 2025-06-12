@@ -221,8 +221,6 @@ async function getAppAccessToken() {
     return cachedAppToken;
 }
 
-// TODO: Check subscriptions first, as to not fill my subscription maximum.
-
 async function getAppSubs(access_token) {
     // 'https://api.twitch.tv/helix/eventsub/subscriptions' \
 // -H 'Authorization: Bearer 2gbdx6oar67tqtcmt49t3wpcgycthx' \
@@ -248,6 +246,7 @@ async function getAppSubs(access_token) {
     return total;
 }
 
+// Have to use ngrok for Webhook tunneling
 async function getAppHook(access_token, type, topic)
 {
     let { version, condition} = topic;
@@ -266,8 +265,8 @@ async function getAppHook(access_token, type, topic)
                 condition,
                 transport: {
                     method: "webhook",
-                    callback: `${process.env.CALLBACK_URL}:443/webhook`,
-                    secret: process.env.TWITCH_SECRET
+                    callback: `https://d4ce-2603-6010-4102-9600-318a-e28c-d2cf-d8a9.ngrok-free.app/webhook`,
+                    secret: process.env.SECRET
                 }   
             })
         }
@@ -290,6 +289,7 @@ async function getAppHook(access_token, type, topic)
 
 export async function requestAppHooks(user_id, topics){
     let access_token = await getAppAccessToken();
+    console.log(`access_token: ${access_token}`);
     let subscriptions = await getAppSubs(access_token);
     if (subscriptions.total > Object.keys(topics).length) {
         for (var subs of subscriptions.data) {
@@ -305,11 +305,13 @@ export async function requestAppHooks(user_id, topics){
 
     subscriptions = await getAppSubs(access_token);
     if (subscriptions.total > 0) {
+        let subs = Object.keys(subscriptions.data);
         for (let type in topics) {
-            for (var subs of subscriptions.data) {
-                if (type !== subs.type){
-                    getAppHook(access_token, type, topics[type]);
-                }
+            if (!subs.includes(type)){
+                getAppHook(access_token, type, topics[type]);
+            }
+            else {
+                console.log("Already subscribed to ", )
             }
         } 
     } else {

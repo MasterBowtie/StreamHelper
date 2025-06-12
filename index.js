@@ -25,8 +25,9 @@ import { PrismaClient } from "@prisma/client";
 import {initSocket, requestAppHooks, requestUserHooks} from "./server/socket/socket.js";
 import * as fs from "fs";
 import * as https from "node:https";
+import * as http from "node:http";
 import { Server } from "socket.io";
-import { createHmac } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 
 // import { test } from './server/controllers/house_controller.js';
 import { HouseRepository } from "./server/repositories/house_repository.js";
@@ -53,7 +54,7 @@ var chat = []
 // Initialize Express and middlewares
 var app = express();
 const httpsServer = https.createServer(credentials, app);
-const hookServer = https.createServer(credentials, app);
+const hookServer = http.createServer(app);
 
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
@@ -84,7 +85,7 @@ io.on("connection", (socket) => {
   })
 })
       
-      // Override passport profile function to get user profile from Twitch API
+// Override passport profile function to get user profile from Twitch API
 OAuth2Strategy.prototype.userProfile = async (accessToken, done )=>  {
   fetch('https://api.twitch.tv/helix/users', {
     method: 'GET',
@@ -134,43 +135,45 @@ passport.use('twitch', new OAuth2Strategy({
     user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, profile.data[0].id);
     twitchToken = accessToken;
     broadcaster = profile.data[0];
+    console.log(`ID: ${broadcaster.id}`);
 
     try {
         let socketHooks = {
           'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}}
         }
         let appHooks = {
-        'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}},
-        'channel.subscribe': {version: "1", condition:{"broadcaster_user_id": broadcaster.id}},
-        'channel.ad_break.begin': {version: "1", condition: {"broadcaster_user_id": broadcaster.id}},
+          'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}},
+          'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}},
+          'channel.subscribe': {version: "1", condition:{"broadcaster_user_id": broadcaster.id}},
+          'channel.ad_break.begin': {version: "1", condition: {"broadcaster_user_id": broadcaster.id}},
         }
-        await requestAppHooks(profile.data[0].id, appHooks);
+        requestAppHooks(profile.data[0].id, appHooks);
 
-        twitchSocket = new initSocket(true)
+        twitchSocket = new initSocket()
         twitchSocket.on("connect", (session) => {
-        console.log(`Connected WebSocket to Twitch for: ${broadcaster.login}`);
-        
-        requestUserHooks(broadcaster.login, twitchToken, session, socketHooks)
-        
-        twitchSocket.on("channel.chat.message", ({payload})=> {
-          // console.log("Chat: ", payload.event);
+          console.log(`Connected WebSocket to Twitch for: ${broadcaster.login}`);
+          
+          requestUserHooks(broadcaster.login, twitchToken, session, socketHooks)
+          
+          twitchSocket.on("channel.chat.message", ({payload})=> {
+            // console.log("Chat: ", payload.event);
 
-          if (!payload.event.message.text.startsWith("!")) {
-            chat.push(
-              {key: payload.event.message_id,
-                message: payload.event.message, 
-                username: payload.event.chatter_user_name,
-                color: payload.event.color});
+            if (!payload.event.message.text.startsWith("!")) {
+              chat.push(
+                {key: payload.event.message_id,
+                  message: payload.event.message, 
+                  username: payload.event.chatter_user_name,
+                  color: payload.event.color});
 
-            io.to("socket").emit("channel.chat.message", chat);
-          } else {
-            let type = payload.event.message.text.split(" ")[0];
-            if (type === "!vote") {
-              io.to("socket").emit("channel.chat.vote", {vote: payload.event.message.text, user: payload.event.chatter_user_login});
+              io.to("socket").emit("channel.chat.message", chat);
+            } else {
+              let type = payload.event.message.text.split(" ")[0];
+              if (type === "!vote") {
+                io.to("socket").emit("channel.chat.vote", {vote: payload.event.message.text, user: payload.event.chatter_user_login});
+              }
             }
-          }
 
-            })
+              })
           })
         } catch (err) {
           console.error(err);
@@ -179,36 +182,53 @@ passport.use('twitch', new OAuth2Strategy({
   }
 ));
 
+function getHmacMessage(request) {
+  return (request.headers['twitch-eventsub-message-id'] + request.headers["twitch-eventsub-message-timestamp"] + request.body);
+}
+
+function verifyMessage(hmac, verifySignature) {
+  return timingSafeEqual(Buffer.from(hmac), Buffer.from(verifySignature));
+}
+// https://dev.twitch.tv/docs/eventsub/handling-webhook-events/#verifying-the-event-message
+
+app.use("/webhook", express.raw({ type: 'application/json' }))
 // Webhook Handlers
 app.post('/webhook', (req, res) => {
-  var message = req.headers['twitch-eventsub-message-type'];
-  if (message === 'webhook_callback_verification') {
-    return res.send(req.body.challenge);
-  }
-  
-  var hmac = createHmac('sha256', process.env.TWITCH_SECRET)
-    .update(req.headers['twitch-eventsub-message-id'] + req.headers['twitch-eventsub-message-timestamp'] + body)
+  let messageType = req.header('Twitch-Eventsub-Message-Type');
+  let messageId = req.header('Twitch-Eventsub-Message-Id');
+  let timestamp = req.header('Twitch-Eventsub-Message-Timestamp');
+  let signature = req.header('Twitch-Eventsub-Message-Signature');
+
+  let rawBody = req.body.toString();
+
+  let hmac = createHmac('sha256', process.env.SECRET)
+    .update(messageId + timestamp + rawBody)
     .digest('hex');
-  
-  if (`sha256=${hmac}` !== req.headers['twitch-eventsub-message-signature']) {
-    return res.sendStatus("403");
+
+  let expectedSignature = `sha256=${hmac}`;
+
+  if (signature !== expectedSignature) {
+    console.error('Invalid signature');
+    return res.status(403).send('Forbidden');
   }
 
-  console.log("Event Type: ", req.body.subscription.type);
-  if (req.body.subscription.type == 'channel.subscribe') {
-    io.to("webhook").emit("channel.subscribe", req.body.event);
+  let body = JSON.parse(rawBody);
+
+  if (messageType === 'webhook_callback_verification') {
+    return res.status(200).send(body.challenge);
   }
 
-  if (req.body.subscription.type == "channel.ad_break.begin")
-  {
-    io.to("webhook").emit("channel.ad_break.begin", req.body.event.duration_seconds);
+  if (messageType === 'notification') {
+    // console.log('Twitch Event:', body.subscription);
+    if (body.subscription.type === "channel.chat.message") {
+      console.log("Message:", body.event);
+      io.to("webhook").emit("channel.message.chat", body.event);
+    }
+    return res.status(204).end();
   }
 
-  if (req.body.subscription.type == 'channel.follow') {
-    console.log("Follow Event: ", req.body.event);
-    io.to("webhook").emit("channel.follow", req.body.event);
-  }
-})
+  res.status(200).end();
+});
 
 app.use(bodyParser.json());
 app.use((req, res, next) => {
@@ -244,7 +264,7 @@ app.use("/twitch", buildTwitchController(user_repository));
 
 
 // Set route to start OAuth link, this is where you define scopes to request
-app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'user:read:chat moderator:read:followers channel:read:subscriptions channel:read:ads' }))
+app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'user:read:chat channel:bot user:bot moderator:read:followers channel:read:subscriptions channel:read:ads' }))
 
 // Set route for OAuth redirect
 app.get('/auth/twitch/callback', 
@@ -256,6 +276,6 @@ httpsServer.listen(process.env.S_PORT || 3141, () => {
   console.log(`Secure listening on port ${process.env.S_PORT || 3141}...`);
 });
 
-hookServer.listen(443, ()=> {
-  console.log(`Webhook listening on port 443...`);
-})
+// hookServer.listen(3000, ()=> {
+//   console.log(`Webhook listening on port 3000...`);
+// })
