@@ -8,7 +8,12 @@ function Vote() {
     const [currentTime, setTime] = useState();
     const [endTime, setEnd] = useState();
 
-    //TODO: Switch setInterval to setTimeout
+    // TODO: Switch setInterval to setTimeout
+    useEffect(()=> {
+        setInterval(()=> {
+            setTime(Date.now())
+        }, 1000);
+    },[])
 
     useEffect(() => {
         if(!socket) return;
@@ -31,10 +36,6 @@ function Vote() {
 
 
     useEffect(() => {
-        setInterval(()=> {
-            setTime(Date.now())
-        }, 1000);
-
         if (endTime) {
             let reset = document.getElementById("reset_button");
             let announce = document.getElementById("announce")

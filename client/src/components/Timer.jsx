@@ -6,10 +6,10 @@ function Timer() {
     const [endTime, setEnd] = useState();
 
     useEffect(() => {
-            setInterval(()=> {
-                setTime(Date.now())
-            }, 1000);
-    },[currentTime])
+        setInterval(()=> {
+            setTime(Date.now())
+        }, 1000);
+    },[])
 
     return(
         <h2 className="title timer" style={{top: "20%"}} onClick={()=>{setEnd(Date.now() + 5 * 60000)}}>

@@ -250,6 +250,8 @@ async function getAppSubs(access_token) {
 async function getAppHook(access_token, type, topic)
 {
     let { version, condition} = topic;
+
+    // TODO: Adjust callback from ngrok
     await fetch(
         'https://api.twitch.tv/helix/eventsub/subscriptions',
         {
