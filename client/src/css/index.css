@@ -51,6 +51,10 @@ p {
   
 }
 
+.adTitle {
+  font-size: 200px !important;
+}
+
 .title
 {
   text-transform: uppercase;

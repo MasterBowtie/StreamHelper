@@ -220,10 +220,13 @@ app.post('/webhook', (req, res) => {
 
   if (messageType === 'notification') {
     // console.log('Twitch Event:', body.subscription);
-    if (body.subscription.type === "channel.chat.message") {
-      console.log("Message:", body.event);
-      io.to("webhook").emit("channel.message.chat", body.event);
-    }
+    io.to("webhook").emit(body.subscription.type, body.event);
+    
+    // if (body.subscription.type === "channel.chat.message") {
+    //   console.log("Message:", body.event);
+    //   io.to("webhook").emit("channel.message.chat", body.event);
+    // }
+    
     return res.status(204).end();
   }
 

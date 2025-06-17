@@ -2,10 +2,10 @@ function Scripture({className, style}) {
     return (
     <div className={`scripture ${className}`} style={style}>
         <p>
-        6 In my distress I called upon the Lord, and cried unto my God: he heard my voice out of his temple, and my cry came before him, even into his ears.
+            9 Wherefore, I say unto you, that ye ought to forgive one another; for he that forgiveth not his brother his trespasses standeth condemned before the Lord; for there remaineth in him the greater sin.
         </p><br/>
         <p>
-            - Psalm 18:6
+            - D&C 64:9
         </p>
     </div>
     )

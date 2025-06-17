@@ -8,6 +8,8 @@ function Vote() {
     const [currentTime, setTime] = useState();
     const [endTime, setEnd] = useState();
 
+    //TODO: Switch setInterval to setTimeout
+
     useEffect(() => {
         if(!socket) return;
         socket.on("channel.chat.vote", (data)=> {
