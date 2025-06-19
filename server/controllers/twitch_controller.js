@@ -6,6 +6,28 @@ import dotenv from "dotenv";
 function buildTwitchController(UserRepository) {
     const router = Router();
 
+    router.get('/subscribers', sessionMiddleware, async (req, res) => {
+        let token = await UserRepository.getToken(process.env.TWITCH_CLIENT_ID)
+        fetch(`https://api.twitch.tv/helix/subscriptions?broadcaster_id=${token.user_id}`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token.token}`,
+                "Client-Id": process.env.TWITCH_CLIENT_ID
+            }
+        }).then(response => {
+            if (response.ok) {
+                return response.json()
+            }
+            else {
+                res.json({total: 0})
+            }
+        }).then(data => {
+            res.json({
+                data
+            })
+        })
+    })
+
     router.get('/followers', sessionMiddleware, async (req, res) => {
         let token = await UserRepository.getToken(process.env.TWITCH_CLIENT_ID)
         fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${token.user_id}`, {

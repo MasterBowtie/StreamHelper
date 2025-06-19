@@ -31,17 +31,17 @@ export default function AdBreak() {
 
     function startAds(data) {
         let div = document.getElementById("adTimer");
-            div.removeAttribute("hidden");
-            let duration = parseInt(data.duration_seconds);
-            let seconds = duration % 60;
-            let minutes = Math.floor(duration/60);
-            console.log(`Duration: ${minutes}:${seconds}`);
-            setEnd(Date.now() + (duration * 1000));
+        div.removeAttribute("hidden");
+        let duration = parseInt(data.duration_seconds);
+        let seconds = duration % 60;
+        let minutes = Math.floor(duration/60);
+        console.log(`Duration: ${minutes}:${seconds}`);
+        setEnd(Date.now() + (duration * 1000));
+        if (alert) alert.play();
+        setTimeout(()=> {
             if (alert) alert.play();
-            setTimeout(()=> {
-                if (alert) alert.play();
-                div.hidden = true;
-            }, duration * 1000);
+            div.hidden = true;
+        }, duration * 1000);
     }
 
     return (

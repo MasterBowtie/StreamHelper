@@ -6,7 +6,8 @@ import { io } from "socket.io-client";
 // TODO: Get Twitch suggested goal milestones
 export default function FollowGoal() {
     const [followers, setFollowers] = useState(0);
-    const [recent, setRecent] = useState("");
+    const [recentFollower, setRecentFollower] = useState("");
+    const [recentSub, setRecentSub] = useState("");
     const [socket, setSocket] = useState(undefined);
     const [percentage, setPercent] = useState("0%")
     const [goal, setGoal] = useState(50);
@@ -18,9 +19,12 @@ export default function FollowGoal() {
       api.get("/twitch/followers").then(res => {
         setSocket(s)
         setFollowers(res.data.total)
-        setRecent(res.data.data[0])
+        setRecentFollower(res.data.data[0])
       })
-      return () => {
+      api.get("/twitch/subscribers").then(res=> {
+        setRecentSub(res.data.data[0]);
+      })
+      return () => {  
         s.disconnect();
       }
     }, [])
@@ -33,7 +37,10 @@ export default function FollowGoal() {
         console.log("Follow: ", data);
         api.get("twitch/followers").then(res => {
           setFollowers(res.data.total);
-          setRecent(res.data.data[0]);
+          setRecentFollower(res.data.data[0]);
+        })
+        api.get("twitch/subscribers").then(res=> {
+          setRecentSub(res.data.data[0]);
         })
       })
     } ,[socket])
@@ -46,7 +53,12 @@ export default function FollowGoal() {
     return (
         <>
         <div>
-          <h1 style={{margin: "0", textAlign: "right", color: 'white'}}>Most Recent Follower: {recent.user_name}</h1>
+          <h1 style={{margin: "0", textAlign: "left", color: 'white'}}>Most Recent Subscriber:</h1>
+          <h1 style={{margin: "0", textAlign: "right", color: "white"}}>{recentSub.user_name}</h1>
+        </div>
+        <div>
+          <h1 style={{margin: "0", textAlign: "left", color: 'white'}}>Most RecentFollower Follower:</h1>
+          <h1 style={{margin: "0", textAlign: "right", color: "white"}}>{recentFollower.user_name}</h1>
         </div>
           <div style={{width: "500px", borderColor: 'black', borderWidth: "3px", borderStyle: "solid"}}>
               <h1 style={{width: percentage, backgroundColor: 'green', margin: "0", color: "white", textAlign: "center"}}>{followers}/{goal} Followers</h1>

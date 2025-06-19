@@ -267,7 +267,7 @@ app.use("/twitch", buildTwitchController(user_repository));
 
 
 // Set route to start OAuth link, this is where you define scopes to request
-app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'user:read:chat channel:bot user:bot moderator:read:followers channel:read:subscriptions channel:read:ads' }))
+app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'user:read:chat channel:bot user:bot moderator:read:followers channel:read:subscriptions channel:read:ads channel:read:subscriptions bits:read' }))
 
 // Set route for OAuth redirect
 app.get('/auth/twitch/callback', 
