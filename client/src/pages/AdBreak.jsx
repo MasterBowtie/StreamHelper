@@ -15,6 +15,7 @@ export default function AdBreak() {
         let audio = new Audio("src/assets/AdStart.mp3")
         audio.autoplay = false;
         audio.loop = false;
+        audio.volume = 0.5;
         setAlert(audio);
         setInterval(()=> {
             setTime(Date.now())

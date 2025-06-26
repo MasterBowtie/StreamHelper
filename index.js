@@ -82,6 +82,9 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("Disconnected Socket")
+    if (io.sockets.adapter.rooms.get("socket").size < 1) {
+      twitchSocket.close();
+    }
   })
 })
       
@@ -142,6 +145,8 @@ passport.use('twitch', new OAuth2Strategy({
           'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}}
         }
         let appHooks = {
+          'channel.subscription.message': {version: "1", condition: {"broadcaster_user_id": broadcaster.id}},
+          'channel.subscribe': {version: "1", condition: {"broadcaster_user_id": broadcaster.id}},
           'channel.chat.message': {version: "1", condition:{"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}},
           'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}},
           'channel.subscribe': {version: "1", condition:{"broadcaster_user_id": broadcaster.id}},

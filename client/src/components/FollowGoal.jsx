@@ -33,12 +33,16 @@ export default function FollowGoal() {
       if (!socket) {
         return;
       }
+
       socket.on("channel.follow", (data) => {
         console.log("Follow: ", data);
         api.get("twitch/followers").then(res => {
           setFollowers(res.data.total);
           setRecentFollower(res.data.data[0]);
         })
+      })
+
+      socket.on("channel.subscribe", (data) =>{
         api.get("twitch/subscribers").then(res=> {
           setRecentSub(res.data.data[0]);
         })
@@ -60,7 +64,7 @@ export default function FollowGoal() {
           <h1 style={{margin: "0", textAlign: "left", color: 'white'}}>Most RecentFollower Follower:</h1>
           <h1 style={{margin: "0", textAlign: "right", color: "white"}}>{recentFollower.user_name}</h1>
         </div>
-          <div style={{width: "500px", borderColor: 'black', borderWidth: "3px", borderStyle: "solid"}}>
+          <div style={{width: "500px", borderColor: 'black', borderWidth: "3px", borderStyle: "solid", backgroundColor: "white"}}>
               <h1 style={{width: percentage, backgroundColor: 'green', margin: "0", color: "white", textAlign: "center"}}>{followers}/{goal} Followers</h1>
           </div>
         </>

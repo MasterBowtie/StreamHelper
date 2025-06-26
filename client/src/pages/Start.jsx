@@ -14,7 +14,7 @@ function Start() {
     return (
         <>
             {/* <img className="container" src="src/assets/background_photo.png"></img> */}
-            <video id="introVideo" className="container" autoPlay src="src/assets/Baptistry.mp4" loop type="video/mp4"></video>
+            <video id="introVideo" className="container" autoPlay src="src/assets/temple_timelapse.mp4" muted type="video/mp4"></video>
             {/* <h3>Starting Soon!</h3> */}
             <Scripture className={"glass"}/>
             <Title title={["Stream Starts in: "]}/>

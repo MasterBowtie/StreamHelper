@@ -2,10 +2,12 @@ function Scripture({className, style}) {
     return (
     <div className={`scripture ${className}`} style={style}>
         <p>
-            9 Wherefore, I say unto you, that ye ought to forgive one another; for he that forgiveth not his brother his trespasses standeth condemned before the Lord; for there remaineth in him the greater sin.
+            4 Surely he hath borne our griefs, and carried our sorrows: yet we did esteem him stricken, smitten of God, and afflicted.
+        </p><p>
+        5 But he was wounded for our transgressions, he was bruised for our iniquities: the chastisement of our peace was upon him; and with his stripes we are healed.
         </p><br/>
         <p>
-            - D&C 64:9
+            - Isaiah 53:4,5
         </p>
     </div>
     )
