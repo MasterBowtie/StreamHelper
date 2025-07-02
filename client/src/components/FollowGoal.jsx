@@ -21,8 +21,9 @@ export default function FollowGoal() {
         setFollowers(res.data.total)
         setRecentFollower(res.data.data[0])
       })
-      api.get("/twitch/subscribers").then(res=> {
-        setRecentSub(res.data.data[0]);
+      api.get("/twitch/recent_sub").then(res=> {
+        console.log(res.data);
+        setRecentSub(res.data);
       })
       return () => {  
         s.disconnect();
@@ -43,8 +44,8 @@ export default function FollowGoal() {
       })
 
       socket.on("channel.subscribe", (data) =>{
-        api.get("twitch/subscribers").then(res=> {
-          setRecentSub(res.data.data[0]);
+        api.get("twitch/recent_sub").then(res=> {
+          setRecentSub(res.data);
         })
       })
     } ,[socket])
@@ -58,7 +59,7 @@ export default function FollowGoal() {
         <>
         <div>
           <h1 style={{margin: "0", textAlign: "left", color: 'white'}}>Most Recent Subscriber:</h1>
-          <h1 style={{margin: "0", textAlign: "right", color: "white"}}>{recentSub.user_name}</h1>
+          <h1 style={{margin: "0", textAlign: "right", color: "white"}}>{recentSub.user_name}{recentSub.gifted? ` (Gifted By:${recentSub.gifted_by_name})`: ""}</h1>
         </div>
         <div>
           <h1 style={{margin: "0", textAlign: "left", color: 'white'}}>Most RecentFollower Follower:</h1>

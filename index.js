@@ -35,6 +35,7 @@ import { buildHouseController } from './server/controllers/house_controller.js';
 import { buildHomeController } from './server/controllers/home_controller.js';
 import { buildTwitchController } from './server/controllers/twitch_controller.js';
 import { UserRepository } from './server/repositories/user_repository.js';
+import { SubscriberRepository } from './server/repositories/subscriber_repository.js';
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ export const MANIFEST = DEBUG ? {} : JSON.parse(fs.readFileSync("static/.vite/ma
 const db = new PrismaClient();
 const house_repository = HouseRepository.getInstance(db);
 const user_repository = UserRepository.getInstance(db);
+const sub_repository = SubscriberRepository.getInstance(db);
 var twitchToken;
 var broadcaster;
 
@@ -82,9 +84,9 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("Disconnected Socket")
-    if (io.sockets.adapter.rooms.get("socket").size < 1) {
-      twitchSocket.close();
-    }
+    // if (io.sockets.adapter.rooms.get("socket").size < 1) {
+    //   twitchSocket.close();
+    // }
   })
 })
       
@@ -151,6 +153,7 @@ passport.use('twitch', new OAuth2Strategy({
           'channel.follow': {version: "2", condition:{"broadcaster_user_id": broadcaster.id, "moderator_user_id": broadcaster.id}},
           'channel.subscribe': {version: "1", condition:{"broadcaster_user_id": broadcaster.id}},
           'channel.ad_break.begin': {version: "1", condition: {"broadcaster_user_id": broadcaster.id}},
+          'channel.chat.notification': {version: "1", condition: {"broadcaster_user_id": broadcaster.id, "user_id": broadcaster.id}},
         }
         requestAppHooks(profile.data[0].id, appHooks);
 
@@ -226,6 +229,49 @@ app.post('/webhook', (req, res) => {
   if (messageType === 'notification') {
     // console.log('Twitch Event:', body.subscription);
     io.to("webhook").emit(body.subscription.type, body.event);
+
+    if (body.subscription.type === "channel.chat.notification") {
+      let data = {};
+      switch (body.event.notice_type) {
+        case "sub":
+          data = {
+            id: body.event.chatter_user_id,
+            user_name: body.event.chatter_user_name,
+            start_date: Date.now(),
+            tier: body.event.sub.sub_tier,
+            gifted: false,
+            gifted_by_id: null,
+            gifted_by_name: null,
+            resub_date: Date.now(),
+          }
+          sub_repository.createSub(data);
+          break;
+
+        case "resub":
+          data = {
+            id: body.event.chatter_user_id,
+            gifted: body.event.resub.is_gift,
+            gifted_by_id: body.event.resub.is_gift? (body.event.resub.gifter_is_anonymous? 0: gifter_user_id): null,
+            gifted_by_name: body.event.resub.is_gift? (body.event.resub.gifter_is_anonymous? "Anonymous": gifter_user_id): null,
+            resub_date: Date.now()
+          }
+          sub_repository.updateSub(data);
+          break;
+        
+        case "sub_gift":
+          data = {
+            id: body.event.sub_gift.recipient_user_id,
+            user_name: body.event.sub_gift.recipient_user_name,
+            start_date: Date.now(),
+            tier: body.event.sub_gift.sub_tier,
+            gifted: true,
+            gifted_by_id: body.event.chatter_user_id,
+            gifted_by_name: body.event.chatter_user_name,
+            resub_date: Date.now(),
+          }
+          sub_repository.createSub(data);
+      }
+    }
     
     // if (body.subscription.type === "channel.chat.message") {
     //   console.log("Message:", body.event);
@@ -268,7 +314,7 @@ if (!DEBUG) {
 
 app.use('/', buildHomeController());
 app.use("/house", buildHouseController(house_repository));
-app.use("/twitch", buildTwitchController(user_repository));
+app.use("/twitch", buildTwitchController(user_repository, sub_repository));
 
 
 // Set route to start OAuth link, this is where you define scopes to request
