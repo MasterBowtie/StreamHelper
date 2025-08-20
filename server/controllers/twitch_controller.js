@@ -25,9 +25,12 @@ function buildTwitchController(UserRepository, SubscriberRepository) {
                 return response.json()
             }
             else {
-                res.json({total: 0})
+                res.json({total: 0,
+                    data: [{user_id: 0, user_login: "broken", user_name: "BROKEN"}]
+                })
             }
         }).then(data => {
+            // console.log(data);
             res.json({
                 data
             })

@@ -16,7 +16,7 @@ import {fileURLToPath} from 'node:url';
 import { OAuth2Strategy } from "passport-oauth";
 import passport from "passport";
 // var twitchStrategy = require("passport-twitch").Strategy;
-import express, { Router } from "express";
+import express, { response, Router } from "express";
 import { engine } from 'express-handlebars';
 import dotenv from "dotenv";
 import session from "express-session";
@@ -70,7 +70,7 @@ var twitchSocket;
 const io = new Server(httpsServer);
 
 io.on("connection", (socket) => {
-  
+  // console.log(io.sockets.adapter.rooms);
   socket.on("create", (data) => {
     if (data === "socket" && twitchSocket) {
       console.log("Connected new socket");
@@ -84,9 +84,10 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("Disconnected Socket")
-    // if (io.sockets.adapter.rooms.get("socket").size < 1) {
-    //   twitchSocket.close();
-    // }
+    let room = io.sockets.adapter.rooms.get("socket")
+    if (!room || room.size < 1) {
+      twitchSocket.close();
+    }
   })
 })
       
@@ -135,9 +136,24 @@ passport.use('twitch', new OAuth2Strategy({
   async function(accessToken, refreshToken, profile, done) {
     // console.log("Profile", profile.data[0].id);
     // console.log("Profile: ", profile.data[0]);
+    let expire = await fetch('https://id.twitch.tv/oauth2/validate', {
+    headers: {
+      Authorization: `OAuth ${accessToken}`,
+    },
+    }).then(response => {
+      // console.log("Response", response);
+      if (response.ok) {
+        return response.json();
+      }
+    })
+    .then(data => {
+      // console.log(data);
+      return Math.floor(Date.now()/1000) + (data.expires_in);
+    })
 
+    console.log("Expires", expire);
     user_repository.createUser(profile.data[0].login, profile.data[0].id);
-    user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, profile.data[0].id);
+    user_repository.setToken(process.env.TWITCH_CLIENT_ID, accessToken, expire, refreshToken, profile.data[0].id);
     twitchToken = accessToken;
     broadcaster = profile.data[0];
     console.log(`ID: ${broadcaster.id}`);
@@ -227,9 +243,6 @@ app.post('/webhook', (req, res) => {
   }
 
   if (messageType === 'notification') {
-    // console.log('Twitch Event:', body.subscription);
-    io.to("webhook").emit(body.subscription.type, body.event);
-
     if (body.subscription.type === "channel.chat.notification") {
       let data = {};
       switch (body.event.notice_type) {
@@ -242,7 +255,7 @@ app.post('/webhook', (req, res) => {
             gifted: false,
             gifted_by_id: null,
             gifted_by_name: null,
-            resub_date: Date.now(),
+            resub_date: null,
           }
           sub_repository.createSub(data);
           break;
@@ -267,9 +280,9 @@ app.post('/webhook', (req, res) => {
             gifted: true,
             gifted_by_id: body.event.chatter_user_id,
             gifted_by_name: body.event.chatter_user_name,
-            resub_date: Date.now(),
+            resub_date: null,
           }
-          sub_repository.createSub(data);
+          sub
       }
     }
     
@@ -277,6 +290,8 @@ app.post('/webhook', (req, res) => {
     //   console.log("Message:", body.event);
     //   io.to("webhook").emit("channel.message.chat", body.event);
     // }
+    // console.log('Twitch Event:', body.subscription);
+    io.to("webhook").emit(body.subscription.type, body.event);
     
     return res.status(204).end();
   }

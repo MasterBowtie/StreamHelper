@@ -19,19 +19,19 @@ model user {
   id        Int     @id @default(autoincrement())
   name      String  @unique(map: "name") @db.VarChar(20)
   token     String? @db.VarChar(100)
-  refresh   String? @db.VarChar(50) 
-  expires   String? @db.VarChar(50)
   client_id String  @unique(map: "client_id") @db.VarChar(50)
   user_id   String? @db.VarChar(20)
+  expires   Int?
+  refresh   String? @db.VarChar(50)
 }
 
 model subscriber {
-  id              Int       @id @unique
-  user_name       String    
-  start_date      String    @db.VarChar(50)
-  tier            Int
-  gifted          Boolean?   @default(false)
-  gifted_by_id    Int?
-  gifted_by_name  String?
-  resub_date      String?    @db.VarChar(50)
+  id             Int      @id @unique
+  user_name      String
+  start_date     String   @db.VarChar(50)
+  tier           Int
+  gifted         Boolean? @default(false)
+  gifted_by_id   Int?
+  gifted_by_name String?
+  resub_date     String?  @db.VarChar(50)
 }

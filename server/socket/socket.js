@@ -158,7 +158,9 @@ export class initSocket {
         this.eventsub.send('cat');
     }
     close() {
-        this.eventsub.close();
+        if (this.eventsub) {
+            this.eventsub.close();
+        }
     }
 
     silenceHandler = false;
@@ -378,7 +380,7 @@ export async function requestUserHooks(user_id, access_token, session_id, topics
     }
 
     subscriptions = await getAppSubs(access_token);
-    console.log("Socket Subs", subscriptions);
+    // console.log("Socket Subs", subscriptions);
     if (subscriptions.total > 0) {
         for (let type in topics) {
             for (var subs of subscriptions.data) {

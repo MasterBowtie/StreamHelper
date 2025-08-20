@@ -29,14 +29,16 @@ export class UserRepository {
         }
     }
 
-    async setToken(client_id, token, user_id) {
-        console.log('updated Token');
+    async setToken(client_id, token, expires, refresh, user_id) {
+        console.log('updated Token', expires);
         await this.db.user.update({
             where: {
                 client_id
             },
             data: {
                 token,
+                expires,
+                refresh,
                 user_id
             }
         })

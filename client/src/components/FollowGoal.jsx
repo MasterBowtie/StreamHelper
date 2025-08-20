@@ -43,11 +43,13 @@ export default function FollowGoal() {
         })
       })
 
-      socket.on("channel.subscribe", (data) =>{
+      socket.on("channel.chat.notification", (data) =>{
         api.get("twitch/recent_sub").then(res=> {
           setRecentSub(res.data);
         })
       })
+
+      
     } ,[socket])
     
     useEffect(() => {
