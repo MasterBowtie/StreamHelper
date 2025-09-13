@@ -330,6 +330,7 @@ if (!DEBUG) {
 app.use('/', buildHomeController());
 app.use("/house", buildHouseController(house_repository));
 app.use("/twitch", buildTwitchController(user_repository, sub_repository));
+// TODO: Add scripture Controller
 
 
 // Set route to start OAuth link, this is where you define scopes to request
