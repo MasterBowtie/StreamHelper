@@ -34,8 +34,10 @@ import { HouseRepository } from "./server/repositories/house_repository.js";
 import { buildHouseController } from './server/controllers/house_controller.js';
 import { buildHomeController } from './server/controllers/home_controller.js';
 import { buildTwitchController } from './server/controllers/twitch_controller.js';
+import { buildScriptureController } from './server/controllers/scripture_controller.js';
 import { UserRepository } from './server/repositories/user_repository.js';
 import { SubscriberRepository } from './server/repositories/subscriber_repository.js';
+import { ScriptureRepository } from './server/repositories/scripture_repository.js';
 
 dotenv.config();
 
@@ -45,6 +47,7 @@ const db = new PrismaClient();
 const house_repository = HouseRepository.getInstance(db);
 const user_repository = UserRepository.getInstance(db);
 const sub_repository = SubscriberRepository.getInstance(db);
+const scripture_repository = ScriptureRepository.getInstance(db);
 var twitchToken;
 var broadcaster;
 
@@ -330,7 +333,7 @@ if (!DEBUG) {
 app.use('/', buildHomeController());
 app.use("/house", buildHouseController(house_repository));
 app.use("/twitch", buildTwitchController(user_repository, sub_repository));
-// TODO: Add scripture Controller
+app.use("/scripture", buildScriptureController(scripture_repository));
 
 
 // Set route to start OAuth link, this is where you define scopes to request
