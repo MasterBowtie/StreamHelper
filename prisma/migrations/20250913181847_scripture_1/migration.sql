@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `scripture` ADD COLUMN `book` INTEGER NOT NULL DEFAULT 0;
