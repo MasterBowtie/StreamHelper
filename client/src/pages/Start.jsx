@@ -1,4 +1,4 @@
-import Scripture from "../components/Scripture"
+import { Scripture }  from "../components/Scripture"
 import Chat from "../components/Chat"
 import Title from "../components/Title"
 import { Timer } from "../components/Timer"
@@ -16,7 +16,7 @@ function Start() {
             {/* <img className="container" src="src/assets/background_photo.png"></img> */}
             <video id="introVideo" className="container" autoPlay src="src/assets/temple_timelapse.mp4" muted type="video/mp4"></video>
             {/* <h3>Starting Soon!</h3> */}
-            <Scripture className={"glass"}/>
+            {/* <Scripture className={"glass"}/> */}
             <Title title={["Stream Starts in: "]}/>
             <Timer/>
             {/* <img id="bowtie" src="src/assets/Events.gif" type="image/gif"/> */}

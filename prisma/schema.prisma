@@ -36,10 +36,21 @@ model subscriber {
   resub_date      String?    @db.VarChar(50)
 }
 
-model scripture {
-  id              Int         @id @default(autoincrement())
-  date            DateTime    @default(now())
-  body            String      @db.LongText
-  reference       String
-  book            Int         @default(0)
+model Scripture {
+  id        Int       @id @default(autoincrement())
+  date      DateTime  @default(now())
+
+  // Refers to collection (1: OT, 2: NT, 3: BoM, 4: D&C)
+  book      Int       
+
+  bodyParas Json      // paragraphs of scripture text
+  reference String    // e.g. "Matthew 22:36-39"
+
+  // Generated month–day column for "today across years"
+  md        String    @db.Char(5) @default(dbgenerated("(date_format(`date`,'%m-%d'))"))
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([md], name: "idx_scripture_md")
 }

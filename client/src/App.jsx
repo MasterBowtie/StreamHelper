@@ -14,7 +14,7 @@ function App() {
   return (
     <>
       <a href="/#/start">Start</a>
-      <br></br><a href="/#/scripture">Scripture</a>
+      <br></br><a href="/#/scripture/crud">Scripture</a>
       <br></br><a href="/#/house">House Styles</a>
       <br></br><a href="/#/goal">Follower Goal</a>
       <br></br><a href="/#/vote">Vote</a>

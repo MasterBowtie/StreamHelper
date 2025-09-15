@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
-import Scripture from './components/Scripture.jsx'
+import { Scripture, ScriptView, Crud } from './components/Scripture.jsx'
 import Start from './pages/Start.jsx'
 import Chat from './components/Chat.jsx'
 import "./css/index.css"
@@ -15,7 +15,10 @@ import AdBreak from './pages/AdBreak.jsx'
 
 const router = createHashRouter([
   {path: "", element: <App/>},
-  {path: "scripture", element: <Scripture/>},
+  {path: "scripture", element: <Scripture/>, children: [
+    {path: "crud", element: <Crud/>},
+    {path: "view", element: <ScriptView/>}
+  ]},
   {path: "start", element: <Start/>},
   {path: "chat", element: <Chat/>},
   {path: "house", element: <StyleHouse/>},
