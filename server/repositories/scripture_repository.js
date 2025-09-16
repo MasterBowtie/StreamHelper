@@ -13,19 +13,72 @@ export class ScriptureRepository {
     }
 
     async getDaily(date) {
-        let d = date ?? new Date();
+        let d = new Date(date)
 
-        let scriptures = await this.db.$queryRaw`
-      SELECT *
-      FROM scripture
-      WHERE DATE_FORMAT(date, '%m-%d') = DATE_FORMAT(${d}, '%m-%d')`;
-        if (scriptures.length < 1) {
-            return {id: 0}
+        let mmdd = d.toISOString().slice(5,10);
+        
+        let data = await this.db.scripture.findMany({
+            where: {md: mmdd},
+            orderBy: { book: "asc" },
+            include: { collection: true}
+        })
+
+        return data.length? data : {id: 0};
+    }
+
+    async getCollections() {
+        let collections = await this.db.collection.findMany({
+            orderBy: { id: "asc"}
+        })
+        return collections;
+    }
+
+    async createScripture(newScript) {
+        var {date, book, reference, body } = newScript
+        try {
+            return await this.db.scripture.create({
+                data: {
+                    date: new Date(date),
+                    book: parseInt(book),
+                    body,
+                    reference
+                },
+                select: {id: true, date: true }
+            })
+        } catch (err) {
+            console.error("Prisma: ", err)
+            return {id: 0, error: "Internal Server Error", status: 500}
         }
+    }
 
-        // TODO
-        // parse scriptures and format verses into list
-        // Think about how to format the scriptures for clean formatting on client
-        return scriptures;
+    async updateScripture(newScript) {
+        var { id, body, reference, date, book } = newScript;
+        try {
+            return await this.db.scripture.update({
+                where: { id: parseInt(id) },
+                data: {
+                    ...(date && { date : new Date(date)}),
+                    ...(book && { book: parseInt(book) }),
+                    ...(body && { body }),
+                    ...(reference && { reference })
+                },
+                select: { id: true, date: true }
+            })
+        } catch (err) {
+            console.error("Prisma: ", err)
+            return {id: 0, error: "Internal Server Error", status: 500}
+        }
+    }
+    async deleteScripture(data) {
+        var { id } = data;
+        try {
+            return await this.db.scripture.delete({
+                where: {id : parseInt(id)},
+                select: { id: true, date: true }
+            });
+        } catch (err) {
+            console.error("Prisma: ", err)
+            return {id: 0, error: "Internal Server Error", status: 500}
+        }
     }
 }

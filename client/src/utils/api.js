@@ -9,7 +9,7 @@ export class Api {
     async makeRequest(url, method, body) {
         const options = {};
         
-        if (method=== "POST" || method === "PUT") {
+        if (method=== "POST" || method === "PUT" || method === "DELETE") {
             options.body = JSON.stringify(body)
         }
         
@@ -43,8 +43,8 @@ export class Api {
         return this.makeRequest(uri, "PUT", body) 
     }
 
-    del (uri) {
-        return this.makeRequest(uri, "DELETE")
+    del (uri, body) {
+        return this.makeRequest(uri, "DELETE", body)
     }
 }
 

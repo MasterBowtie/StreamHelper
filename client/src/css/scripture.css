@@ -1,0 +1,45 @@
+.main {
+    display: flex;
+    width: 100%;
+    margin: 20px;
+}
+
+.crud-section {
+    flex-grow: 1;
+}
+
+.view-section {
+    flex-grow: 2;
+    max-width: 50%;
+    margin-right: 100px;
+}
+
+.verse {
+    text-indent: 20px;
+    max-width: 300px;
+}
+
+textarea {
+    resize: none;
+    width: 80%;
+    margin-left: 20px;
+}
+
+input {
+    width: 60%;
+}
+
+.verse-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+button {
+    block-size: 100%;
+}
+
+#submit {
+    margin: 20px;
+}

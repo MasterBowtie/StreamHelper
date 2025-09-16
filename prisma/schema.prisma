@@ -41,9 +41,10 @@ model Scripture {
   date      DateTime  @default(now())
 
   // Refers to collection (1: OT, 2: NT, 3: BoM, 4: D&C)
-  book      Int       
+  book      Int    
+  collection Collection @relation(fields: [book], references: [id], onDelete: Restrict)   
 
-  bodyParas Json      // paragraphs of scripture text
+  body Json      // paragraphs of scripture text
   reference String    // e.g. "Matthew 22:36-39"
 
   // Generated month–day column for "today across years"
@@ -53,4 +54,13 @@ model Scripture {
   updatedAt DateTime  @updatedAt
 
   @@index([md], name: "idx_scripture_md")
+  @@index([book], name: "idx_scripture_book")
 }
+
+model Collection {
+  id    Int     @id
+  name  String  @unique
+
+  scriptures Scripture[]
+}
+

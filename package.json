@@ -9,7 +9,7 @@
   "scripts": {
     "server": "nodemon index.js",
     "migrate-dev": "prisma migrate dev",
-    "seed": "prisma db seed"
+    "seed": "npx prisma db seed"
   },
   "author": "MasterBowtie",
   "license": "ISC",
@@ -46,6 +46,8 @@
     "prisma-repl": "^1.4.0",
     "request-compose": "^2.1.7"
   },
-
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "type": "module"
 }
