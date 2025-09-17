@@ -7,7 +7,7 @@ import "../css/scripture.css";
 
 
 
-function Crud() {
+function ScriptureCrud() {
       const api = useApi();
       const [id, setId] = useState(null);
       const [collection, setCollection] = useState([]);
@@ -137,13 +137,15 @@ function Crud() {
                   </div>
                   <div className="view-section">
                         <h2>{date}</h2>
-                        {daily.map((day, index) => <ScriptView key={`d_${index}`} scripture={day} callback={() => select(day)}/>)}
+                        <div className="verse-section">
+                        {daily.map((day, index) => <ScriptureView key={`d_${index}`} scripture={day} callback={() => select(day)} className="preview"/>) }
+                        </div>
                   </div>
             </div>
       )
 }
 
-function ScriptView({scripture, callback}) {
+function ScriptureView({scripture, callback, className}) {
       const api = useApi();
       const [body, setBody] = useState(scripture && scripture.body);
       const [ref, setRef] = useState(scripture && scripture.reference);
@@ -167,15 +169,15 @@ function ScriptView({scripture, callback}) {
       }, [])
 
       return (
-            <div>
-                  {body && body.map((verse, index) => <p className="verse" key={`v_${index}`}>{verse}</p>)}
-                  <p className="verse">{ref} - {book}</p>
+            <div className={`scripture ${className}`}>
+                  {body && body.map((verse, index) => <p key={`v_${index}`}>{verse}</p>)}
+                  <p>{ref} - {book}</p>
                   {callback && <button onClick={callback}>Select</button>}
             </div>
       )
 }
 
-function Scripture({className, style}) {
+function Scripture() {
     return (
       <>
             <Outlet/>
@@ -183,5 +185,5 @@ function Scripture({className, style}) {
     )
 }
 
-export { Scripture, Crud, ScriptView }
+export { Scripture, ScriptureCrud, ScriptureView }
 

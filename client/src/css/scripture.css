@@ -11,12 +11,44 @@
 .view-section {
     flex-grow: 2;
     max-width: 50%;
-    margin-right: 100px;
+    margin-inline: 100px;
 }
 
-.verse {
-    text-indent: 20px;
-    max-width: 300px;
+.verse-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    overflow-y: scroll;
+    justify-content: flex-start;
+}
+
+.scripture {
+    text-indent: 40px;
+    padding: 20px;
+    border-radius: 10px;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    padding: 20px;
+    height: fit-content;
+}
+
+.scripture.preview {
+    background-color: rgba(0, 0, 0, 0.2);
+    font-size: large;
+    width: min(230px, 90%);
+}
+
+.scripture.display {
+    margin: auto;
+    width: min(400px, 90%);
+    font-size: x-large;
+    position: absolute;
+    top: 30%;
+    left: 200px;
+    /* right: 0px; */
+    color: #f0f8ff;
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    text-align: left; 
 }
 
 textarea {
@@ -27,13 +59,6 @@ textarea {
 
 input {
     width: 60%;
-}
-
-.verse-section {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
 }
 
 button {
