@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { DEBUG, MANIFEST } from "../../index.js";
-import { sessionMiddleware } from "../middleware.js";
+import { publicMiddleware, sessionMiddleware } from "../middleware.js";
 
 function buildHomeController() {
     const router = Router();
 
-    router.get("/", sessionMiddleware, (req, res) => {
+    router.get("/", publicMiddleware, (req, res) => {
         res.render("index", {
             debug: DEBUG,
             jsBundle: DEBUG ? "" : MANIFEST["src/main.jsx"]["file"],
@@ -13,6 +13,10 @@ function buildHomeController() {
             assetUrl: process.env.ASSET_URL || "https://localhost:5173",
             layout: false
         })
+    })
+
+    router.get("/stream", sessionMiddleware, (req, res) => {
+        
     })
 
     router.get("/bad", sessionMiddleware, (req, res) => {
