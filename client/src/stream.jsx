@@ -5,6 +5,7 @@ import { StreamApp, StreamMenu } from './StreamApp.jsx'
 import FollowGoal from './components/FollowGoal.jsx'
 import { Vote } from './components/Vote.jsx'
 import Chat from './components/Chat.jsx'
+import "./css/index.css"
 
 const router = createHashRouter([
     {path: "", element: <StreamApp/>, children: [

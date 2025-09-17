@@ -51,6 +51,10 @@
     text-align: left; 
 }
 
+.scripture.display.intermission {
+    top: 40%;
+}
+
 textarea {
     resize: none;
     width: 80%;

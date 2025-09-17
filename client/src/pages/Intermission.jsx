@@ -1,4 +1,4 @@
-import { Scripture } from "../components/Scripture"
+import { ScriptureView } from "../components/Scripture"
 import Chat from "../components/Chat"
 import Title from "../components/Title"
 
@@ -16,7 +16,7 @@ function Intermission() {
             <video id="introVideo" className="container" autoPlay src="src/assets/Baptistry.mp4" loop type="video/mp4"></video>
             {/* <h3>Starting Soon!</h3> */}
             <Title title={["Please Hold","Madness Happening"]}/>
-            {/* <Scripture style={{top: "45%"}}className={"glass"}/> */}
+            <ScriptureView className="display intermission"/>
             {/* <img id="bowtie" src="src/assets/Events.gif" type="image/gif"/> */}
         </>
     )
