@@ -4,11 +4,22 @@ import fs from "fs";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  server: {
-    https: {
-      key: fs.readFileSync("../cert/cert.key"),
-      cert: fs.readFileSync("../cert/cert.crt")
-    }
-  },
-  plugins: [react()],
+    appType: "custom",
+    build: {
+        manifest: "true",
+        outDir: "dist",
+        rollupOptions: {
+            input: [
+                resolve(__dirname, 'src/main.jsx'),
+                resolve(__dirname, 'src/stream.jsx'),
+            ]
+        }
+    },
+    server: {
+      https: {
+        key: fs.readFileSync("../cert/cert.key"),
+        cert: fs.readFileSync("../cert/cert.crt")
+      }
+    },
+    plugins: [react()],
 })

@@ -3,9 +3,10 @@ import { Outlet } from "react-router-dom"
 function StreamMenu() {
     return (
     <div>
-      <br></br><a href="/#/goal">Follower Goal</a>
-      <br></br><a href="/#/vote">Vote</a>
-      <br></br><a href="/#/chat">Chat</a>
+      <a href="/">Main Menu</a>
+      <br></br><a href="/stream/#/goal">Follower Goal</a>
+      <br></br><a href="/stream/#/vote">Vote</a>
+      <br></br><a href="/stream/#/chat">Chat</a>
     </div>
     )
 }
@@ -16,4 +17,4 @@ function StreamApp() {
   )
 }
 
-export { StreamApp }
+export { StreamApp, StreamMenu }

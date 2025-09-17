@@ -42,7 +42,7 @@ import { ScriptureRepository } from './server/repositories/scripture_repository.
 dotenv.config();
 
 export const DEBUG = process.env.NODE_ENV !== "production";
-const ASSET_URL = process.env.ASSET_URL || "http://localhost:5173";
+const ASSET_URL = process.env.ASSET_URL || "https://localhost:5173";
 const MANIFEST = DEBUG ? null : JSON.parse(fs.readFileSync(path.join(__dirname, "client/dist/.vite/manifest.json"), "utf-8"))
 
 const db = new PrismaClient();
