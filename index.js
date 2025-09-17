@@ -32,7 +32,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 // import { test } from './server/controllers/house_controller.js';
 import { HouseRepository } from "./server/repositories/house_repository.js";
 import { buildHouseController } from './server/controllers/house_controller.js';
-import { buildHomeController } from './server/controllers/home_controller.js';
+import { buildController } from './server/middleware.js';
 import { buildTwitchController } from './server/controllers/twitch_controller.js';
 import { buildScriptureController } from './server/controllers/scripture_controller.js';
 import { UserRepository } from './server/repositories/user_repository.js';
@@ -330,7 +330,7 @@ if (!DEBUG) {
 }
 
 
-app.use('/', buildHomeController());
+app.use('/', buildController());
 app.use("/house", buildHouseController(house_repository));
 app.use("/twitch", buildTwitchController(user_repository, sub_repository));
 app.use("/scripture", buildScriptureController(scripture_repository));
