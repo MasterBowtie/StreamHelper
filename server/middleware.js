@@ -44,14 +44,14 @@ function buildController() {
     const router = Router();
 
     router.get("/", renderEntry("main"));
-    router.get("/stream", sessionMiddleware);
+    router.get("/stream", sessionMiddleware, renderEntry("stream"));
 
     return router;
 }
 
 function sessionMiddleware (req, res, next) {
     if( req.session && req.session.passport && req.session.passport.user) {
-        return renderEntry("stream");
+        next()
     } else {   
         res.redirect("/auth/twitch");
     }

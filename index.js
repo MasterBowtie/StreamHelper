@@ -42,7 +42,9 @@ import { ScriptureRepository } from './server/repositories/scripture_repository.
 dotenv.config();
 
 export const DEBUG = process.env.NODE_ENV !== "production";
-export const MANIFEST = DEBUG ? {} : JSON.parse(fs.readFileSync("static/.vite/manifest.json").toString())
+const ASSET_URL = process.env.ASSET_URL || "http://localhost:5173";
+const MANIFEST = DEBUG ? null : JSON.parse(fs.readFileSync(path.join(__dirname, "client/dist/.vite/manifest.json"), "utf-8"))
+
 const db = new PrismaClient();
 const house_repository = HouseRepository.getInstance(db);
 const user_repository = UserRepository.getInstance(db);
@@ -60,6 +62,10 @@ var chat = []
 var app = express();
 const httpsServer = https.createServer(credentials, app);
 const hookServer = http.createServer(app);
+
+app.locals.DEBUG = DEBUG;
+app.locals.ASSET_URL = ASSET_URL;
+app.locals.MANIFEST = MANIFEST;
 
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
@@ -341,7 +347,7 @@ app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'user:read:chat
 
 // Set route for OAuth redirect
 app.get('/auth/twitch/callback', 
-  passport.authenticate('twitch', {successRedirect: "/", failureRedirect: '/bad' }
+  passport.authenticate('twitch', {successRedirect: "/stream", failureRedirect: '/bad' }
   ));
 
 

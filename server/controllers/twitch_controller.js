@@ -1,7 +1,5 @@
 import { Router } from "express";
-import { DEBUG, MANIFEST } from "../../index.js";
 import { sessionMiddleware } from "../middleware.js";
-import dotenv from "dotenv";
 
 function buildTwitchController(UserRepository, SubscriberRepository) {
     const router = Router();
