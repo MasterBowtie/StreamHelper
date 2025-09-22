@@ -53,11 +53,15 @@ export class ScriptureRepository {
 
     async updateScripture(newScript) {
         var { id, body, reference, date, book } = newScript;
+        let d = date && new Date(date);
         try {
+            let mmdd = d && d.toISOString().slice(5,10);
+            // console.log(mmdd);
             return await this.db.scripture.update({
                 where: { id: parseInt(id) },
                 data: {
                     ...(date && { date : new Date(date)}),
+                    ...(mmdd && { md: mmdd}),
                     ...(book && { book: parseInt(book) }),
                     ...(body && { body }),
                     ...(reference && { reference })

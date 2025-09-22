@@ -25,8 +25,8 @@ function ScriptureCrud() {
 
       useEffect(() => {
             api.post("scripture/daily", {date}).then((res) => {
-                  console.log("Daily: ", res);
                   if (res[0] && res[0].id !== 0) {
+                        console.log("Daily: ", res);
                         setDaily(res)
                   } else {
                         setDaily([]);
@@ -51,26 +51,28 @@ function ScriptureCrud() {
             if (event.nativeEvent.submitter.name === "submit") {
                   api.post("scripture/update", obj).then(res => {
                         if (res.id !== 0) {
+                              console.log("Obj", obj);
                               console.log("Response", res);
                               setId(res.id);
+                              obj.collection = { name: obj.book }
+                              let newDaily = []
+                              daily.forEach((item) => {item.id !== res.id && newDaily.push(item)})
+                              newDaily.push(obj);
+                              setDaily(newDaily);
                         }
                   })
             } else if (event.nativeEvent.submitter.name === "delete") {
                   console.log("DELETE")
                   api.del("scripture/delete", obj).then(res => {
+                        console.log(res);
                         if (res.id !== 0) {
+                              let newDaily = [];
+                              daily.forEach((item) => {item.id !== res.id && newDaily.push(item)})
+                              setDaily(newDaily);
                               reset();
                         }
                   })
             }
-            api.post("scripture/daily", {date}).then((res) => {
-                  console.log("Daily Update: ", res);
-                  if (res[0] && res[0].id !== 0) {
-                        setDaily(res)
-                  } else {
-                        setDaily([]);
-                  }
-            })
             event.preventDefault();
       }
 
@@ -95,13 +97,12 @@ function ScriptureCrud() {
             setId(null);
             setBody([""]);
             setRef("");
+            setBook(undefined);
       }
 
       function select(scripture) {
-            console.log(scripture.reference);
             setRef(scripture.reference);
             setId(scripture.id);
-            setDate(new Date(scripture.date).toISOString().split("T")[0]);
             setBody(scripture.body);
             setBook(scripture.book);
       }
@@ -114,7 +115,7 @@ function ScriptureCrud() {
                               <label>Id:</label><input name="id" value={id? id: "New"} readOnly></input>
                               <br/>
                               <label>Book:</label>
-                              <select name="book" value={book}>
+                              <select name="book" value={book} onChange={(e) => {setBook(e.target.value)}}>
                                     {collection.map((c, index) => <option key={`c_${index}`} value={c.id} >{c.name}</option>)}
                               </select>
                               <br/>
@@ -137,8 +138,8 @@ function ScriptureCrud() {
                   </div>
                   <div className="view-section">
                         <h2>{date}</h2>
-                        <div className="verse-section">
-                        {daily.map((day, index) => <ScriptureView key={`d_${index}`} scripture={day} callback={() => select(day)} className="preview"/>) }
+                        <div className="verse-view">
+                        {daily.map((day) => <ScriptureView key={`${day.id}`} scripture={day} callback={() => select(day)} className="preview"/>) }
                         </div>
                   </div>
             </div>
