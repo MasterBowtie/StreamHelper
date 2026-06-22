@@ -1,21 +1,17 @@
 import { Router } from "express";
-import {
-    getLoginUrl,
-    exchangeCodeForToken
-} from "../services/twitchAuthService.js"
 
-function buildAuthController() {
+function buildAuthRouter({twitchAuthService}) {
     const router = Router();
 
     router.get('/login', (req, res) => {
-        res.redirect(getLoginUrl());
+        const url = twitchAuthService.getLoginUrl();
+
+        res.redirect(url);
     });
 
     router.get("/callback", async (req, res) => {
         try {
-            const { code } = req.query;
-
-            const tokenData = await exchangeCodeForToken(code);
+            const tokenData = await twitchAuthService.exchangeCodeForToken(req.query.code);
 
             res.json(tokenData);
         } catch (error) {
@@ -29,4 +25,4 @@ function buildAuthController() {
     return router
 }
 
-export { buildAuthController }
+export { buildAuthRouter }

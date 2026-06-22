@@ -1,4 +1,4 @@
-import { twitchConfig } from "../config/twitchConfig.js";
+import { twitchConfig } from "twitchConfig.js";
 
 export async function exchangeCodeForToken(code) {
     const response = await fetch(twitchConfig.tokenUrl, {

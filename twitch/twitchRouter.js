@@ -1,11 +1,16 @@
 import { Router } from "express";
-import { DEBUG, MANIFEST } from "../../index.js";
-import { sessionMiddleware } from "../middleware.js";
+import { DEBUG, MANIFEST } from "../index.js";
+import { sessionMiddleware } from "../server/middleware.js";
+import { buildAuthRouter } from "./authRouter.js";
 import dotenv from "dotenv";
 
-function buildTwitchController(UserRepository) {
+function buildTwitchRouter({UserRepository, twitchAuthService}) {
     const router = Router();
 
+    router.use("/auth", buildAuthRouter({twitchAuthService}))
+
+
+    // need to update to new system
     router.get('/followers', sessionMiddleware, async (req, res) => {
         let token = await UserRepository.getToken(process.env.TWITCH_CLIENT_ID)
         fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${token.user_id}`, {
@@ -31,4 +36,4 @@ function buildTwitchController(UserRepository) {
     return router;
 }
 
-export { buildTwitchController }
+export { buildTwitchRouter }

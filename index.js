@@ -28,10 +28,16 @@ import * as https from "node:https";
 import { Server } from "socket.io";
 
 // import { test } from './server/controllers/house_controller.js';
+
+// Twitch imports
+import { buildTwitchRouter } from './twitch/twitchRouter.js';
+import { twitchAuthService } from './twitch/twitchAuthService.js'
+
+
+
 import { HouseRepository } from "./server/repositories/house_repository.js";
 import { buildHouseController } from './server/controllers/house_controller.js';
 import { buildHomeController } from './server/controllers/home_controller.js';
-import { buildTwitchController } from './server/controllers/twitch_controller.js';
 import { UserRepository } from './server/repositories/user_repository.js';
 import { access } from 'node:fs';
 
@@ -203,15 +209,7 @@ if (!DEBUG) {
 
 app.use('/', buildHomeController());
 app.use("/house", buildHouseController(house_repository));
-app.use("/twitch", buildTwitchController(user_repository));
-
-
-// Set route to start OAuth link, this is where you define scopes to request
-app.get('/auth/twitch', passport.authenticate('twitch', { scope: 'channel:bot user:read:chat moderator:manage:announcements moderator:read:followers' }))
-
-// Set route for OAuth redirect
-app.get('/auth/twitch/callback', passport.authenticate('twitch', {successRedirect: "/", failureRedirect: '/bad' }));
-
+app.use("/twitch", buildTwitchRouter(user_repository, twitchAuthService));
 
 httpsServer.listen(process.env.S_PORT || 3141, () => {
   console.log(`Secure listening on port ${process.env.S_PORT || 3141}...`);
