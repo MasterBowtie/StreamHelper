@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { DEBUG, MANIFEST } from "../../index.js";
-import { sessionMiddleware } from "../middleware.js";
+import { DEBUG, MANIFEST } from "../index.js";
+import { sessionMiddleware } from "../server/middleware.js";
 
-function buildHomeController() {
+function buildHomeRouter() {
     const router = Router();
 
     router.get("/", sessionMiddleware, (req, res) => {
@@ -28,4 +28,4 @@ function buildHomeController() {
     return router;
 }
 
-export { buildHomeController }
+export { buildHomeRouter }

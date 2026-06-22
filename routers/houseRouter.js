@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { sessionMiddleware } from "../middleware.js";
+import { sessionMiddleware } from "../server/middleware.js";
 
-function buildHouseController(HouseRepository) {
+function buildHouseRouter(HouseRepository) {
     const router = Router();
 
     router.get("/", sessionMiddleware,  (req, res) => {
@@ -29,4 +29,4 @@ function buildHouseController(HouseRepository) {
     return router;
 }
 
-export { buildHouseController }
+export { buildHouseRouter }

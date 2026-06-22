@@ -36,8 +36,8 @@ import { twitchAuthService } from './twitch/twitchAuthService.js'
 
 
 import { HouseRepository } from "./server/repositories/house_repository.js";
-import { buildHouseController } from './server/controllers/house_controller.js';
-import { buildHomeController } from './server/controllers/home_controller.js';
+import { buildHouseRouter } from './routers/houseRouter.js';
+import { buildHomeRouter } from './routers/homeRouter.js';
 import { UserRepository } from './server/repositories/user_repository.js';
 import { access } from 'node:fs';
 
@@ -207,8 +207,8 @@ if (!DEBUG) {
 }
 
 
-app.use('/', buildHomeController());
-app.use("/house", buildHouseController(house_repository));
+app.use('/', buildHomeRouter());
+app.use("/house", buildHouseRouter(house_repository));
 app.use("/twitch", buildTwitchRouter(user_repository, twitchAuthService));
 
 httpsServer.listen(process.env.S_PORT || 3141, () => {
