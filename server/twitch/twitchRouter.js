@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { DEBUG, MANIFEST } from "../index.js";
-import { sessionMiddleware } from "../server/middleware.js";
+import { DEBUG, MANIFEST } from "../../index.js";
+import { sessionMiddleware } from "../middleware.js";
 import { buildAuthRouter } from "./authRouter.js";
 import dotenv from "dotenv";
 
