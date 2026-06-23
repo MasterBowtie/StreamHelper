@@ -1,7 +1,7 @@
 import { twitchConfig } from "twitchConfig.js";
 
-export async function exchangeCodeForToken(code) {
-    const response = await fetch(twitchConfig.tokenUrl, {
+async function exchangeCodeForToken(code) {
+    const response = await fetch(twitchConfig.oauth.tokenUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -22,18 +22,87 @@ export async function exchangeCodeForToken(code) {
     return await response.json();
 }
 
-export function getLoginUrl() {
+function getLoginUrl() {
     const params = new URLSearchParams ({
         client_id: twitchConfig.clientId,
         redirect_uri: twitchConfig.redirectUri,
         response_type: 'code',
-        scope: [
-            "channel:bot",
-            "user:read:chat",
-            "moderator:manage:announcements",
-            "moderator:read:followers"
-        ].join(' ')
+        scope: twitchConfig.scopes.join(' ')
     });
 
-    return `${twitchConfig.authUrl}?${params}`
+    return `${twitchConfig.oauth.authUrl}?${params}`;
+}
+
+async function fetchTwitchUser(accessToken) {
+    const response = await fetch(
+        `${twitchConfig.helix.baseUrl}/users`,
+        {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Client-Id': twitchConfig.clientId
+            }
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch Twitch user");
+    }
+
+    const data = await response.json();
+
+    return data.data[0];
+}
+
+async function authenticateBroadcaster(code) {
+    const tokenData = await exchangeCodeForToken(code);
+
+    const twitchUser = await fetchTwitchUser(tokenData.access_token);
+
+    return {
+        twitchUser,
+        tokens: {
+            accessToken: tokenData.access_token,
+            refreshToken: tokenData.refresh_token,
+            expiresIn: tokenData.expires_in
+        }
+    };
+}
+
+async function refreshAccessToken(refreshToken) {
+    const response = await fetch(
+        twitchConfig.oauth.tokenUrl,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                client_id: twitchConfig.clientId,
+                client_secret: twitchConfig.clientSecret,
+                grant_type: 'refresh_token',
+                refresh_token: refreshToken
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error('Failed to refresh access token')
+    }
+
+    const tokenData = await response.json();
+
+    return {
+        accessToken: tokenData.access_token,
+        refreshToken: tokenData.refresh_token,
+        expiresIn: tokenData.expires_in
+    }
+
+}
+
+export {
+    getLoginUrl,
+    exchangeCodeForToken,
+    fetchTwitchUser,
+    authenticateBroadcaster,
+    refreshAccessToken
 }
