@@ -20,7 +20,7 @@ function buildTokenManager({userRepository, twitchAuthService}) {
     await userRepository.updateTokens({
         accessToken: token.accessToken,
         refreshToken: token.refreshToken,
-        expiresAt: token.expiresAt
+        expiresIn: token.expiresIn
     });
 
     return token.accessToken;

@@ -23,12 +23,12 @@ export class UserRepository {
         return rows[0];
     }
 
-    async updateToken(id, accessToken, refreshToken, expiresAt) {
+    async updateToken({accessToken, refreshToken, expiresIn}) {
         const [result] = await this.pool.execute(
             `UPDATE twitch_users
             SET access_token = ?, refresh_token = ?, expires_at = NOW() + INTERVAL ? SECOND
-            WHERE id = ?`,
-            [accessToken, refreshToken, expiresAt, id]
+            WHERE id = 1`,
+            [accessToken, refreshToken, expiresIn]
         );
 
         return result.affectedRows > 0;
@@ -45,7 +45,7 @@ export class UserRepository {
             twitchUser.displayName, 
             token.accessToken, 
             token.refreshToken, 
-            token.expiresAt
+            token.expiresIn
             ]
         )
 
@@ -58,16 +58,14 @@ export class UserRepository {
         const [result] = await this.pool.execute(
             `INSERT INTO twitch_users 
             (twitch_id, login, display_name, access_token, refresh_token, expires_at, created_at, updated_at)
-            Values (?, ?, ?, ?, NOW() + INTERVAL ? SECOND, ?, ?)`,
+            Values (?, ?, ?, ?, NOW() + INTERVAL ? SECOND)`,
             [
             twitchUser.twitchId, 
             twitchUser.login,
             twitchUser.displayName, 
             token.accessToken, 
             token.refreshToken, 
-            token.expiresAt, 
-            new Date(), 
-            new Date()]
+            token.expiresIn]
         );
 
         return result.insertId;
