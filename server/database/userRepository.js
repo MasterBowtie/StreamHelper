@@ -35,12 +35,12 @@ export class UserRepository {
     }
 
     async createBroadcaster({twitchUser, token}) {
-        await this.pool.execute(
+        const [result] = await this.pool.execute(
             `INSERT INTO twitch_users 
             (id, twitch_id, login, display_name, access_token, refresh_token, expires_at, created_at, updated_at)
             Values (1, ?, ?, ?, ?, ?, NOW() + INTERVAL ? SECOND)`,
             [
-            twitchUser.twitchUserId, 
+            twitchUser.twitchId, 
             twitchUser.login,
             twitchUser.displayName, 
             token.accessToken, 
@@ -48,6 +48,8 @@ export class UserRepository {
             token.expiresAt
             ]
         )
+
+        return result.insertId;
     }
 
     async createUser({twitchUser, token}) {
@@ -58,7 +60,7 @@ export class UserRepository {
             (twitch_id, login, display_name, access_token, refresh_token, expires_at, created_at, updated_at)
             Values (?, ?, ?, ?, NOW() + INTERVAL ? SECOND, ?, ?)`,
             [
-            twitchUser.twitchUserId, 
+            twitchUser.twitchId, 
             twitchUser.login,
             twitchUser.displayName, 
             token.accessToken, 

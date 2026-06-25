@@ -1,4 +1,4 @@
-import { twitchConfig } from "twitchConfig.js";
+import { twitchConfig } from "./twitchConfig.js";
 
 async function exchangeCodeForToken(code) {
     const response = await fetch(twitchConfig.oauth.tokenUrl, {
@@ -19,7 +19,13 @@ async function exchangeCodeForToken(code) {
         throw new Error("Failed to exchange code for token");
     }
 
-    return await response.json();
+    const data = await response.json();
+
+    return {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        expiresIn: data.expires_in
+    }
 }
 
 function getLoginUrl() {
