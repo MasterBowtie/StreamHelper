@@ -5,6 +5,7 @@ function buildTwitchApiClient({
 }) {
     async function request(endpoint, options = {}) {
         const accessToken = await tokenManager.getValidAccessToken();
+
         const response = await fetch(`${twitchConfig.helix.baseUrl}${endpoint}`,
             {
                 ...options,
@@ -17,7 +18,9 @@ function buildTwitchApiClient({
         );
 
         if (!response.ok) {
-            throw new Error(`Twitch API Error: ${response.status}`);
+            const error = await response.json();
+            console.error("Twitch API Error:", error)
+            throw new Error(`Twitch API Error: ${response.status} ${JSON.stringify(error)}`);
         }
 
         return await response.json();

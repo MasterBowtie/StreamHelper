@@ -18,26 +18,46 @@ export class UserRepository {
             "SELECT * FROM twitch_users WHERE login = ?",
             [login]
         );
-        // TODO: Decrypt Tokens
 
         return rows[0];
     }
 
-    async updateToken({accessToken, refreshToken, expiresIn}) {
+    async updateToken(id, {accessToken, refreshToken, expiresIn}) {
         const [result] = await this.pool.execute(
             `UPDATE twitch_users
             SET access_token = ?, refresh_token = ?, expires_at = NOW() + INTERVAL ? SECOND
-            WHERE id = 1`,
-            [accessToken, refreshToken, expiresIn]
+            WHERE id = ?`,
+            [accessToken, refreshToken, expiresIn, id]
         );
 
-        return result.affectedRows > 0;
+        return result.affectedRows === 1;
+    }
+
+    async updateBroadcaster({twitchUser, token}) {
+        const [result] = await this.pool.execute(
+            `UPDATE twitch_users
+            SET twitch_id=?,
+            login=?,
+            display_name=?,
+            access_token=?,
+            refresh_token=?
+            expires_at = NOW() + INTERVAL ? SECOND
+            WHERE id = 1`,
+            [twitchUser.twitchId, 
+            twitchUser.login,        
+            twitchUser.displayName,
+            token.accessToken,
+            token.refreshToken,
+            token.expiresIn]
+        )
+
+        return result.insertId;
     }
 
     async createBroadcaster({twitchUser, token}) {
         const [result] = await this.pool.execute(
             `INSERT INTO twitch_users 
-            (id, twitch_id, login, display_name, access_token, refresh_token, expires_at, created_at, updated_at)
+            (id, twitch_id, login, display_name, access_token, refresh_token, expires_at)
             Values (1, ?, ?, ?, ?, ?, NOW() + INTERVAL ? SECOND)`,
             [
             twitchUser.twitchId, 
@@ -57,7 +77,7 @@ export class UserRepository {
 
         const [result] = await this.pool.execute(
             `INSERT INTO twitch_users 
-            (twitch_id, login, display_name, access_token, refresh_token, expires_at, created_at, updated_at)
+            (twitch_id, login, display_name, access_token, refresh_token, expires_at)
             Values (?, ?, ?, ?, NOW() + INTERVAL ? SECOND)`,
             [
             twitchUser.twitchId, 

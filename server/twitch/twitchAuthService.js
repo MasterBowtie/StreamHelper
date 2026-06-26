@@ -16,13 +16,13 @@ function buildTwitchAuthService() {
             redirect_uri: twitchConfig.redirectUri
             })
         });
+        const data = await response.json();
     
         if (!response.ok) {
-            throw new Error("Failed to exchange code for token");
+            console.error(data)
+            throw new Error("Failed to exchange code for token:", JSON.stringify(data));
         }
-
-        const data = await response.json();
-
+        
         return {
             accessToken: data.access_token,
             refreshToken: data.refresh_token,
@@ -71,7 +71,6 @@ function buildTwitchAuthService() {
 
     async function authenticateBroadcaster(code) {
         const token = await exchangeCodeForToken(code);
-
         const twitchUser = await fetchTwitchUser(token.accessToken);
 
         return {

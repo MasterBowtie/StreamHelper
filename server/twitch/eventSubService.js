@@ -1,4 +1,6 @@
 import { twitchConfig } from "./twitchConfig.js";
+import { getSubscriptions } from "./subscriptions.js";
+import { handleStreamOffline } from "./eventHandlers/streamOffline.js";
 
 function buildEventSubService({
     twitchApiClient
@@ -77,18 +79,26 @@ function buildEventSubService({
 
     async function registerSubscriptions(broadcaster) {
         await readyPromise;
-        await twitchApiClient.createEventSubSubscription({
-            type: 'stream.online',
-            version: '1',
-            condition: {
-                broadcaster_user_id: broadcaster.twitch_user_id
-            },
-            sessionId
-        });
+        const subscriptions = getSubscriptions(broadcaster);
+
+        for (const sub of subscriptions) {
+            await twitchApiClient.createEventSubSubscription({...sub, sessionId});
+            console.log("Registered:", sub.type);
+        }
     }
 
     function handleNotification(message) {
-        console.log('EventSub Notification', message.payload.event);
+        const type = message.payload.subscription.type;
+        switch(type) {
+            case 'stream.online':
+                handleStreamOnline(message);
+                break;
+            case 'stream.offline':
+                handleStreamOffline(message);
+                break;
+            default:
+                console.log("Unhandled EventSub event:", type);
+        }
     }
 
     function handleReconnect(message) {
@@ -118,7 +128,8 @@ function buildEventSubService({
 
     return {
         start,
-        stop
+        stop,
+        registerSubscriptions
     };
 }
 

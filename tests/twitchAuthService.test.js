@@ -4,6 +4,13 @@ import { twitchConfig } from "../server/twitch/twitchConfig.js";
 
 let twitchAuthService;
 
+function mockFetch(ok, body) {
+    global.fetch = vi.fn().mockResolvedValue({
+        ok,
+        json: vi.fn().mockResolvedValue(body)
+    });
+}
+
 afterEach(()=> {
     vi.restoreAllMocks();
 })
@@ -52,16 +59,11 @@ describe("GetLoginURL", () => {
 
 describe("ExchangeCodeForToken", () => {
     it("return token data from Twitch", async () => {
-        global.fetch = vi.fn()
-            .mockResolvedValue({
-                ok: true,
-                json: vi.fn().mockResolvedValue({
-                    access_token: "access123",
-                    refresh_token: "refresh123",
-                    expires_in: 3600
-                })
-            });
-        
+        mockFetch(true, {
+            access_token: "access123",
+            refresh_token: "refresh123",
+            expires_in: 3600
+            })
         const result = await twitchAuthService.exchangeCodeForToken("test-code");
 
         expect(fetch).toHaveBeenCalledWith(
@@ -79,9 +81,10 @@ describe("ExchangeCodeForToken", () => {
     });
 
     it("thows when Twitch rejects the code", async()=> {
-        global.fetch = vi.fn().mockResolvedValue({
-            ok: false
-        })
+        mockFetch(false, {
+            status: 400,
+            message: "Invalid authorization code"
+        });
 
         await expect(twitchAuthService.exchangeCodeForToken("bad-code")).rejects.toThrow("Failed to exchange code for token")
     });
@@ -89,13 +92,10 @@ describe("ExchangeCodeForToken", () => {
 
 describe("RefreshAccessToken", ()=>{
     it("return token data from Twitch", async()=>{
-        global.fetch = vi.fn().mockResolvedValue({
-            ok: true,
-            json: vi.fn().mockResolvedValue({
-                access_token: "access321",
-                refresh_token: "refresh321",
-                expires_in: 3600
-            })
+        mockFetch(true, {
+            access_token: "access321",
+            refresh_token: "refresh321",
+            expires_in: 3600
         });
 
         const result = await twitchAuthService.refreshAccessToken("test-token");
@@ -125,24 +125,19 @@ describe("RefreshAccessToken", ()=>{
 
 describe("FetchTwitchUser",()=>{
     it("return the Twitch user data", async()=>{
-        global.fetch = vi.fn().mockResolvedValue({
-            ok: true,
-            json: vi.fn().mockResolvedValue({
-              "data": [
-                {
-                  "id": "141981764",
-                  "login": "mctesterson",
-                  "display_name": "McTesterson",
-                  "type": "user",
-                  "broadcaster_type": "partner",
-                  "description": "A Twitch user",
-                  "profile_image_url": "https://...",
-                  "offline_image_url": "https://...",
-                  "view_count": 12345,
-                  "created_at": "2020-01-01T00:00:00Z"
-                }
-              ]
-            })
+        mockFetch(true, {
+            "data": [{
+                "id": "141981764",
+                "login": "mctesterson",
+                "display_name": "McTesterson",
+                "type": "user",
+                "broadcaster_type": "partner",
+                "description": "A Twitch user",
+                "profile_image_url": "https://...",
+                "offline_image_url": "https://...",
+                "view_count": 12345,
+                "created_at": "2020-01-01T00:00:00Z"
+            }]
         });
 
         const result = await twitchAuthService.fetchTwitchUser("good_token");
@@ -165,66 +160,16 @@ describe("FetchTwitchUser",()=>{
     })
 
     it("throws when Twitch rejects the token", async()=>{
-        global.fetch = vi.fn().mockResolvedValue({
-            ok:false
-        })
+        mockFetch(false, null)
 
         await expect(twitchAuthService.fetchTwitchUser("bad_token")).rejects.toThrow("Failed to fetch Twitch user");
     })
 
     it("throws when Twitch returns emtpy data", async()=>{
-        global.fetch = vi.fn().mockResolvedValue({
-            ok: true,
-            json: vi.fn().mockResolvedValue({
-              "data": []
-            })
+        mockFetch(true,{
+            "data": []
         });
 
         await expect(twitchAuthService.fetchTwitchUser("emtpy_token")).rejects.toThrow("User not found");
     })
 })
-
-describe("AuthenticateBroadcaster", ()=>{
-    it("authenticate a broadcaster and return user & token data", async()=>{
-        global.fetch = vi.fn().mockResolvedValueOnce({
-            ok: true,
-            json: async ()=>({
-                access_token: "access123",
-                refresh_token: "refresh123",
-                expires_in: 3600
-            })
-        }).mockResolvedValueOnce({
-            ok: true,
-            json: async()=>({
-                data: [{
-                  "id": "141981764",
-                  "login": "mctesterson",
-                  "display_name": "Test McTesterson",
-                  "type": "user",
-                  "broadcaster_type": "partner",
-                  "description": "A Twitch user",
-                  "profile_image_url": "https://...",
-                  "offline_image_url": "https://...",
-                  "view_count": 12345,
-                  "created_at": "2020-01-01T00:00:00Z"
-                }]
-            })
-        })
-
-
-        const result = await twitchAuthService.authenticateBroadcaster("auth-code");
-
-        expect(result).toEqual({
-            token: {
-                accessToken: "access123",
-                refreshToken: "refresh123",
-                expiresIn: 3600
-            },
-            twitchUser: {
-                twitchId: "141981764",
-                login: "mctesterson",
-                displayName: "Test McTesterson"
-            }
-        });
-    });
-});

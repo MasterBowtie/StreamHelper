@@ -4,6 +4,7 @@ function buildTokenManager({userRepository, twitchAuthService}) {
     
     async function getValidAccessToken() {
     const broadcaster = await userRepository.getBroadcaster();
+    // console.log(broadcaster);
 
     if (!broadcaster) {
         throw new Error('No broadcaster configured');
@@ -17,7 +18,9 @@ function buildTokenManager({userRepository, twitchAuthService}) {
     }
     
     const token = await twitchAuthService.refreshAccessToken(broadcaster.refresh_token);
-    await userRepository.updateTokens({
+    console.log("Token:", token);
+    
+    await userRepository.updateToken(1,{
         accessToken: token.accessToken,
         refreshToken: token.refreshToken,
         expiresIn: token.expiresIn
