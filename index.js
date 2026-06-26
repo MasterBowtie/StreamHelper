@@ -15,7 +15,7 @@ import { engine } from 'express-handlebars';
 import session from "express-session";
 import bodyParser from "body-parser";
 import * as fs from "fs";
-import * as https from "node:https";
+import * as http from "node:http";
 import { Server } from "socket.io";
 import { access } from 'node:fs';
 
@@ -43,12 +43,14 @@ export const MANIFEST = DEBUG ? {} : JSON.parse(fs.readFileSync("static/.vite/ma
 const db = buildDatabasePool();
 const userRepository = new UserRepository(db);
 
-
 const twitchAuthService = buildTwitchAuthService();
 const tokenManager = buildTokenManager({userRepository, twitchAuthService })
 const twitchApiClient = buildTwitchApiClient({ tokenManager})
 const eventSubService = buildEventSubService({twitchApiClient})
+
+const broadcaster = await userRepository.getBroadcaster();
 await eventSubService.start();
+await eventSubService.registerSubscriptions(broadcaster);
 
 // Build Routers
 const authRouter = buildAuthRouter({
@@ -56,21 +58,15 @@ const authRouter = buildAuthRouter({
 });
 const twitchRouter = buildTwitchRouter({ authRouter });
 
-
-
-var privateKey  = fs.readFileSync('cert/cert.key', 'utf8');
-var certificate = fs.readFileSync('cert/cert.crt', 'utf8');
-var credentials = {key: privateKey, cert: certificate};
-
 // Initialize Express and middlewares
 var app = express();
-const httpsServer = https.createServer(credentials, app);
+const server = http.createServer(app);
 
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 
-const io = new Server(httpsServer);
+const io = new Server(server);
 
 io.on("connection", (socket) => {
   console.log("Connected new socket")
@@ -116,6 +112,6 @@ if (!DEBUG) {
 
 app.use("/twitch", twitchRouter);
 
-httpsServer.listen(process.env.S_PORT || 3141, () => {
+server.listen(process.env.S_PORT || 3141, () => {
   console.log(`Secure listening on port ${process.env.S_PORT || 3141}...`);
 });
