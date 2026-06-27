@@ -1,4 +1,3 @@
-
 export class UserRepository {
     constructor(pool) {
         this.pool = pool;
@@ -58,7 +57,7 @@ export class UserRepository {
         const [result] = await this.pool.execute(
             `INSERT INTO twitch_users 
             (id, twitch_id, login, display_name, access_token, refresh_token, expires_at)
-            Values (1, ?, ?, ?, ?, ?, NOW() + INTERVAL ? SECOND)`,
+            VALUES (1, ?, ?, ?, ?, ?, NOW() + INTERVAL ? SECOND)`,
             [
             twitchUser.twitchId, 
             twitchUser.login,
@@ -78,7 +77,7 @@ export class UserRepository {
         const [result] = await this.pool.execute(
             `INSERT INTO twitch_users 
             (twitch_id, login, display_name, access_token, refresh_token, expires_at)
-            Values (?, ?, ?, ?, NOW() + INTERVAL ? SECOND)`,
+            VALUES (?, ?, ?, ?, NOW() + INTERVAL ? SECOND)`,
             [
             twitchUser.twitchId, 
             twitchUser.login,

@@ -12,6 +12,7 @@ function buildTwitchApiClient({
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                     'Client-Id': twitchConfig.clientId,
+                    'Content-Type': 'application.json',
                     ...options.headers
                 }
             }
@@ -62,10 +63,24 @@ function buildTwitchApiClient({
         return request('/eventsub/subscriptions');
     }
 
+    async function getStream(userId) {
+        const data = await request(`/stream?user_id=${userId}`);
+
+        return data.data[0] ?? null;
+    }
+
+    async function getChannelInformation(userId) {
+        const data = await request(`/channels?broadcaster_id=${userId}`);
+
+        return data.data[0] ?? null;
+    }
+
     return {
         getCurrentUser,
         createEventSubSubscription,
-        getEventSubSubscriptions
+        getEventSubSubscriptions,
+        getStream,
+        getChannelInformation,
     }
 }
 

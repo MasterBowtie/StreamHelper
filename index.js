@@ -28,6 +28,10 @@ import { buildTwitchAuthService } from "./server/twitch/twitchAuthService.js";
 import { buildTokenManager } from "./server/twitch/tokenManager.js";
 import { buildTwitchApiClient } from "./server/twitch/twitchApiClient.js";
 import { buildEventSubService } from "./server/twitch/eventSubService.js";
+import { buildEventDispatcher } from "./server/twitch/eventDispatcher.js";
+
+// Handlers
+import { buildSteamOfflineHandler, buildSteamOnlineHandler } from "./server/twitch/eventHandlers/streamConnect.js";
 
 // Routers
 import { buildTwitchRouter } from "./server/routers/twitchRouter.js";
@@ -43,14 +47,25 @@ export const MANIFEST = DEBUG ? {} : JSON.parse(fs.readFileSync("static/.vite/ma
 const db = buildDatabasePool();
 const userRepository = new UserRepository(db);
 
+// Twitch Integration
 const twitchAuthService = buildTwitchAuthService();
 const tokenManager = buildTokenManager({userRepository, twitchAuthService })
 const twitchApiClient = buildTwitchApiClient({ tokenManager})
-const eventSubService = buildEventSubService({twitchApiClient})
+const eventDispatcher = buildEventDispatcher();
+const eventSubService = buildEventSubService({twitchApiClient, eventDispatcher})
+
+// Connect Dispatcher & Handlers
+eventDispatcher.registerHandler("stream.online", buildSteamOnlineHandler({twitchApiClient}));
+eventDispatcher.registerHandler("stream.offline", buildSteamOfflineHandler());
+
 
 const broadcaster = await userRepository.getBroadcaster();
 await eventSubService.start();
 await eventSubService.registerSubscriptions(broadcaster);
+
+
+
+
 
 // Build Routers
 const authRouter = buildAuthRouter({

@@ -1,9 +1,9 @@
 import { twitchConfig } from "./twitchConfig.js";
 import { getSubscriptions } from "./subscriptions.js";
-import { handleStreamOffline } from "./eventHandlers/streamOffline.js";
 
 function buildEventSubService({
-    twitchApiClient
+    twitchApiClient,
+    eventDispatcher
 }) {
     let socket = null;
     let sessionId = null;
@@ -58,7 +58,7 @@ function buildEventSubService({
                 break;
             
             case 'session_keepalive':
-                console.log("EventSub keepalive received...")
+                // console.log("EventSub keepalive received...")
                 break;
             
             case 'session_reconnect':
@@ -87,18 +87,8 @@ function buildEventSubService({
         }
     }
 
-    function handleNotification(message) {
-        const type = message.payload.subscription.type;
-        switch(type) {
-            case 'stream.online':
-                handleStreamOnline(message);
-                break;
-            case 'stream.offline':
-                handleStreamOffline(message);
-                break;
-            default:
-                console.log("Unhandled EventSub event:", type);
-        }
+     async function handleNotification(message) {
+        await eventDispatcher.dispatch(message);
     }
 
     function handleReconnect(message) {

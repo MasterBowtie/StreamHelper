@@ -18,7 +18,6 @@ function buildTokenManager({userRepository, twitchAuthService}) {
     }
     
     const token = await twitchAuthService.refreshAccessToken(broadcaster.refresh_token);
-    console.log("Token:", token);
     
     await userRepository.updateToken(1,{
         accessToken: token.accessToken,
