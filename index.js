@@ -21,7 +21,8 @@ import { access } from 'node:fs';
 
 // Database & Repositories
 import { buildDatabasePool } from "./server/database/database.js";
-import { UserRepository } from "./server/database/userRepository.js";
+import { UserRepository } from "./server/database/twitchUserRepository.js";
+import { StreamRepository } from "./server/database/streamRepository.js";
 
 // Twitch
 import { buildTwitchAuthService } from "./server/twitch/twitchAuthService.js";
@@ -46,6 +47,7 @@ export const MANIFEST = DEBUG ? {} : JSON.parse(fs.readFileSync("static/.vite/ma
 
 const db = buildDatabasePool();
 const userRepository = new UserRepository(db);
+const streamRepository = new StreamRepository(db);
 
 // Twitch Integration
 const twitchAuthService = buildTwitchAuthService();
@@ -55,8 +57,8 @@ const eventDispatcher = buildEventDispatcher();
 const eventSubService = buildEventSubService({twitchApiClient, eventDispatcher})
 
 // Connect Dispatcher & Handlers
-eventDispatcher.registerHandler("stream.online", buildSteamOnlineHandler({twitchApiClient}));
-eventDispatcher.registerHandler("stream.offline", buildSteamOfflineHandler());
+eventDispatcher.registerHandler("stream.online", buildSteamOnlineHandler({twitchApiClient, streamRepository}));
+eventDispatcher.registerHandler("stream.offline", buildSteamOfflineHandler({ streamRepository }));
 
 
 const broadcaster = await userRepository.getBroadcaster();

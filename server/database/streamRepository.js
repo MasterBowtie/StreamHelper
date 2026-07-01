@@ -3,9 +3,9 @@ export class StreamRepository {
         this.pool = pool;
     }
 
-    async findId({id}) {
+    async findById(id) {
         const [rows] = await this.pool.execute(
-            `SELECT * FROM stream
+            `SELECT * FROM streams
             WHERE id = ?`,
             [id]
         )
@@ -13,19 +13,20 @@ export class StreamRepository {
         return rows[0] ?? null;
     }
 
-    async startStream({startAt}) {
+    // Uses Twitch stream start time
+    async startStream({start_at}) {
         const [result] = await this.pool.execute(
-            `INSERT INTO stream
+            `INSERT INTO streams
             (start_at)
             VALUES (?)`,
-            [startAt]
+            [start_at]
         )
 
         return result.insertId
     }
 
     async findActive() {
-        const [rows] = this.pool.execute(
+        const [rows] = await this.pool.execute(
             `SELECT * FROM streams
             WHERE end_at IS NULL
             LIMIT 1`
@@ -34,20 +35,21 @@ export class StreamRepository {
         return rows[0] ?? null;
     }
 
-    async endStream({id, endAt}) {
+    // Twitch does NOT give and end time for stream.
+    async endStream(id) {
         const[result] = await this.pool.execute(
-                `UPDATE stream
-                SET end_at = ?
+                `UPDATE streams
+                SET end_at = NOW()
                 WHERE id = ?`,
-                [endAt, id]
+                [id]
         )
 
         return result.affectedRows === 1;
     }
 
     async getLatest() {
-        const [rows] = this.pool.execute(
-            `SELECT * FROM stream
+        const [rows] = await this.pool.execute(
+            `SELECT * FROM streams
             ORDER BY start_at DESC
             LIMIT 1`
         );
@@ -57,7 +59,7 @@ export class StreamRepository {
 
     async updateStream({id, startAt, endAt}) {
         const [result] = await this.pool.execute(
-            `UPDATE stream
+            `UPDATE streams
             SET start_at = ?,
             end_at = ?
             WHERE id = ?`,

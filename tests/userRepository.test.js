@@ -13,6 +13,15 @@ beforeEach(()=> {
     repository = new UserRepository(mockPool);
 });
 
+describe('getBroadcaster', ()=>{
+    it("fetch broadcaster from the db", async()=>{
+        // TODO:
+    })
+
+    it("handle a fail when no broadcaster is found", async()=>{
+        // TODO:
+    })
+})
 
 describe("createBroadcaster", () => {
     it("should create a broadcaster and return the inserted id", async()=> {
@@ -41,7 +50,6 @@ describe("createBroadcaster", () => {
     })
 })
 
-// TODO: updateBroadcaster
 describe("updateBroadcaster",()=>{
     it("update broadcaster and return the updated id", async()=>{
         mockPool.execute.mockResolvedValue([

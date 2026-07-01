@@ -1,0 +1,20 @@
+CREATE TABLE twitch_users (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    twitch_id VARCHAR(50) NOT NULL UNIQUE,
+    login VARCHAR(50) NOT NULL,
+    display_name VARCHAR(50),
+    access_token TEXT,
+    refresh_token TEXT,
+    expires_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    INDEX idx_stream_start (start_at)
+);
+
+CREATE TABLE streams (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    start_at DATETIME NOT NULL,
+    end_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
