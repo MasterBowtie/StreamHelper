@@ -14,20 +14,11 @@ function buildAuthRouter({twitchAuthService, userRepository, eventSubService}) {
     router.get("/callback", async (req, res) => {
         try {
             const auth = await twitchAuthService.authenticateBroadcaster(req.query.code);
-            
-            const broadcaster = await userRepository.getBroadcaster();
-            if (!broadcaster) {
-                // Upsert broadcaster
-                await userRepository.createBroadcaster({
-                    twitchUser: auth.twitchUser,
-                    token: auth.token
-                });
-            } else {
-                await userRepository.updateBroadcaster({
-                    twitchUser: auth.twitchUser,
-                    token: auth.token
-                })
-            }
+        
+            await userRepository.updateBroadcaster({
+                twitchUser: auth.twitchUser,
+                token: auth.token
+            })
 
             // Start EventSub AFTER DB is ready
             await eventSubService.start()
