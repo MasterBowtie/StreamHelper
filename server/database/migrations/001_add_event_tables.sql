@@ -12,6 +12,7 @@ IF NOT EXISTS CREATE TABLE events (
     twitch_id VARCHAR(50),
     occurred_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    meta_data JSON,
 
     FOREIGN KEY (twitch_id) REFERENCES twitch_users(twitch_id),
     INDEX idx_events_occurred_at (occurred_at)

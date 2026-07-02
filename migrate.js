@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import mysql from "mysql2/promise"
+import  "dotenv/config";
+
 
 const MIGRATIONS_DIR = "./server/database/migrations";
 

@@ -6,7 +6,7 @@ export class StreamRepository {
     async findById(id) {
         const [rows] = await this.pool.execute(
             `SELECT * FROM streams
-            WHERE id = ?`,
+            WHERE stream_id = ?`,
             [id]
         )
 
@@ -40,7 +40,7 @@ export class StreamRepository {
         const[result] = await this.pool.execute(
                 `UPDATE streams
                 SET end_at = NOW()
-                WHERE id = ?`,
+                WHERE stream_id = ?`,
                 [id]
         )
 
@@ -62,7 +62,7 @@ export class StreamRepository {
             `UPDATE streams
             SET start_at = ?,
             end_at = ?
-            WHERE id = ?`,
+            WHERE stream_id = ?`,
             [startAt, endAt, id]
         )
 
