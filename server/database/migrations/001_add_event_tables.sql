@@ -9,13 +9,16 @@ CREATE TABLE IF NOT EXISTS streams (
 CREATE TABLE IF NOT EXISTS events (
     event_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     event_type VARCHAR(50) NOT NULL,
+    stream_id INT NULL,
     twitch_id VARCHAR(50),
     occurred_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     meta_data JSON,
 
     FOREIGN KEY (twitch_id) REFERENCES twitch_users(twitch_id),
-    INDEX idx_events_occurred_at (occurred_at)
+    FOREIGN KEY (stream_id) REFERENCES streams(stream_id),
+    INDEX idx_events_occurred_at (occurred_at),
+    INDEX idx_events_stream_id ON events(stream_id)
 );
 
 CREATE TABLE IF NOT EXISTS follows (
