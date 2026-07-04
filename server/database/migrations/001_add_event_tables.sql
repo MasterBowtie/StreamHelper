@@ -1,4 +1,4 @@
-IF NOT EXISTS CREATE TABLE streams (
+CREATE TABLE IF NOT EXISTS streams (
     stream_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     start_at DATETIME NOT NULL,
     end_at DATETIME,
@@ -6,7 +6,7 @@ IF NOT EXISTS CREATE TABLE streams (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-IF NOT EXISTS CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
     event_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     event_type VARCHAR(50) NOT NULL,
     twitch_id VARCHAR(50),
@@ -18,7 +18,7 @@ IF NOT EXISTS CREATE TABLE events (
     INDEX idx_events_occurred_at (occurred_at)
 );
 
-IF NOT EXISTS CREATE TABLE follows (
+CREATE TABLE IF NOT EXISTS follows (
     follow_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     twitch_id VARCHAR(50),
     event_id INT,
@@ -31,7 +31,7 @@ IF NOT EXISTS CREATE TABLE follows (
 );
 
 
-IF NOT EXISTS CREATE TABLE subscriptions (
+CREATE TABLE IF NOT EXISTS subscriptions (
     sub_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     twitch_id VARCHAR(50) NOT NULL,
     event_id INT NOT NULL,
@@ -53,7 +53,7 @@ IF NOT EXISTS CREATE TABLE subscriptions (
     INDEX idx_subscriptions_gifted_by (gifted_by_id)
 );
 
-IF NOT EXISTS CREATE TABLE raids(
+CREATE TABLE IF NOT EXISTS raids(
     event_id INT NOT NULL PRIMARY KEY,
     raider_id VARCHAR(50) NOT NULL,
     viewer_count INT NOT NULL,
