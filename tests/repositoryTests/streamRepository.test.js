@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { StreamRepository } from "../server/database/streamRepository";
+import { StreamRepository } from "../../server/database/streamRepository.js";
 import { create } from "express-handlebars";
-import json_streamonline from "./fixtures/json_streamonline.js";
+import json_streamonline from "../fixtures/json_streamonline.js";
 
 let mockPool;
 let repository;

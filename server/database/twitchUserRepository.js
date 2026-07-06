@@ -1,4 +1,4 @@
-export class UserRepository {
+export class TwitchUserRepository {
     constructor(pool) {
         this.pool = pool;
     }
@@ -41,12 +41,16 @@ export class UserRepository {
             )
             return result.affectedRows === 1;
         }
+
+        console.error("How did you get here?")
+        return false;
     }
 
     async getBroadcaster() {
-        const [rows] = await this.pool.execute(`SELECT * 
+        const [rows] = await this.pool.execute(`
+            SELECT * 
             FROM twitch_users
-                WHERE id = 1 LIMIT 1`);
+            WHERE id = 1 LIMIT 1`);
         
         return rows[0] || null;
     }
@@ -71,30 +75,32 @@ export class UserRepository {
         return rows[0] || null;
     }
 
-    async createTwitchUser({twitchUser, token}) {
+    async createTwitchUser({twitchId, login, displayName}) {
         const [result] = await this.pool.execute(
             `INSERT INTO twitch_users 
-            (twitch_id, login, display_name, access_token, refresh_token, expires_at)
-            VALUES (?, ?, ?, ?, NOW() + INTERVAL ? SECOND)`,
+            (twitch_id, login, display_name)
+            VALUES (?, ?, ?)`,
             [
-            twitchUser.twitchId, 
-            twitchUser.login,
-            twitchUser.displayName
+            twitchId, 
+            login,
+            displayName
             ]
         );
 
         return result.insertId;
     }
 
-    async updateIdentity({twitchUser}) {
+    async updateIdentity({twitchId, displayName}) {
         const [result] = await this.pool.execute(
             `UPDATE twitch_users
             SET display_name = ?
             WHERE twitch_id = ?`,
             [   
-            twitchUser.displayName,
-            twitchUser.twitchId 
+            displayName,
+            twitchId 
             ]
         )
+
+        return result.affectedRows === 1;
     }
 }

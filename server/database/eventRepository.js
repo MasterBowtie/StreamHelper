@@ -3,11 +3,11 @@ export class EventRepository {
         this.pool = pool;
     }
 
-    async createEvent({eventId, eventType, twitchId, streamId=null, occurredAt, metaData=null}) {
+    async createEvent({eventType, twitchId, streamId=null, occurredAt, metaData=null}) {
         const [result] = await this.pool.execute(
             `INSERT INTO events
-            (event_id, event_type, twitch_id, streamid, occurred_at, meta_data)`,
-            [eventId, eventType, twitchId, streamId, occurredAt, metaData]
+            (event_type, twitch_id, streamid, occurred_at, meta_data)`,
+            [eventType, twitchId, streamId, occurredAt, metaData]
         );
 
         return result.insertId;
@@ -21,36 +21,44 @@ export class EventRepository {
         return rows[0] ?? null;
     }
     
-    async getEventsByType({eventType, streamId, limit=100}) {
-        let query = `SELECT * FROM events WHERE event_type = ?`;
-        const values = [eventType];
+    async getEvents({eventType, streamId, limit=100, startAt, endAt}={}) {
+        let query = `SELECT * FROM events WHERE`;
+        const conditions = [];
+        const values = [];
+
+        if (eventType !== undefined) {
+            conditions.push("event_type = ?");
+            values.push(eventType);
+        }
 
         if (streamId !== undefined) {
-            query += " AND stream_id = ?";
+            conditions.push("stream_id = ?");
             values.push(streamId);
         }
 
+        if (startAt !== undefined) {
+            conditions.push("occurred_at >= ?");
+            values.push(startAt);
+        }
+
+        if (endAt !== undefined) {
+            conditions.push("occurred_at < ?");
+            values.push(endAt);
+        }
+
+        if (conditions.length === 0) {
+            throw new Error("getEvents(): no conditions were given");
+        }
+
+        query += conditions.join(" AND ");
         query += " ORDER BY occurred_at DESC";
 
-        if (limit) {
-            query += " LIMIT ?";
-            values.push(Number(limit));
+        if (!Number.isInteger(limit) || limit <= 0) {
+            throw new Error("getEvents(): limit must be a positive integer");
         }
-        const [rows] = await this.pool.execute(query, values);
-        return rows;
-    }
+        query += " LIMIT ?";
+        values.push(Number(limit));
 
-    async getEventsByTimeSpan({startAt, endAt, limit=100, streamId}) {
-        let query = `SELECT * FROM events
-            WHERE occurred_at >= ? AND occurred_at < ?
-            `;
-        const values= [startAt, endAt];
-
-        if (streamId !== undefined) {
-            query += " AND stream_id = ?";
-            values.push(streamId);
-        }
-        query += " ORDER BY occurred_at DESC";
 
         const [rows] = await this.pool.execute(query, values);
         return rows;
