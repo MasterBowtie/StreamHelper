@@ -14,7 +14,6 @@ beforeEach(()=>{
 
 describe("createEvent", ()=>{
     it("create and submit a new event", async()=>{
-
         const mockEvent = {
             id: "stream-event-id",
             eventType: "test.event",
@@ -76,7 +75,7 @@ describe("getEventById", ()=>{
 describe("getEvents", ()=> {
     it("Throw an error when no conditions are given", async()=>{
         await expect(repository.getEvents())
-            .rejects.toThrow("getEvents(): no conditions were given");
+            .rejects.toThrow("getEvents(): No conditions were given");
     })
 
     it("get events by type", async()=>{

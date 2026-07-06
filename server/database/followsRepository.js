@@ -1,28 +1,49 @@
-class FollowsRepository {
+export class FollowsRepository {
     constructor(pool) {
         this.pool = pool;
     }
 
-    async getFollowers({streamId} = {}) {
-        let query = `SELECT * FROM follows f
+    async createFollower({twitchId, eventId}) {
+        const [result] = await this.pool.execute(
+            `INSERT INTO follows
+            (twitch_id, event_id) VALUES (?, ?)`,
+            [twitchId, eventId]
+        )
+
+        return result.insertId;
+    }
+
+    async findByTwitchId(twitchId) {
+        const [rows] = await this.pool.execute(
+            `SELECT f.twitch_id, u.display_name, e.occurred_at
+            FROM follows f
             JOIN twitch_users u ON u.twitch_id = f.twitch_id
-            WHERE f.is_following = TRUE
+            JOIN events e ON e.event_id = f.event_id
+            WHERE f.twitch_id = ?`,
+            [twitchId]
+        )
+
+        return rows[0] ?? null;
+    }
+
+    async getFollowers({streamId, isFollowing=true} = {}) {
+        let query = `SELECT f.twitch_id, u.display_name, e.occurred_at FROM follows f
+            JOIN twitch_users u ON u.twitch_id = f.twitch_id
+            JOIN events e ON e.event_id = f.event_id
+            WHERE f.is_following = ?
             `;
         
-        const values = [];
+        const values = [isFollowing];
 
         if (streamId !== undefined) {
             query += `
-            AND f.event_id IN (
-            SELECT event_id FROM events WHERE stream_id = ?
-            )`;
+            AND e.stream_id = ?`;
             values.push(streamId);
         }
-        const [rows] = this.pool.execute(query, values);
+        const [rows] = await this.pool.execute(query, values);
 
         return rows;
     }
-
 
     async getMostRecentFollower() {
         const [rows] = await this.pool.execute(
@@ -38,52 +59,27 @@ class FollowsRepository {
         return rows[0] ?? null;
     }
 
-    async getTotalFollowerCount() {
-        const [rows] = await this.pool.execute(
-            `SELECT COUNT(*) AS follower_count 
-            FROM follows
-            WHERE is_following = TRUE`
-        );
+    async gainedFollowers(streamId, isFollowing=true) {
+        let query = `
+            SELECT COUNT(DISTINCT f.twitch_id) as follower_count
+            FROM follows f
+            JOIN events e ON e.events_id = f.event_id
+            WHERE f.is_following = ?`
+        const values = [isFollowing];
+
+        if (streamId !== undefined) {
+            query += " AND e.stream_id = ?";
+            values.push(streamId);
+        }
+
+        const [rows] = await this.pool.execute(query, values);
 
         return rows[0].follower_count;
     }
 
-    async gainedFollowersByStream(streamId) {
-        const [rows] = this.pool.execute(`
-            SELECT COUNT(DISTINCT f.twitch_id)
-            FROM follows f
-            JOIN events e ON e.events_id = f.event_id
-            WHERE e.stream_id = ?
-            AND f.is_following = TRUE`,
-            [streamId]);
-        return rows[0];
-    }
-
-    async findByTwitchId({twitchId}) {
-        const [rows] = await this.pool.execute(
-            `SELECT * FROM follows f
-            JOIN twitch_users u ON u.twitch_id = f.twitch_id
-            WHERE f.twitch_id = ?`,
-            [twitchId]
-        )
-
-        return rows[0] ?? null;
-    }
-
-    async createFollow({twitchId, eventId}) {
-        const [result] = await this.pool.execute(
-            `INSERT INTO follows
-            (twitch_id, event_id) VALUES (?, ?)`,
-            [twitchId, eventId]
-        )
-
-        return result.insertId;
-    }
-
-// IMPORTANT
-// Update eventId, verify and isFollowing when someone re-follows
-
-    async updateFollower({twitchId, eventId, verify, isFollowing}) {
+    // IMPORTANT
+    // Update eventId, verify and isFollowing when someone re-follows
+    async updateFollower({twitchId, eventId, verify, isFollowing}={}) {
         let query = `UPDATE follows SET `;
         const values = [];
         const updates = [];
@@ -106,13 +102,10 @@ class FollowsRepository {
         if (updates.length > 0) {
             query += updates.join(", ");
         } else {
-            console.warn("updateFollower() called with no fields to update.");
-            return false;
+            throw new Error("updateFollower(): Called with no fields to update.");
         }
         query += " WHERE twitch_id = ?"
         values.push(twitchId);
-
-        if (updates.length === 0)
 
         const [result] = await this.pool.execute(query, values);
         return result.affectedRows === 1;

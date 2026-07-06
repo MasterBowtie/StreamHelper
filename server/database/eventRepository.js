@@ -47,7 +47,7 @@ export class EventRepository {
         }
 
         if (conditions.length === 0) {
-            throw new Error("getEvents(): no conditions were given");
+            throw new Error("getEvents(): No conditions were given");
         }
 
         query += conditions.join(" AND ");
