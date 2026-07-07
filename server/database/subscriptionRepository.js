@@ -1,20 +1,6 @@
-class SubscriptionRepository {
+export class SubscriptionRepository {
     constructor(pool) {
         this.pool = pool;
-    }
-
-    // TODO:
-    async getSubscriberById(id) {
-
-    }
-
-    async getSubscribers() {
-        const [rows] = await this.pool.execute(
-            `SELECT * FROM subscriptions s
-            JOIN twitch_users u ON u.twitch_id = s.twitch_id`
-        );
-
-        return rows;
     }
 
     async addSubscriber({twitchId, eventId, tier, months, isGift, giftedBy=null}) {
@@ -28,7 +14,41 @@ class SubscriptionRepository {
         return result.insertId;
     }
 
-    async updateSubscriber({twitchId, eventId, tier, months, isGift, giftedBy, isSubscribed, verified = new Date()}) {
+    async getSubscriberById(id) {
+        const [rows] = await this.pool.execute(
+            `SELECT s.twitch_id, u.display_name, s.tier, s.gifted_by_id, g.display_name as gift_name FROM subscriptions s
+            JOIN twitch_users u ON u.twitch_id = s.twitch_id
+            LEFT JOIN twitch_users g ON g.twitch_id = s.gifted_by_id
+            WHERE s.twitch_id = ?`,
+            [id]
+        );
+
+        return rows[0] ?? null;
+    }
+
+    async getSubscribers(streamId) {
+        let query = `
+            SELECT s.twitch_id, u.display_name, s.tier, s.gifted_by_id, g.display_name as gift_name FROM subscriptions s
+            JOIN twitch_users u ON u.twitch_id = s.twitch_id
+            LEFT JOIN twitch_users g ON g.twitch_id = s.gifted_by_id
+            JOIN events e ON e.event_id = s.event_id
+            WHERE s.is_subscribed = TRUE`
+        const values = [];
+        
+        if (streamId !== undefined) {
+            query += ` AND e.stream_id = ?`;
+            values.push(streamId);
+        }
+
+        const [rows] = await this.pool.execute(query, values);
+
+        return rows;
+    }
+
+    async updateSubscriber({twitchId, eventId, tier, months, isGift, giftedBy, isSubscribed, verified}) {
+        if (!twitchId) {
+            throw new Error("updateSubscriber(): Invalid TwitchId")
+        }        
         let query = `UPDATE subscriptions SET `;
         const values = [];
         const updates = [];
@@ -73,8 +93,7 @@ class SubscriptionRepository {
         if (updates.length > 0) {
             query += updates.join(", ");
         } else {
-            console.warn("updateSubscriber() called with no fields to update.");
-            return false;
+            throw new Error("updateSubscriber() called with no fields to update.");
         }
         query += " WHERE twitch_id = ?";
         values.push(twitchId);
@@ -83,31 +102,30 @@ class SubscriptionRepository {
         return result.affectedRows === 1;
     }
 
-    async getTotalSubscriberCount() {
-        const [rows] = await this.pool.execute(
-            `SELECT COUNT(*) as subscriber_count
-            FROM subscriptions 
-            WHERE is_subscribed = TRUE`
-        );
+    async getSubscriberCount(streamId) {
+        let query = `
+            SELECT COUNT(DISTINCT s.twitch_id) as subscriber_count
+            FROM subscriptions s`;
+        const values = [];
 
+        if (streamId !== undefined) {
+            query += ` JOIN events e ON e.event_id = s.event_id
+            WHERE e.stream_id = ? AND `
+            values.push(streamId);
+        }else {
+            query += ` WHERE `
+        }
+        query += `s.is_subscribed = TRUE`;
+
+        const [rows] = await this.pool.execute(query, values);
         return rows[0].subscriber_count;
-    }
-
-    async getSubscriptionsByStream(streamId) {
-        const [rows] = this.pool.execute(`
-            SELECT COUNT(DISTINCT s.twitch_id)
-            FROM subscriptions s
-            JOIN events e ON e.events_id = s.event_id
-            WHERE e.stream_id = ?
-            AND s.is_subscribed = TRUE`,
-            [streamId]);
-        return rows[0];
     }
     
     async mostRecentSubscriber({tier, isGifted = false, streamId} = {}) {
-        let query = `SELECT s.twitch_id, e.occurred_at, u.display_name
+        let query = `SELECT s.twitch_id, e.occurred_at, u.display_name, g.display_name as gift_name
             FROM subscriptions s
             JOIN twitch_users u ON u.twitch_id = s.twitch_id
+            LEFT JOIN twitch_users g ON g.twitch_id = s.gifted_by_id
             JOIN events e ON e.event_id = s.event_id
             WHERE s.is_subscribed = TRUE
               AND s.is_gift = ? `;
@@ -162,6 +180,10 @@ class SubscriptionRepository {
         `;
 
         values.push(limit);
+
+        if (!Number.isInteger(limit) || limit <= 0) {
+            throw new Error("getTopGifters(): Invalid limit");
+        }
 
         const [rows] = await this.pool.execute(query, values);
         return rows;

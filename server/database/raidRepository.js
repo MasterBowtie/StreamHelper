@@ -1,4 +1,4 @@
-class RaidRepository {
+export class RaidRepository {
     constructor (pool) {
         this.pool = pool;
     }
