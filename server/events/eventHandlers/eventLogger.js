@@ -14,7 +14,7 @@ function buildEventLogger({eventRepository, streamRepository}) {
             metadata: message
         }
 
-        await eventRepository.createEvent(event);
+        return await eventRepository.createEvent(event);
     }
 
     return logger;

@@ -11,9 +11,6 @@ beforeEach(()=>{
     followRepo = {
         createFollower: vi.fn(),
         findByTwitchId: vi.fn(),
-        getFollowers: vi.fn(),
-        getMostRecentFollower: vi.fn(),
-        gainedFollowers: vi.fn(),
         updateFollower: vi.fn(),
     }
 
@@ -27,11 +24,54 @@ beforeEach(()=>{
 });
 
 describe("FollowerHandler", ()=>{
-    it("initial test", async()=>{
-        const logSpy = vi.spyOn(console, "log").mockImplementation(()=>{});
+    it("Create brand new follower", async()=>{
+        userRepo.findByTwitchId.mockResolvedValue(null);
+        userRepo.createTwitchUser.mockResolvedValue(4);
+        followRepo.findByTwitchId.mockResolvedValue(null);
+        followRepo.createFollower.mockResolvedValue(2)
+        
+        await handler(json_channelfollow.payload.event);
 
-        handler(json_channelfollow.payload.event);
+        expect(userRepo.findByTwitchId).toHaveBeenCalled();
+        expect(userRepo.createTwitchUser).toHaveBeenCalled();
+        expect(followRepo.findByTwitchId).toHaveBeenCalled();
+        expect(followRepo.createFollower).toHaveBeenCalled();
+    });
 
-        expect(logSpy).toHaveBeenCalledWith("Cool_User followed");
-    })
-})
+    it("Update follower identity", async()=>{
+        userRepo.findByTwitchId.mockResolvedValue({
+            twitch_id: 4,
+            display_name: "McTesterson"
+        });
+        userRepo.updateIdentity.mockResolvedValue(true);
+        followRepo.findByTwitchId.mockResolvedValue(null);
+        followRepo.createFollower.mockResolvedValue(2)
+        
+        await handler(json_channelfollow.payload.event);
+
+        expect(userRepo.findByTwitchId).toHaveBeenCalled();
+        expect(userRepo.updateIdentity).toHaveBeenCalled();
+        expect(followRepo.findByTwitchId).toHaveBeenCalled();
+        expect(followRepo.createFollower).toHaveBeenCalled();
+    });
+
+    it("Update follower that previously unfollowed", async()=>{
+        userRepo.findByTwitchId.mockResolvedValue({
+            twitch_id: 4,
+            display_name: "McTesterson"
+        });
+        userRepo.updateIdentity.mockResolvedValue(true);
+        followRepo.findByTwitchId.mockResolvedValue({
+            twitch_id: 4,
+            display_name: "Cool_User"
+        });
+        followRepo.updateFollower.mockResolvedValue(true)
+        
+        await handler(json_channelfollow.payload.event);
+
+        expect(userRepo.findByTwitchId).toHaveBeenCalled();
+        expect(userRepo.updateIdentity).toHaveBeenCalled();
+        expect(followRepo.findByTwitchId).toHaveBeenCalled();
+        expect(followRepo.updateFollower).toHaveBeenCalled();
+    });
+});

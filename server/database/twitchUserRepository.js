@@ -68,7 +68,7 @@ export class TwitchUserRepository {
 
     async findByTwitchId(twitchId) {
         const [rows] = await this.pool.execute(
-            `SELECT * FROM twitch_users
+            `SELECT twitch_id, login, display_name FROM twitch_users
             WHERE twitch_id = ?`,
             [twitchId]
         );

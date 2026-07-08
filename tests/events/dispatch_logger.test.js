@@ -35,10 +35,13 @@ describe("Logger", ()=>{
         streamRepo.findActive.mockResolvedValue([
             {stream_id: 5}
         ]);
-        await logger(json_streamonline);
+        eventRepo.createEvent.mockResolvedValue(5);
+
+        const result = await logger(json_streamonline);
 
         expect(streamRepo.findActive).toHaveBeenCalled();
         expect(eventRepo.createEvent).toHaveBeenCalled();
+        expect(result).toBe(5);
     })
 })
 
