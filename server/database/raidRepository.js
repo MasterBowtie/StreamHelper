@@ -13,7 +13,7 @@ export class RaidRepository {
         return result.insertId;
     }
 
-    async getMostRecentRaid({streamId}={}) {
+    async getMostRecentRaid(streamId) {
         let query = `
             SELECT r.raider_id, r.viewer_count, e.occurred_at, u.display_name
             FROM raids r
@@ -34,7 +34,7 @@ export class RaidRepository {
         return rows[0] ?? null;
     }
 
-    async getRaidCount({ steamId }={}) {
+    async getRaidCount(streamId) {
         let query = `
             SELECT COUNT(*) AS raid_count
             FROM raids r
@@ -51,15 +51,21 @@ export class RaidRepository {
         return rows[0].raid_count;
     }
 
-    async getRaidStats({
+    async getRaiderStats({
         streamId = null,
         since = null,
         metric = "max_viewers",
-        limit = 3 } = {}) 
+        limit = 1 } = {}) 
     {
         let select;
 
-        if (metric === "count") {
+        if (metric === "max_viewers") {
+            select = `
+                r.raider_id,
+                u.display_name,
+                MAX(r.viewer_count) AS value
+            `;
+        } else if (metric === "count") {
             select = `
                 r.raider_id,
                 u.display_name,
@@ -72,11 +78,7 @@ export class RaidRepository {
                 SUM(r.viewer_count) AS value
             `;
         } else {
-            select = `
-                r.raider_id,
-                u.display_name,
-                MAX(r.viewer_count) AS value
-            `;
+            throw new Error("getRaiderStats(): Invalid metric");
         }
 
         let query = `
