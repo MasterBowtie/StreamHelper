@@ -1,4 +1,4 @@
-export function buildEventDispatcher() {
+export function buildEventDispatcher({eventLogger}) {
     const handlers = {};
 
     function registerHandler(eventType, handler) {
@@ -6,14 +6,15 @@ export function buildEventDispatcher() {
     }
     
     async function dispatch(message) {
-        const eventType = message.payload.subscription.type;
+        await eventLogger(message);
+
+        const eventType = message.payload.subscription.type
 
         const handler = handlers[eventType];
         if (!handler) {
             console.warn("Unhandled EventSub event:", eventType);
             return;
         }
-
         await handler(message.payload.event);
     }
 

@@ -1,4 +1,4 @@
-export class FollowsRepository {
+export class FollowerRepository {
     constructor(pool) {
         this.pool = pool;
     }

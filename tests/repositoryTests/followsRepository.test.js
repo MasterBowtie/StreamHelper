@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { FollowsRepository } from "../../server/database/followsRepository.js";
+import { FollowerRepository } from "../../server/database/followerRepository.js";
 
 let mockPool;
 let repository;
@@ -9,7 +9,7 @@ beforeEach(()=>{
         execute: vi.fn()
     };
 
-    repository = new FollowsRepository(mockPool);
+    repository = new FollowerRepository(mockPool);
 });
 
 describe("createFollow", ()=>{

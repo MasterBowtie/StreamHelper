@@ -3,11 +3,11 @@ export class EventRepository {
         this.pool = pool;
     }
 
-    async createEvent({eventType, twitchId, streamId=null, occurredAt, metaData=null}) {
+    async createEvent({eventType, twitchId, streamId=null, occurredAt, metadata=null}) {
         const [result] = await this.pool.execute(
             `INSERT INTO events
             (event_type, twitch_id, streamid, occurred_at, meta_data)`,
-            [eventType, twitchId, streamId, occurredAt, metaData]
+            [eventType, twitchId, streamId, occurredAt, metadata]
         );
 
         return result.insertId;

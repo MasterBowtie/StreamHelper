@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest"; 
-import { buildEventDispatcher } from "../server/twitch/eventDispatcher.js";
-import { buildStreamOnlineHandler, buildStreamOfflineHandler } from "../server/twitch/eventHandlers/streamConnect.js";
-import json_streamonline from "./fixtures/json_streamonline.js";
-import json_streamoffline from "./fixtures/json_streamoffline.js";
-import json_badEvent from "./fixtures/json_badEvent.js";
+import { buildEventDispatcher } from "../../server/events/eventDispatcher.js";
+import { buildStreamOnlineHandler, buildStreamOfflineHandler } from "../../server/events/eventHandlers/streamConnect.js";
+import json_streamonline from "../fixtures/json_streamonline.js";
+import json_streamoffline from "../fixtures/json_streamoffline.js";
+import json_badEvent from "../fixtures/json_badEvent.js";
 
 
 const fakeApiClient = {
