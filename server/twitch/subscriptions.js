@@ -17,6 +17,13 @@ export function getSubscriptions(broadcaster) {
                 broadcaster_user_id: broadcaster.twitch_id,
                 moderator_user_id: broadcaster.twitch_id
             }
+        },
+        {
+            type: "channel.subscribe",
+            version: "1",
+            condition: {
+                broadcaster_user_id: broadcaster.twitch_id
+            },
         }
     ]
 }

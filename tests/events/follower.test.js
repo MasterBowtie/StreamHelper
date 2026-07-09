@@ -4,7 +4,7 @@ import { buildFollowHandler } from "../../server/events/eventHandlers/followHand
 
 let handler;
 let followRepo;
-let userRepo;
+let userService;
 
 
 beforeEach(()=>{
@@ -14,53 +14,35 @@ beforeEach(()=>{
         updateFollower: vi.fn(),
     }
 
-    userRepo = {
-        findByTwitchId: vi.fn(),
-        createTwitchUser: vi.fn(),
-        updateIdentity: vi.fn(),
-    }
+    userService = vi.fn()
 
-    handler = buildFollowHandler({followerRepository: followRepo, twitchUserRepository: userRepo});
+    handler = buildFollowHandler({followerRepository: followRepo, twitchUserService: userService});
 });
 
 describe("FollowerHandler", ()=>{
     it("Create brand new follower", async()=>{
-        userRepo.findByTwitchId.mockResolvedValue(null);
-        userRepo.createTwitchUser.mockResolvedValue(4);
         followRepo.findByTwitchId.mockResolvedValue(null);
         followRepo.createFollower.mockResolvedValue(2)
         
         await handler(json_channelfollow.payload.event);
 
-        expect(userRepo.findByTwitchId).toHaveBeenCalled();
-        expect(userRepo.createTwitchUser).toHaveBeenCalled();
+        expect(userService).toHaveBeenCalled();
         expect(followRepo.findByTwitchId).toHaveBeenCalled();
         expect(followRepo.createFollower).toHaveBeenCalled();
     });
 
     it("Update follower identity", async()=>{
-        userRepo.findByTwitchId.mockResolvedValue({
-            twitch_id: 4,
-            display_name: "McTesterson"
-        });
-        userRepo.updateIdentity.mockResolvedValue(true);
         followRepo.findByTwitchId.mockResolvedValue(null);
         followRepo.createFollower.mockResolvedValue(2)
         
         await handler(json_channelfollow.payload.event);
 
-        expect(userRepo.findByTwitchId).toHaveBeenCalled();
-        expect(userRepo.updateIdentity).toHaveBeenCalled();
+        expect(userService).toHaveBeenCalled();
         expect(followRepo.findByTwitchId).toHaveBeenCalled();
         expect(followRepo.createFollower).toHaveBeenCalled();
     });
 
     it("Update follower that previously unfollowed", async()=>{
-        userRepo.findByTwitchId.mockResolvedValue({
-            twitch_id: 4,
-            display_name: "McTesterson"
-        });
-        userRepo.updateIdentity.mockResolvedValue(true);
         followRepo.findByTwitchId.mockResolvedValue({
             twitch_id: 4,
             display_name: "Cool_User"
@@ -69,8 +51,7 @@ describe("FollowerHandler", ()=>{
         
         await handler(json_channelfollow.payload.event);
 
-        expect(userRepo.findByTwitchId).toHaveBeenCalled();
-        expect(userRepo.updateIdentity).toHaveBeenCalled();
+        expect(userService).toHaveBeenCalled();
         expect(followRepo.findByTwitchId).toHaveBeenCalled();
         expect(followRepo.updateFollower).toHaveBeenCalled();
     });

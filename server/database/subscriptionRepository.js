@@ -3,12 +3,12 @@ export class SubscriptionRepository {
         this.pool = pool;
     }
 
-    async addSubscriber({twitchId, eventId, tier, months, isGift, giftedBy=null}) {
+    async addSubscriber({twitchId, eventId, tier, months, isGift}) {
         const [result] = await this.pool.execute(
             `INSERT INTO subscriptions
-            (twitch_id, event_id, tier, months, is_gift, gifted_by_id)
+            (twitch_id, event_id, tier, months, is_gift)
             VALUES (?, ?, ?, ?, ?, ?)`,
-            [twitchId, eventId, tier, months, isGift, giftedBy]
+            [twitchId, eventId, tier, months, isGift]
         );
 
         return result.insertId;
