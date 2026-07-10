@@ -11,89 +11,44 @@ or in the "license" file accompanying this file. This file is distributed on an 
 
 import  "dotenv/config";
 import express, { Router } from "express";
-import { engine } from 'express-handlebars';
 import session from "express-session";
 import bodyParser from "body-parser";
 import * as fs from "fs";
 import * as http from "node:http";
-import { Server } from "socket.io";
 import { access } from 'node:fs';
 
-// Database & Repositories
-import { buildDatabasePool } from "./server/database/database.js";
-import { StreamRepository } from "./server/database/streamRepository.js";
-import { TwitchtwitchUserRepository } from "./server/database/twitchtwitchUserRepository.js";
-import { EventRepository } from "./server/database/eventRepository.js";
+import { initialize } from "./server/startup/initializeStreamHelper.js";
 
-// Twitch
-import { buildTwitchAuthService } from "./server/twitch/twitchAuthService.js";
-import { buildTokenManager } from "./server/twitch/tokenManager.js";
-import { buildTwitchApiClient } from "./server/twitch/twitchApiClient.js";
-import { buildEventSubService } from "./server/twitch/eventSubService.js";
-
-// Handlers
-import { buildTwitchUserService } from "./server/events/eventHandlers/twitchUserService.js";
-import { buildEventDispatcher } from "./server/event/eventDispatcher.js";
-import { buildEventLogger } from "./server/events/eventHandlers/eventLogger.js";
-import { buildSteamOfflineHandler, buildSteamOnlineHandler } from "./server/event/eventHandlers/streamConnect.js";
-
-// Routers
-import { buildTwitchRouter } from "./server/routers/twitchRouter.js";
-import { buildAuthRouter } from "./server/routers/authRouter.js";
-import { buildFollowHandler } from "./server/events/eventHandlers/followHandler.js";
+// Builder Functions
+import { buildDatabase } from "./builders/buildDatabase.js";
+import { buildTwitch } from "./builders/buildTwitch.js";
+import { buildEvents } from "./builders/buildEvents.js";
+import { buildServices } from "./builders/buildServices.js";
+import { buildHandlers } from "./builders/buildHandlers.js";
+import { buildRouters } from "./builders/buildRouters.js";
+import { buildWebsocketServer } from "./websocket/websocketServer.js";
 
 // Server data
 export const DEBUG = process.env.NODE_ENV !== "production";
 export const MANIFEST = DEBUG ? {} : JSON.parse(fs.readFileSync("static/.vite/manifest.json").toString())
 
-const db = buildDatabasePool();
-const twitchUserRepository = new TwitchUserRepository(db);
-const streamRepository = new StreamRepository(db);
-const eventRepository = new EventRepository(db);
-
-// Twitch Integration
-const twitchAuthService = buildTwitchAuthService();
-const tokenManager = buildTokenManager({twitchUserRepository, twitchAuthService });
-const twitchApiClient = buildTwitchApiClient({ tokenManager});
-const eventLogger = buildEventLogger({eventRepository, streamRepository});
-const eventDispatcher = buildEventDispatcher({eventLogger});
-const eventSubService = buildEventSubService({twitchApiClient, eventDispatcher})
-
-// Connect Dispatcher & Handlers
-const twitchUserService = buildTwitchUserService({twitchUserRepository});
-eventDispatcher.registerHandler("stream.online", buildSteamOnlineHandler({twitchApiClient, streamRepository}), true);
-eventDispatcher.registerHandler("stream.offline", buildSteamOfflineHandler({ streamRepository }), true);
-eventDispatcher.registerHandler("channel.follow", buildFollowHandler({followerRepository, twitchUserService}), true)
-
-const broadcaster = await twitchUserRepository.getBroadcaster();
-await eventSubService.start();
-await eventSubService.registerSubscriptions(broadcaster);
-
-// Build Routers
-const authRouter = buildAuthRouter({
-  twitchAuthService, twitchUserRepository, eventSubService
-});
-const twitchRouter = buildTwitchRouter({ authRouter });
+const db = buildDatabase();
+const twitch = buildTwitch(db);
+const events = buildEvents({db, twitch});
+const services = buildServices({db});
+buildHandlers({
+  eventDispatcher: events.eventDispatcher,
+  services,
+  db,
+  twitch
+})
+const routers = buildRouters({twitch, db, events, services});
 
 // Initialize Express and middlewares
 var app = express();
 const server = http.createServer(app);
+const webSocketServer = buildWebsocketServer();
 
-app.engine('handlebars', engine());
-app.set('view engine', 'handlebars');
-app.set('views', './views');
-
-const io = new Server(server);
-
-io.on("connection", (socket) => {
-  console.log("Connected new socket")
-
-  // socket.emit("channel.chat.message", chat);
-
-  socket.on("disconnect", () => {
-    console.log("Disconnected Socket")
-  })
-})
 
 app.use(bodyParser.json());
 app.use((req, res, next) => {
@@ -124,11 +79,15 @@ if (!DEBUG) {
 }
 
 
-// app.use('/', buildHomeRouter());
+app.use('/', routers.mainRouter);
 // app.use("/house", buildHouseRouter(house_repository));
 
-app.use("/twitch", twitchRouter);
+app.use("/twitch", routers.twitchRouter);
+
+await initialize({twitchUserRepository: db.twitchUserRepository, eventSubService: events.eventSubService});
 
 server.listen(process.env.S_PORT || 3141, () => {
-  console.log(`Secure listening on port ${process.env.S_PORT || 3141}...`);
+  console.log(`Stream Helper-Server listening on port ${process.env.S_PORT || 3141}...`);
 });
+
+webSocketServer.start(server);

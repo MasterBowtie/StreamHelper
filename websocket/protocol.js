@@ -1,0 +1,1 @@
+// createMessage(type, payload)
