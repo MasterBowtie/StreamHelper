@@ -1,12 +1,10 @@
 import { buildFollowHandler } from "../events/eventHandlers/followHandler.js";
 import { buildStreamOfflineHandler, buildStreamOnlineHandler } from "../events/eventHandlers/streamConnect.js";
 
-export function buildHandlers({eventDispatcher, services, db, twitch, }) {
-    eventDispatcher.registerHandler("stream.online", buildStreamOnlineHandler({
-        twitchApiClient: twitch.twitchApiClient,
-        streamRepository: db.streamRepository}));
+export function buildHandlers({events, services, db, twitch, websocket}) {
+    events.eventDispatcher.registerHandler("stream.online", buildStreamOnlineHandler({ twitch, db, websocket}));
 
-    eventDispatcher.registerHandler("stream.offline", buildStreamOfflineHandler({streamRepository: db.streamRepository}));
+    events.eventDispatcher.registerHandler("stream.offline", buildStreamOfflineHandler({db, websocket}));
 
-    eventDispatcher.registerHandler("channel.follow", buildFollowHandler({followerRepository: db.followerRepository, twitchUserService: services.twitchUserService}))
+    events.eventDispatcher.registerHandler("channel.follow", buildFollowHandler({db, services, websocket}))
 }

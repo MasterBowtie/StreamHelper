@@ -1,3 +1,12 @@
-// publish(type, payload)
+import { createMessage } from "./protocol.js"
 
-// broadcast(type, payload)
+export function buildNotifier({webSocketServer}) {
+
+    function publish(type, payload) {
+        webSocketServer.broadcast(createMessage(type, payload));
+    }
+
+    return {
+        publish
+    };
+}

@@ -1,1 +1,7 @@
-// createMessage(type, payload)
+export function createMessage(type, payload) {
+    return {
+        type,
+        payload,
+        timestamp: new Date().toISOString()
+    };
+}

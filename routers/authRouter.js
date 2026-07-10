@@ -1,11 +1,11 @@
 import { Router } from "express";
 
-function buildAuthRouter({twitchAuthService, twitchUserRepository, eventSubService}) {
+function buildAuthRouter({twitch, db, events}) {
     const router = Router();
 
     // Redirect to Twitch Login
     router.get('/login', (req, res) => {
-        const url = twitchAuthService.getLoginUrl();
+        const url = twitch.twitchAuthService.getLoginUrl();
 
         res.redirect(url);
     });
@@ -13,16 +13,16 @@ function buildAuthRouter({twitchAuthService, twitchUserRepository, eventSubServi
     // Twitch Oauth callback
     router.get("/callback", async (req, res) => {
         try {
-            const auth = await twitchAuthService.authenticateBroadcaster(req.query.code);
+            const auth = await twitch.twitchAuthService.authenticateBroadcaster(req.query.code);
         
-            await twitchUserRepository.updateBroadcaster({
+            await db.twitchUserRepository.updateBroadcaster({
                 twitchUser: auth.twitchUser,
                 token: auth.token
             })
             
             // Start EventSub AFTER DB is ready
-            await eventSubService.start()
-            await eventSubService.registerSubscriptions(auth.twitchUser);
+            await events.eventSubService.start()
+            await events.eventSubService.registerSubscriptions(auth.twitchUser);
 
             return res.redirect('/setup-complete')
         } catch (error) {

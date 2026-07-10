@@ -1,7 +1,7 @@
-import { buildTwitchUserService } from "../events/eventHandlers/twitchUserService.js";
+import { buildTwitchUserService } from "../services/twitchUserService.js";
 
 export function buildServices({db}) {
-    const twitchUserService = buildTwitchUserService({twitchUserRepository: db.twitchUserRepository});
+    const twitchUserService = buildTwitchUserService({db});
 
 
     return {

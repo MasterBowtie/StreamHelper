@@ -1,5 +1,5 @@
 import { buildEventDispatcher } from "../events/eventDispatcher.js";
-import { buildEventLogger } from "../events/eventHandlers/eventLogger.js";
+import { buildEventLogger } from "../events/eventLogger.js";
 import { buildEventSubService } from "../twitch/eventSubService.js";
 
 
@@ -11,7 +11,7 @@ export function buildEvents({twitch, db}) {
 
     const eventDispatcher = buildEventDispatcher({eventLogger});
 
-    const eventSubService = buildEventSubService({twitchApiClient: twitch.twitchApiClient, eventDispatcher});
+    const eventSubService = buildEventSubService({twitch, eventDispatcher});
 
     return {
         eventLogger,

@@ -2,7 +2,7 @@ import { twitchConfig } from "./twitchConfig.js";
 import { getSubscriptions } from "./subscriptions.js";
 
 function buildEventSubService({
-    twitchApiClient,
+    twitch,
     eventDispatcher
 }) {
     let socket = null;
@@ -85,7 +85,7 @@ function buildEventSubService({
         console.log("Subscription:", JSON.stringify(subscriptions, null, 2))
 
         for (const sub of subscriptions) {
-            await twitchApiClient.createEventSubSubscription({...sub, sessionId});
+            await twitch.twitchApiClient.createEventSubSubscription({...sub, sessionId});
             console.log("Registered:", sub.type);
         }
     }

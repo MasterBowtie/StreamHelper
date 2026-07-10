@@ -1,9 +1,9 @@
 const REFRESH_BUFFER_MS = 5 * 60 * 1000;
 
-function buildTokenManager({twitchUserRepository, twitchAuthService}) {
+function buildTokenManager({db, twitchAuthService}) {
     
     async function getValidAccessToken() {
-    const broadcaster = await twitchUserRepository.getBroadcaster();
+    const broadcaster = await db.twitchUserRepository.getBroadcaster();
 
     if (!broadcaster) {
         throw new Error('No broadcaster configured');
@@ -18,7 +18,7 @@ function buildTokenManager({twitchUserRepository, twitchAuthService}) {
     
     const token = await twitchAuthService.refreshAccessToken(broadcaster.refresh_token);
     
-    await twitchUserRepository.updateToken({
+    await db.twitchUserRepository.updateToken({
         accessToken: token.accessToken,
         refreshToken: token.refreshToken,
         expiresIn: token.expiresIn

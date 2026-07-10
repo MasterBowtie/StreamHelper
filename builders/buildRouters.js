@@ -4,9 +4,9 @@ import { buildTwitchRouter } from "../routers/twitchRouter.js";
 
 export function buildRouters({twitch, db, events, services}) {
     const authRouter = buildAuthRouter({
-        twitchAuthService: twitch.twitchAuthService,
-        twitchUserRepository: db.twitchUserRepository,
-        eventSubService: events.eventSubService
+        twitch,
+        db,
+        events
     })
 
     const twitchRouter = buildTwitchRouter({

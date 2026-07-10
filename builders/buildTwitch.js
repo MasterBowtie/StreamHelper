@@ -2,20 +2,12 @@ import { buildTwitchAuthService } from "../twitch/twitchAuthService.js";
 import { buildTwitchApiClient } from "../twitch/twitchApiClient.js";
 import { buildTokenManager } from "../twitch/tokenManager.js";
 
-export function buildTwitch({
-    twitchUserRepository
-}) {
-    const twitchAuthService = buildTwitchAuthService({
-        twitchUserRepository
-    });
+export function buildTwitch({ db }) {
+    const twitchAuthService = buildTwitchAuthService();
 
-    const tokenManager = buildTokenManager({
-        twitchUserRepository, twitchAuthService
-    });
+    const tokenManager = buildTokenManager({ db, twitchAuthService });
 
-    const twitchApiClient = buildTwitchApiClient({
-        tokenManager
-    });
+    const twitchApiClient = buildTwitchApiClient({ tokenManager });
 
     return {
         twitchAuthService,
