@@ -1,10 +1,10 @@
 export const twitchConfig = {
-    clientId: process.env.TWITCH_CLIENT_ID,
-    clientSecret: process.env.TWITCH_SECRET,
-    redirectUri: process.env.TWITCH_REDIRECT_URI,
+    clientId: process.env.TWITCH_CLIENT_ID ?? "dv469c3zeve91zn4krv8hoccz83b0w",
+    clientSecret: process.env.TWITCH_CLIENT_SECRET,
+    redirectUri: process.env.TWITCH_REDIRECT_URI ?? "http://localhost:3141/twitch/auth/callback",
 
     oauth: {
-        authUrl: 'https://id.twitch.tv/oauth2/authorize',
+        authUrl: "https://id.twitch.tv/oauth2/device",
         tokenUrl: 'https://id.twitch.tv/oauth2/token',
         validateUrl: 'https://id.twitch.tv/oauth2/validate'
     },

@@ -2,6 +2,68 @@ import { twitchConfig } from "./twitchConfig.js";
 
 function buildTwitchAuthService() {
 
+    async function startDeviceAuth() {
+        const response = await fetch(twitchConfig.oauth.authUrl,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    client_id: twitchConfig.clientId,
+                    scopes: twitchConfig.scopes.join(" ")
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error("OAuth Error:", data.message);
+        }
+
+        return {
+            deviceCode: data.device_code,
+            userCode: data.user_code,
+            verificationUrl: data.verification_url,
+            expiresIn: data.expires_in,
+            interval: data.interval
+        };
+    }
+
+    async function pollDeviceToken(deviceCode) {
+        const response = await fetch(
+            twitchConfig.tokenUrl,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    client_id: twitchConfig.clientId,
+                    device_code: deviceCode,
+                    grant_type: "urn:ietf:params:oauth:grant-type:device_code"
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (data.message === "authorization_pending") {
+                return null;
+            }
+
+            throw new Error(data.message);
+        }
+
+        return {
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+            expiresIn: data.expires_in
+        }
+    }
+
     async function exchangeCodeForToken(code) {
         const response = await fetch(twitchConfig.oauth.tokenUrl, {
         method: 'POST',
@@ -69,8 +131,19 @@ function buildTwitchAuthService() {
         };
     }
 
-    async function authenticateBroadcaster(code) {
-        const token = await exchangeCodeForToken(code);
+    async function authenticateBroadcaster({deviceCode, code}) {
+        let token;
+
+        if (code) {
+            token = await exchangeCodeForToken(code);
+        } else if (deviceCode) {
+            token = await pollDeviceToken(deviceCode);
+        }
+
+        if (!token) {
+            return null;
+        }
+
         const twitchUser = await fetchTwitchUser(token.accessToken);
 
         return {
@@ -112,6 +185,8 @@ function buildTwitchAuthService() {
     }
 
     return  {
+        startDeviceAuth,
+        pollDeviceToken,
         getLoginUrl,
         exchangeCodeForToken,
         fetchTwitchUser,

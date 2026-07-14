@@ -71,7 +71,7 @@ app.use('/', routers.mainRouter);
 
 app.use("/twitch", routers.twitchRouter);
 
-await initialize({twitchUserRepository: db.twitchUserRepository, eventSubService: events.eventSubService});
+await initialize({db, events});
 
 server.listen(process.env.S_PORT || 3141, () => {
   console.log(`Stream Helper-Server listening on port ${process.env.S_PORT || 3141}...`);

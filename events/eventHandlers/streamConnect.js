@@ -1,4 +1,4 @@
-import { EVENTS } from "../events";
+import { EVENTS } from "../events.js";
 
 function buildStreamOnlineHandler({twitch, db, websocket}) {
     async function handler(event) {

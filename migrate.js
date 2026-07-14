@@ -4,7 +4,7 @@ import mysql from "mysql2/promise"
 import  "dotenv/config";
 
 
-const MIGRATIONS_DIR = "./server/database/migrations";
+const MIGRATIONS_DIR = "./database/migrations";
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,

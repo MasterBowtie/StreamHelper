@@ -1,7 +1,7 @@
-export async function initialize({twitchUserRepository, eventSubService}) {
+export async function initialize({db, events}) {
     console.log("Initializing Stream Helper...");
 
-    const broadcaster = await twitchUserRepository.getBroadcaster();
+    const broadcaster = await db.twitchUserRepository.getBroadcaster();
 
     if (!broadcaster) {
         console.warn("No broadcaster configured. Waiting for authentication.");
@@ -10,7 +10,7 @@ export async function initialize({twitchUserRepository, eventSubService}) {
 
     console.log("Found broadcaster:", broadcaster.display_name);
 
-    await eventSubService.start(broadcaster);
+    await events.eventSubService.start(broadcaster);
 
     console.log("Stream Helper ready.")
 } 

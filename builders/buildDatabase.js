@@ -5,10 +5,12 @@ import { EventRepository } from "../database/eventRepository.js";
 import { FollowerRepository} from "../database/followerRepository.js"
 import { SubscriptionRepository } from "../database/subscriptionRepository.js"
 import { RaidRepository } from "../database/raidRepository.js"
+import { SettingRepository } from "../database/settingRepository.js";
 
 export function buildDatabase() {
     const db = buildDatabasePool();
-
+    
+    const settingRepository = new SettingRepository(db);
     const twitchUserRepository = new TwitchUserRepository(db);
     const streamRepository = new StreamRepository(db);
     const eventRepository = new EventRepository(db);
@@ -18,6 +20,7 @@ export function buildDatabase() {
 
     return {
         db,
+        settingRepository,
         twitchUserRepository,
         streamRepository,
         eventRepository,
