@@ -1,4 +1,4 @@
-import { EVENTS } from "../../server/constants.js";
+import { EVENTS } from "../../websocket/events.js";
 
 function buildStreamOnlineHandler({twitch, db, websocket}) {
     async function handler(event) {

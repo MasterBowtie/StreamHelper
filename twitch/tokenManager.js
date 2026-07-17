@@ -2,17 +2,17 @@ const REFRESH_BUFFER_MS = 5 * 60 * 1000;
 
 export function buildTokenManager({db, twitchAuthService}) {
     
-    async function getValidAccessToken() {
-        const broadcaster = await db.twitchUserRepository.getBroadcaster();
-
+    async function getValidAccessToken(broadcaster) {
         if (!broadcaster) {
-            throw new Error('No broadcaster configured');
+            return {
+                success: false,
+                reason: "No broadcaster configured"
+            };
         }
 
         const expiresAt = new Date(broadcaster.expires_at);
-        const refreshThreshold = Date.now() + REFRESH_BUFFER_MS;
         
-        if (expiresAt.getTime() > refreshThreshold) {
+        if (expiresAt.getTime() > Date.now() + REFRESH_BUFFER_MS) {
             return broadcaster.access_token;
         }
 

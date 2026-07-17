@@ -3,7 +3,7 @@ import { buildAuthRouter } from "./authRouter.js";
 import dotenv from "dotenv";
 
 
-function buildTwitchRouter({authRouter}) {
+function buildTwitchRouter(components, authRouter) {
     const router = Router();
 
     // Public auth Routes

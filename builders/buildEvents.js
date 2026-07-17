@@ -18,17 +18,23 @@ export function buildEvents({twitch, db, services, websocket}) {
 
     async function initialize(broadcaster) {
         if (!broadcaster) {
-            return false
+
+            twitch.setEventSubStatus({
+                connected: false,
+                reason: "No broadcaster"
+            })
+            return;
         }
 
         await eventSubService.start();
 
         await eventSubService.registerSubscriptions(broadcaster);
 
-        return true;
+        twitch.setEventSubStatus({connected: true});
     }
 
     return {
+        initialize,
         eventLogger,
         eventDispatcher,
         eventSubService

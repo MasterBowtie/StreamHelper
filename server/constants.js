@@ -9,22 +9,6 @@ const AUTH_CLIENT_TYPES = {
     PRIVATE: "private"
 };
 
-const EVENTS = {
-    // Twitch
-    ONLINE: "stream.online",
-    OFFLINE: "stream.offline",
-    FOLLOW: "channel.follow",
-    SUBSCRIBE: "channel.subscribe",
-    RAID: "channel.raid",
-
-    // Application
-    CONNECTED: "app.connected",
-    SETTINGS_UPDATED: "app.settings.updated",
-    AUTH_REQUIRED: "app.auth.required",
-    READY: "app.ready",
-    CLIENT_ID_ERROR: "app.client.id.invalid"
-}
-
 const SETTINGS_DEFAULTS = [
     {
         key: 'auth.mode',
@@ -50,5 +34,4 @@ export {
     SETTINGS_DEFAULTS,
     AUTH_MODES,
     AUTH_CLIENT_TYPES,
-    EVENTS
 }

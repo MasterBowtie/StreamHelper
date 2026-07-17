@@ -24,7 +24,14 @@ function buildSettingsService({ db, encryptionService }) {
         cache.clear();
 
         for (const setting of settings) {
-            cache.set(setting.key, setting);
+            cache.set(setting.setting_key, 
+                {
+                    settingValue: setting.setting_value,
+                    settingKey: setting.setting_key,
+                    settingType: setting.setting_type,
+                    description: setting.description
+                }
+            );
         }
     }
 

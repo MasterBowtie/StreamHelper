@@ -14,7 +14,7 @@ import { buildEvents } from "./builders/buildEvents.js";
 import { buildRouters } from "./builders/buildRouters.js";
 import { buildWebsocketServer } from "./websocket/websocketServer.js";
 import { buildWebsocket } from "./builders/buildWebsocket.js";
-import { EVENTS } from "./server/constants.js";
+import { EVENTS } from "./websocket/events.js";
 
 // Server data
 export const DEBUG = process.env.NODE_ENV !== "production";
@@ -22,30 +22,23 @@ export const MANIFEST = DEBUG ? {} : JSON.parse(fs.readFileSync("static/.vite/ma
 
 var app = express();
 const server = http.createServer(app);
+const components = {};
 
-const db = await buildRepositories();
-await db.initialize()
-const services = buildServices({db});
-await services.initialize();
-const websocket = buildWebsocket();
-await websocket.initialize(server);
-const twitch = await buildTwitch({db, services});
-const {initialized, reason, broadcaster} = await twitch.initialize();
+components.db = await buildRepositories();
+await components.db.initialize()
+components.services = buildServices(components);
+await components.services.initialize();
+components.websocket = buildWebsocket();
+await components.websocket.initialize(server);
+components.twitch = await buildTwitch(components);
+const {initialized, reason, broadcaster} = await components.twitch.initialize();
+components.events = buildEvents(components);
 
 if (initialized) {
-  const events = buildEvents({twitch, db, services, websocket});
-  await events.initialize(broadcaster);
-} else {
-  console.warn("Twitch Not Initialized:", reason);
-  if (reason === "invalid client") {
-    websocket.notifier.notify(EVENTS.CLIENT_ID_ERROR);
-  }
-  // TODO: More Handling of Bad Auth
+  await components.events.initialize(broadcaster);
 }
 
-// const events = buildEvents({db, twitch});
-// buildHandlers({ events, services, db, twitch, websocket })
-// const routers = buildRouters({twitch, db, events, services});
+components.routers = buildRouters(components);
 
 // Initialize Express and middlewares
 
@@ -81,7 +74,7 @@ if (!DEBUG) {
 }
 
 
-// app.use('/', routers.mainRouter);
+app.use('/', components.routers.mainRouter);
 // app.use("/house", buildHouseRouter(house_repository));
 
 // app.use("/twitch", routers.twitchRouter);

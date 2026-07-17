@@ -10,7 +10,7 @@ export function buildServices({db}) {
     const twitchUserService = buildTwitchUserService({db});
 
     async function initialize() {
-        settingService.initialize();
+        await settingService.initialize();
 
         console.log("Services Initialized...");
     }
