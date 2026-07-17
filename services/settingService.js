@@ -1,5 +1,22 @@
+import { SETTINGS_DEFAULTS } from "../server/constants.js";
+
 function buildSettingsService({ db, encryptionService }) {
     const cache = new Map();
+
+    async function initialize() {
+        await ensureDefaults();
+        await load();
+    }
+
+    async function ensureDefaults() {
+        for (const setting of SETTINGS_DEFAULTS) {
+            const existing = await db.settingRepository.findByKey(setting.key);
+        
+            if (!existing) {
+                await db.settingRepository.createSetting(setting);
+            }
+        }
+    }
 
     async function load() {
         const settings = await db.settingRepository.getAllSettings();
@@ -10,8 +27,6 @@ function buildSettingsService({ db, encryptionService }) {
             cache.set(setting.key, setting);
         }
     }
-
-    async function reload() {}
 
     async function get(key) {
         const setting = cache.get(key);
@@ -43,7 +58,7 @@ function buildSettingsService({ db, encryptionService }) {
         const setting = cache.get(key);
 
         if (!setting) {
-            throw new Error("Unknown setting:", key)
+            throw new Error(`Unknown setting: ${key}`)
         }
 
         let storedValue;
@@ -72,11 +87,12 @@ function buildSettingsService({ db, encryptionService }) {
         }
 
         await db.settingRepository.updateSetting({key, value: storedValue, type, description})
+        setting.value = storedValue;
     }
 
     return {
+        initialize,
         load,
-        reload,
         get,
         set
     }

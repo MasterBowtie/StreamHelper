@@ -1,4 +1,4 @@
-import { twitchConfig } from "./twitchConfig.js";
+import { twitchConfig } from "../twitch/twitchConfig.js";
 import { getSubscriptions } from "./subscriptions.js";
 
 function buildEventSubService({

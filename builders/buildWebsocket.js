@@ -2,14 +2,21 @@ import { buildWebsocketServer } from "../websocket/websocketServer.js";
 import { buildNotifier } from "../websocket/notify.js";
 
 export function buildWebsocket() {
-    const webSocketServer = buildWebsocketServer();
+    const websocketServer = buildWebsocketServer();
 
     const notifier = buildNotifier({
-        webSocketServer
+        websocketServer
     });
 
+    async function initialize(server) {
+        websocketServer.start(server);
+
+        console.log("Websocket Initialized...");
+    }
+
     return {
-        webSocketServer,
+        initialize,
+        websocketServer,
         notifier
     };
 }

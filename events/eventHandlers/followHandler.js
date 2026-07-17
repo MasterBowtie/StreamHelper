@@ -1,4 +1,4 @@
-import { EVENTS } from "../events.js";
+import { EVENTS } from "../../server/constants.js";
 
 function buildFollowHandler({db, services, websocket}) {
     async function handler(event, eventId) {
@@ -20,7 +20,7 @@ function buildFollowHandler({db, services, websocket}) {
             })
         }
 
-        await websocket.notifier.publish(EVENTS.FOLLOW, {
+        await websocket.notifier.notify(EVENTS.FOLLOW, {
             displayName: event.user_name
         });
 

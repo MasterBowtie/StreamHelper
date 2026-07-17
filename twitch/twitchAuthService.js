@@ -1,115 +1,40 @@
 import { twitchConfig } from "./twitchConfig.js";
+import { AUTH_CLIENT_TYPES } from "../server/constants.js"
 
-function buildTwitchAuthService() {
+export function buildTwitchAuthService({authService, services}) {
 
-    async function startDeviceAuth() {
-        const response = await fetch(twitchConfig.oauth.authUrl,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    client_id: twitchConfig.clientId,
-                    scopes: twitchConfig.scopes.join(" ")
-                })
-            }
-        );
+    async function authenticateBroadcaster(authRequest) {
+        let token;
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error("OAuth Error:", data.message);
+        switch (authRequest.type) {
+            case "device":
+                token = await authService.pollDeviceToken(authRequest.deviceCode);
+                break;
+            case "authorization_code":
+                token = await authService.exchangeCodeForToken(authRequest.code);
+                break;
+            
+            default:
+                throw new Error(`Unsupported authentication type: ${authRequest.type}`)
         }
 
+        const twitchUser = await fetchTwitchUser(token.accessToken);
+
         return {
-            deviceCode: data.device_code,
-            userCode: data.user_code,
-            verificationUrl: data.verification_url,
-            expiresIn: data.expires_in,
-            interval: data.interval
+            twitchUser,
+            token
         };
     }
-
-    async function pollDeviceToken(deviceCode) {
-        const response = await fetch(
-            twitchConfig.tokenUrl,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: new URLSearchParams({
-                    client_id: twitchConfig.clientId,
-                    device_code: deviceCode,
-                    grant_type: "urn:ietf:params:oauth:grant-type:device_code"
-                })
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            if (data.message === "authorization_pending") {
-                return null;
-            }
-
-            throw new Error(data.message);
-        }
-
-        return {
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token,
-            expiresIn: data.expires_in
-        }
-    }
-
-    async function exchangeCodeForToken(code) {
-        const response = await fetch(twitchConfig.oauth.tokenUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-            client_id: twitchConfig.clientId,
-            client_secret: twitchConfig.clientSecret,
-            code,
-            grant_type: "authorization_code",
-            redirect_uri: twitchConfig.redirectUri
-            })
-        });
-        const data = await response.json();
     
-        if (!response.ok) {
-            console.error(data)
-            throw new Error("Failed to exchange code for token:", JSON.stringify(data));
-        }
-        
-        return {
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token,
-            expiresIn: data.expires_in
-        }
-    }
-
-    function getLoginUrl() {
-        const params = new URLSearchParams ({
-            client_id: twitchConfig.clientId,
-            redirect_uri: twitchConfig.redirectUri,
-            response_type: 'code',
-            scope: twitchConfig.scopes.join(' ')
-        });
-
-        return `${twitchConfig.oauth.authUrl}?${params}`;
-    }
-
     async function fetchTwitchUser(accessToken) {
+        const clientId = await services.settingService.get("twitch.clientId");
+
         const response = await fetch(
             `${twitchConfig.helix.baseUrl}/users`,
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
-                    'Client-Id': twitchConfig.clientId
+                    'Client-Id': clientId
                 }
             }
         );
@@ -131,28 +56,21 @@ function buildTwitchAuthService() {
         };
     }
 
-    async function authenticateBroadcaster({deviceCode, code}) {
-        let token;
-
-        if (code) {
-            token = await exchangeCodeForToken(code);
-        } else if (deviceCode) {
-            token = await pollDeviceToken(deviceCode);
-        }
-
-        if (!token) {
-            return null;
-        }
-
-        const twitchUser = await fetchTwitchUser(token.accessToken);
-
-        return {
-            twitchUser,
-            token
-        };
-    }
-
     async function refreshAccessToken(refreshToken) {
+        const clientType = await services.settingService.get("twitch.clientType")
+        const clientId = await services.settingService.get("twitch.clientId");
+
+        const params = new URLSearchParams({
+                    client_id: clientId,
+                    grant_type: 'refresh_token',
+                    refresh_token: refreshToken
+                });
+        
+                if (clientType === AUTH_CLIENT_TYPES.PRIVATE) {
+            params.append("client_secret", await services.settingService.get("twitch.clientSecret"));
+        }
+
+
         const response = await fetch(
             twitchConfig.oauth.tokenUrl,
             {
@@ -160,24 +78,21 @@ function buildTwitchAuthService() {
                 headers: {
                     "Content-Type": 'application/x-www-form-urlencoded'
                 },
-                body: new URLSearchParams({
-                    client_id: twitchConfig.clientId,
-                    client_secret: twitchConfig.clientSecret,
-                    grant_type: 'refresh_token',
-                    refresh_token: refreshToken
-                })
+                body: params
             }
         );
 
-        const body = await response.json();
-
-        if (!response.ok) {
-            throw new Error(`Token refresh failed: ${body.message ?? JSON.stringify(body)}`);
-        }
-
         const tokenData = await response.json();
 
+        if (!response.ok) {
+                return {
+                    success: false,
+                    reason: tokenData.message
+                };
+        }
+
         return {
+            success: true,
             accessToken: tokenData.access_token,
             refreshToken: tokenData.refresh_token,
             expiresIn: tokenData.expires_in
@@ -185,14 +100,8 @@ function buildTwitchAuthService() {
     }
 
     return  {
-        startDeviceAuth,
-        pollDeviceToken,
-        getLoginUrl,
-        exchangeCodeForToken,
         fetchTwitchUser,
         authenticateBroadcaster,
-        refreshAccessToken
+        refreshAccessToken,
     };
 }
-
-export { buildTwitchAuthService }

@@ -1,25 +1,20 @@
-export function buildTwitchStatusService({ twitchUserRepository }) {
-    async function getStatus() {
-        const broadcaster = await twitchUserRepository.getBroadcaster();
+// May be redundant...
+export async function getTwitchStatus(db) {
+    const broadcaster = await db.twitchUserRepository.getBroadcaster();
 
-        if (!broadcaster) {
-            return {
-                authentication: false
-            };
-        }
-
+    if (!broadcaster) {
         return {
-            authentication: true,
-            broadcaster: {
-                broadcaster: {
-                    twitchId: broadcaster.twitch_id,
-                    displayName: broadcaster.display_name
-                }
-            }
-        }
+            authentication: false
+        };
     }
 
     return {
-        getStatus
-    };
+        authentication: true,
+        broadcaster: {
+            broadcaster: {
+                twitchId: broadcaster.twitch_id,
+                displayName: broadcaster.display_name
+            }
+        }
+    }
 }

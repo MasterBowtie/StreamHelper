@@ -1,3 +1,5 @@
+import { EVENTS } from "../../server/constants.js";
+
 export function buildSubscriptionHandler({subscriptionRepository, twitchUserService}) {
     async function handler(event, eventId) {
         twitchUserService(event)

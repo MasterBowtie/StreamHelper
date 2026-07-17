@@ -25,7 +25,7 @@ export class SettingRepository {
         return result.affectedRows === 1;
     }
 
-    async getSetting(settingKey) {
+    async findByKey(settingKey) {
         const [rows] = await this.pool.execute(
             `SELECT setting_value, setting_type, description
             FROM settings
@@ -44,7 +44,7 @@ export class SettingRepository {
         return rows;
     }
 
-    async removeSetting(settingKey) {
+    async removeByKey(settingKey) {
         const result = await this.pool.execute(
             `DELETE FROM settings 
             WHERE setting_key = ?`,

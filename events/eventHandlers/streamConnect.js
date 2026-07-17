@@ -1,4 +1,4 @@
-import { EVENTS } from "../events.js";
+import { EVENTS } from "../../server/constants.js";
 
 function buildStreamOnlineHandler({twitch, db, websocket}) {
     async function handler(event) {
@@ -8,7 +8,7 @@ function buildStreamOnlineHandler({twitch, db, websocket}) {
         if (!activeStream) {
             await db.streamRepository.startStream(new Date(event.started_at));
             console.log("Hello! Stream is online!");
-            await websocket.notifier.publish(EVENTS.ONLINE);
+            await websocket.notifier.notify(EVENTS.ONLINE);
         } else {
             // FIXME
             // Check twitch when last stream was...
@@ -31,7 +31,7 @@ function buildStreamOfflineHandler({db, websocket}) {
             const streamEnd = new Date(stream.end_at);
             console.log(`Stream duration: ${streamEnd - streamStart}`);
 
-            await websocket.notifier.publish(EVENTS.OFFLINE, {
+            await websocket.notifier.notify(EVENTS.OFFLINE, {
                 duration: streamEnd - streamStart
             });
         } else {

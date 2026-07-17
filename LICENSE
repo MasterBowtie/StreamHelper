@@ -1,4 +1,4 @@
-STREAM HELPER SERVER LICENCE
+STREAM HELPER LICENSE
 =======================================================================
 
 Version 1.0
@@ -13,7 +13,7 @@ This work is licensed under the Creative Commons
 Attribution-NonCommercial-ShareAlike 4.0 International Public License
 (CC BY-NC-SA 4.0), the full text of which is included below, subject
 to the following additional terms and conditions. These additional
-terms supplement the CC BY-NC-SA 4.0 licence and take precedence
+terms supplement the CC BY-NC-SA 4.0 license and take precedence
 where they conflict.
 
 By exercising any rights to the Licensed Material, You accept and
@@ -26,13 +26,13 @@ CC BY-NC-SA 4.0 Public License.
    You may use this tool for any lawful purpose, including for
    processing images as part of a commercial project, provided that
    such use complies with the restrictions set out below and the
-   terms of the CC BY-NC-SA 4.0 licence.
+   terms of the CC BY-NC-SA 4.0 license.
 
 
 2. RESTRICTIONS
 
    In addition to the restrictions set out in the CC BY-NC-SA 4.0
-   licence, the following restrictions apply:
+   license, the following restrictions apply:
 
    a. NO REPACKAGING OR RESALE
       You may not repackage, redistribute, sublicense, or sell
@@ -58,14 +58,14 @@ CC BY-NC-SA 4.0 Public License.
 3. ATTRIBUTION
 
    a. In addition to the attribution requirements set out in
-      Section 3(a) of the CC BY-NC-SA 4.0 licence, You must
-      include the name "StreamHelper-Server" in any attribution notice.
+      Section 3(a) of the CC BY-NC-SA 4.0 license, You must
+      include the name "StreamHelper" in any attribution notice.
 
    b. Any fork, derivative work, variation, improvement, or
       subsequent release of this tool must retain the
-      "StreamHelper-Server" name in a reasonably prominent position.
+      "StreamHelper" name in a reasonably prominent position.
 
-   c. You may interchange "Stream Helper Server" for "StreamHelper-Server" as
+   c. You may interchange "Stream Helper" for "StreamHelper" as
       needed.
 
 
@@ -73,16 +73,16 @@ CC BY-NC-SA 4.0 Public License.
 
    Any variations, improvements, derivative works, or modified
    versions of this tool that are publicly released must be
-   distributed under this same licence, including these Additional
-   Terms, or a licence with substantially equivalent terms.
+   distributed under this same license, including these Additional
+   Terms, or a license with substantially equivalent terms.
 
 5. DISCLAIMER
 
-   This licence is provided on an "as-is" basis. The Licensor makes
+   This license is provided on an "as-is" basis. The Licensor makes
    no representations or warranties regarding the enforceability or
    legal sufficiency of these terms. You are encouraged to seek
    independent legal advice if you have questions about the scope
-   or applicability of this licence.
+   or applicability of this license.
 
 6. CONTRIBUTIONS
 
@@ -90,7 +90,7 @@ CC BY-NC-SA 4.0 Public License.
    documentation, or images) to this repository, You agree that:
 
    a. Your contribution is provided under the terms of this
-      Stream Helper Server Licence.
+      Stream Helper License.
 
    b. You grant the Licensor (MasterBowtie) a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free,
