@@ -53,31 +53,13 @@ app.use((req, res, next) => {
 
 
 //Serve static assets
-if (!DEBUG) {
-  app.use(express.static('static'));
-} else {
-  app.use((req, res, next) => {
-    // console.log(req.url.includes("."));
-    if (req.url.includes(".")) {
-      // let lookup = decodeURI(`${process.env.ASSET_URL}${req.url}`);
-      // let file = lookup.substring(1, lookup.length);
-      
-      // fs.access(file, fs.constants.R_OK, function (err) {
-      //   console.log(err ? `${lookup} doesn't exist` : `${lookup} ' is there`);
-      // });
-      // console.log("Redirect")
-      res.redirect(`${process.env.ASSET_URL}${req.url}`)
-    } else {
-      next();
-    }
-  });
-}
-
+app.use("/assets", express.static('static'));
 
 app.use('/', components.routers.mainRouter);
+app.use("/twitch", components.routers.twitchRouter);
+app.use('/settings', components.routers.settingsRouter);
 // app.use("/house", buildHouseRouter(house_repository));
 
-// app.use("/twitch", routers.twitchRouter);
 
 // await initialize({db, events});
 

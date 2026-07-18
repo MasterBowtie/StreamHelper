@@ -10,20 +10,27 @@ function buildSettingsService({ db, encryptionService }) {
 
     async function ensureDefaults() {
         for (const setting of SETTINGS_DEFAULTS) {
-            const existing = await db.settingRepository.findByKey(setting.key);
+            const {success, data, message} = await db.settingRepository.findByKey(setting.key);
         
-            if (!existing) {
+            if (success && !data) {
                 await db.settingRepository.createSetting(setting);
             }
         }
     }
 
     async function load() {
-        const settings = await db.settingRepository.getAllSettings();
+        const {success, data, message} = await db.settingRepository.getAllSettings();
+
+        if (!success) {
+            return {
+                success,
+                message
+            };
+        }
 
         cache.clear();
 
-        for (const setting of settings) {
+        for (const setting of data) {
             cache.set(setting.setting_key, 
                 {
                     settingValue: setting.setting_value,
@@ -33,39 +40,64 @@ function buildSettingsService({ db, encryptionService }) {
                 }
             );
         }
+
+        return {
+            success: true
+        }
     }
 
     async function get(key) {
         const setting = cache.get(key);
 
         if (!setting) {
-            return null;
+            return {
+                success: false,
+                message: "There is no setting with that key"
+            };
         }
         switch (setting.settingType) {
 
             case SETTING_TYPES.NUMBER: 
-                return Number(setting.settingValue);
+                return {
+                    success: true,
+                    data: Number(setting.settingValue)
+                };
 
             case SETTING_TYPES.BOOLEAN:
-                return setting.settingValue === "true";
+                return {
+                    success: true,
+                    data: setting.settingValue === "true"
+                };
 
             case SETTING_TYPES.JSON:
-                return JSON.parse(setting.settingValue);
+                return {
+                    success: true,
+                    data: JSON.parse(setting.settingValue)
+                };
             
             case SETTING_TYPES.PASSWORD:
-                return encryptionService.decrypt(setting.settingValue);
+                return {
+                    success: true,
+                    data: encryptionService.decrypt(setting.settingValue)
+                };
             
             case SETTING_TYPES.STRING:
             default:
-                return setting.settingValue;
+                return {
+                    success: true,
+                    data: setting.settingValue
+                };
         }
     }
 
-    async function set({key, value, type, description}) {
+    async function set({key, value}) {
         const setting = cache.get(key);
 
         if (!setting) {
-            throw new Error(`Unknown setting: ${key}`)
+            return {
+                success: false,
+                message: "Unknown setting"
+            }
         }
 
         let storedValue;
@@ -93,8 +125,10 @@ function buildSettingsService({ db, encryptionService }) {
                 break;
         }
 
-        await db.settingRepository.updateSetting({key, value: storedValue, type, description})
+        const dbData = await db.settingRepository.updateSetting({key, value: storedValue})
         setting.value = storedValue;
+
+        return dbData;
     }
 
     return {

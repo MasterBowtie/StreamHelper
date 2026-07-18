@@ -10,7 +10,10 @@ export class EventRepository {
             [eventType, twitchId, streamId, occurredAt, metadata]
         );
 
-        return result.insertId;
+        return {
+            success: true,
+            data: result.insertId
+        };
     }
 
     async getEventById(id) {
@@ -18,7 +21,10 @@ export class EventRepository {
         WHERE event_id = ?`,
         [id]);
 
-        return rows[0] ?? null;
+        return {
+            success: true,
+            data: rows[0] ?? null
+        };
     }
     
     async getEvents({eventType, streamId, limit=100, startAt, endAt}={}) {
@@ -47,20 +53,29 @@ export class EventRepository {
         }
 
         if (conditions.length === 0) {
-            throw new Error("getEvents(): No conditions were given");
+            return {
+                success: false,
+                message: "getEvents(): No conditions were given"
+            }
         }
 
         query += conditions.join(" AND ");
         query += " ORDER BY occurred_at DESC";
 
         if (!Number.isInteger(limit) || limit <= 0) {
-            throw new Error("getEvents(): limit must be a positive integer");
+            return {
+                success: false,
+                message:"getEvents(): limit must be a positive integer"
+            }
         }
         query += " LIMIT ?";
         values.push(Number(limit));
 
 
         const [rows] = await this.pool.execute(query, values);
-        return rows;
+        return {
+            success: true,
+            data: rows
+        };
     }
 }

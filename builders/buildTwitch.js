@@ -4,7 +4,6 @@ import { buildTokenManager } from "../twitch/tokenManager.js";
 import { buildPublicTwitchAuthService } from "../twitch/publicTwitchAuthService.js";
 import { buildPrivateTwitchAuthService } from "../twitch/privateTwitchAuthService.js";
 import { AUTH_CLIENT_TYPES } from "../server/constants.js"
-import { config } from "dotenv";
 
 export async function buildTwitch({ db, services }) {
 
@@ -17,7 +16,14 @@ export async function buildTwitch({ db, services }) {
             connected: false
         }
     }
-    twitchState.clientType = await services.settingService.get("twitch.clientType");
+    const {success, data, message } = await services.settingService.get("twitch.clientType");
+
+    if (!success) {
+        twitchState.message = message;
+    }
+    // console.log("Build Twitch:", data);
+    twitchState.clientType = data;
+
 
     const authService = twitchState.clientType === AUTH_CLIENT_TYPES.PUBLIC ? buildPublicTwitchAuthService({services}) : buildPrivateTwitchAuthService({services});
 
@@ -26,6 +32,22 @@ export async function buildTwitch({ db, services }) {
     const tokenManager = buildTokenManager({ db, twitchAuthService , services});
 
     const twitchApiClient = buildTwitchApiClient({ tokenManager });
+
+    async function onSettingChange(key) {
+        switch (key) {
+            case 'twitch.clientId':
+            case 'twitch.clientSecret':
+            case 'twitch.clientType':
+
+                twitchState.authenticated = false;
+                twitchState.broadcaster = null;
+                twitchState.eventSub.connected = false;
+
+                break;
+            default:
+                break;
+        }
+    }
 
     function getStatus() {
         return {...twitchState};
@@ -64,6 +86,7 @@ export async function buildTwitch({ db, services }) {
     return {
         initialize,
         getStatus,
+        onSettingChange,
         setEventSubStatus,
         twitchAuthService,
         twitchApiClient,

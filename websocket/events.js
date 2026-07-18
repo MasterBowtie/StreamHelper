@@ -7,6 +7,7 @@ export const EVENTS = {
         RAID: "channel.raid",
     },
     APP: {
+        TWITCH_STATUS_CHANGE: "twitch.status.changed",
         CONNECTED: "app.connected",
         SETTINGS_UPDATED: "app.settings.updated",
         AUTH_REQUIRED: "app.auth.required",

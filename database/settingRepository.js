@@ -10,19 +10,35 @@ export class SettingRepository {
             VALUES (?, ?, ?, ?)`, 
             [key, value, type, description]);
 
-        return result.insertId;
+        return {
+            success: true,
+            data: result.insertId
+        };
     }
 
     async updateSetting({key, value, type, description}) {
-        const result = await this.pool.execute(
-            `UPDATE settings SET
-                setting_value = ?,
-                setting_type = ?,
-                description = ?
-                WHERE setting_key = ? 
-            `, [value, type, description, key])
+        let query = `UPDATE settings SET `
+        const values = [value];
+        const updates = ['setting_value = ?'];
 
-        return result.affectedRows === 1;
+        if (type !== undefined) {
+            values.push(type);
+            updates.push('setting_type = ?');
+        }
+        if (description !== undefined) {
+            values.push(description);
+            updates.push('description = ?');
+        }
+
+        query += updates.join(", ");
+        query += " WHERE setting_key = ?"
+        values.push(key);
+        const result = await this.pool.execute(query, values);
+
+        return {
+            success: true,
+            data: result.affectedRows === 1
+        };
     }
 
     async findByKey(settingKey) {
@@ -33,7 +49,10 @@ export class SettingRepository {
             [settingKey]
         );
 
-        return rows[0] ?? null;
+        return {
+            success: true,
+            data: rows[0] ?? null
+        };
     }
 
     async getAllSettings() {
@@ -41,7 +60,10 @@ export class SettingRepository {
             `SELECT setting_key, setting_value, setting_type, description
             FROM settings`);
     
-        return rows;
+        return {
+            data: rows,
+            success: true
+        };
     }
 
     async removeByKey(settingKey) {
@@ -51,6 +73,9 @@ export class SettingRepository {
             [settingKey]
         );
 
-        return result.affectedRows === 1;
+        return {
+            success: true,
+            data: result.affectedRows === 1
+        };
     }
 }

@@ -9,6 +9,7 @@ import { SettingRepository } from "../database/settingRepository.js";
 
 export async function buildRepositories() {
     const db = buildDatabase();
+    // TODO: update repository returns to {success: bool, message? data?}
     const settingRepository = new SettingRepository(db.pool);
     const twitchUserRepository = new TwitchUserRepository(db.pool);
     const streamRepository = new StreamRepository(db.pool);

@@ -24,7 +24,7 @@ const SETTINGS_DEFAULTS = [
     },
     {
         key: 'twitch.clientId',
-        value: 'mxrc75kg0ydkt2wo4lyhejgpbo9s3d',
+        value: 'dv469c3zeve91zn4krv8hoccz83b0w',
         type: "string",
         description: "Twitch application client ID"
     }

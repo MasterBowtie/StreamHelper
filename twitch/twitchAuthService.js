@@ -5,12 +5,11 @@ export function buildTwitchAuthService({authService, services}) {
 
     async function authenticateBroadcaster(authRequest) {
         let token;
-
         switch (authRequest.type) {
-            case "device":
+            case "public":
                 token = await authService.pollDeviceToken(authRequest.deviceCode);
                 break;
-            case "authorization_code":
+            case "private":
                 token = await authService.exchangeCodeForToken(authRequest.code);
                 break;
             
@@ -66,7 +65,7 @@ export function buildTwitchAuthService({authService, services}) {
                     refresh_token: refreshToken
                 });
         
-                if (clientType === AUTH_CLIENT_TYPES.PRIVATE) {
+        if (clientType === AUTH_CLIENT_TYPES.PRIVATE) {
             params.append("client_secret", await services.settingService.get("twitch.clientSecret"));
         }
 
@@ -85,6 +84,7 @@ export function buildTwitchAuthService({authService, services}) {
         const tokenData = await response.json();
 
         if (!response.ok) {
+                console.log("refreshAccessToken", tokenData)
                 return {
                     success: false,
                     reason: tokenData.message
