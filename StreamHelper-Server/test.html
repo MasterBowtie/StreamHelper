@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+const socket = new WebSocket("ws://localhost:3141");
+
+socket.onopen = () => console.log("Connected");
+socket.onmessage = e => console.log(e.data);
+socket.onclose = () => console.log("Disconnected");
+socket.onerror = console.error;
+</script>
+</body>
+</html>

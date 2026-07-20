@@ -1,14 +1,18 @@
 import { Router } from "express";
 
-function buildAuthRouter({twitch, db, events}) {
+function buildAuthRouter({twitch, db, events, services}) {
     const router = Router();
 
-    // Redirect to Twitch Login
-    router.get('/login', (req, res) => {
-        const url = twitch.twitchAuthService.getLoginUrl();
 
-        res.redirect(url);
+    router.get('/connect', async (req, res) => {
+        const result = await twitch.connect();
+        res.json(result);
     });
+
+    router.get('/disconnect', async (req, res) => {
+        const result = await twitch.disconnect(events);
+        res.json(result);
+    })
 
     // Twitch Oauth callback
     router.get("/callback", async (req, res) => {

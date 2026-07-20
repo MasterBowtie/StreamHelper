@@ -8,14 +8,13 @@ export function buildWebsocket() {
         websocketServer
     });
 
-    async function initialize(server) {
-        websocketServer.start(server);
+    // async function initialize(server) {
+    //     websocketServer.start(server);
 
-        console.log("Websocket Initialized...");
-    }
+    //     console.log("Websocket Initialized...");
+    // }
 
     return {
-        initialize,
         websocketServer,
         notifier
     };

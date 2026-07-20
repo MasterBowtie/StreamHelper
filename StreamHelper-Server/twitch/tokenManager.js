@@ -2,7 +2,9 @@ const REFRESH_BUFFER_MS = 5 * 60 * 1000;
 
 export function buildTokenManager({db, twitchAuthService}) {
     
-    async function getValidAccessToken(broadcaster) {
+    async function getValidAccessToken() {
+        const broadcaster = await db.twitchUserRepository.getBroadcaster();
+
         if (!broadcaster) {
             return {
                 success: false,

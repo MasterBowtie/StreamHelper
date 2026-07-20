@@ -1,6 +1,12 @@
+import { twitchConfig } from "./twitchConfig.js";
+
 export function buildPublicTwitchAuthService({services}) {
     async function startDeviceAuth() {
         const clientId = await services.settingService.get("twitch.clientId");
+
+        if (!clientId.success) {
+            return clientId;
+        }
 
         const response = await fetch(twitchConfig.oauth.authUrl,
             {
@@ -9,7 +15,7 @@ export function buildPublicTwitchAuthService({services}) {
                     "Content-Type": 'application/x-www-form-urlencoded'
                 },
                 body: new URLSearchParams({
-                    client_id: clientId,
+                    client_id: clientId.data,
                     scopes: twitchConfig.scopes.join(" ")
                 })
             }
@@ -18,10 +24,14 @@ export function buildPublicTwitchAuthService({services}) {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error("OAuth Error:", data.message);
+            return {
+                success: false,
+                message: data.message
+            };
         }
 
         return {
+            success: true,
             deviceCode: data.device_code,
             userCode: data.user_code,
             verificationUrl: data.verification_url,
@@ -33,15 +43,19 @@ export function buildPublicTwitchAuthService({services}) {
     async function pollDeviceToken(deviceCode) {
         const clientId = await services.settingService.get("twitch.clientId");
 
+        if (!clientId.success) {
+            return clientId;
+        }
+
         const response = await fetch(
-            twitchConfig.tokenUrl,
+            twitchConfig.oauth.tokenUrl,
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
                 body: new URLSearchParams({
-                    client_id: clientId,
+                    client_id: clientId.data,
                     device_code: deviceCode,
                     grant_type: "urn:ietf:params:oauth:grant-type:device_code"
                 })
@@ -52,21 +66,48 @@ export function buildPublicTwitchAuthService({services}) {
 
         if (!response.ok) {
             if (data.message === "authorization_pending") {
-                return null;
+                return {
+                    success: "pending"
+                };
             }
 
-            throw new Error(data.message);
+            return {
+                success: false,
+                message: data.message,
+            };
         }
 
         return {
+            success: true,
             accessToken: data.access_token,
             refreshToken: data.refresh_token,
             expiresIn: data.expires_in
         }
     }
 
+    async function awaitDeviceToken(deviceCode, interval) {
+        while(true) {
+            const result = await pollDeviceToken(deviceCode);
+
+            if (result.success === true) {
+                return result;
+            } else if (!result.success) {
+                return result;
+            }
+
+            await sleep(interval);
+        }
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => {
+            setTimeout(resolve, ms)
+        });
+    }
+
     return {
         startDeviceAuth,
-        pollDeviceToken
+        pollDeviceToken,
+        awaitDeviceToken,
     }
 }

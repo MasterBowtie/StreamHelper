@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-export function buildMainRouter({twitch}) {
+export function buildMainRouter({twitch, websocket}) {
     const router = Router();
 
     router.get("/setup-complete", (req, res) =>{
@@ -9,7 +9,11 @@ export function buildMainRouter({twitch}) {
 
     router.get("/status", (req, res) => {
         res.send(twitch.getStatus())
-    }) 
+    })
+    
+    router.get("/test", (req, res) => {
+        websocket.notifier.notify("test");
+    })
 
     return router;
 }

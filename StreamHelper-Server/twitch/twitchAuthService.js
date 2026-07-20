@@ -1,16 +1,16 @@
 import { twitchConfig } from "./twitchConfig.js";
 import { AUTH_CLIENT_TYPES } from "../server/constants.js"
 
-export function buildTwitchAuthService({authService, services}) {
+export function buildTwitchAuthService({publicTwitchAuth, privateTwitchAuth, services}) {
 
     async function authenticateBroadcaster(authRequest) {
         let token;
         switch (authRequest.type) {
             case "public":
-                token = await authService.pollDeviceToken(authRequest.deviceCode);
+                token = await publicTwitchAuth.pollDeviceToken(authRequest.deviceCode);
                 break;
             case "private":
-                token = await authService.exchangeCodeForToken(authRequest.code);
+                token = await privateTwitchAuth.exchangeCodeForToken(authRequest.code);
                 break;
             
             default:

@@ -29,7 +29,6 @@ await components.db.initialize()
 components.services = buildServices(components);
 await components.services.initialize();
 components.websocket = buildWebsocket();
-await components.websocket.initialize(server);
 components.twitch = await buildTwitch(components);
 const {initialized, reason, broadcaster} = await components.twitch.initialize();
 components.events = buildEvents(components);
@@ -65,4 +64,5 @@ app.use('/settings', components.routers.settingsRouter);
 
 server.listen(process.env.S_PORT || 3141, () => {
   console.log(`Stream Helper-Server listening on port ${process.env.S_PORT || 3141}...`);
+  components.websocket.websocketServer.start(server);
 });

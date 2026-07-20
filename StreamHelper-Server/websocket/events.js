@@ -12,9 +12,10 @@ export const EVENTS = {
         SETTINGS_UPDATED: "app.settings.updated",
         AUTH_REQUIRED: "app.auth.required",
         READY: "app.ready",
-        ERRORS: {
-            CLIENT_ID_ERROR: "app.client.id.invalid",
-        }
-
-    }
+        TWITCH_CONNECT: "twitch.connect",
+    },
+    ERRORS: {
+        CLIENT_ID_ERROR: "error.client.id.invalid",
+        CLIENT_INVALID: "error.client.invalid",
+    },
 }

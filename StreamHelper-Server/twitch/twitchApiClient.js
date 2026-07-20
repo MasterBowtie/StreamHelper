@@ -6,6 +6,11 @@ function buildTwitchApiClient({
     async function request(endpoint, options = {}) {
         const accessToken = await tokenManager.getValidAccessToken();
 
+        if (!accessToken) {
+            console.error("Error:", accessToken.message);
+            return {success: false, message: "No Access Token"};
+        }
+
         const response = await fetch(`${twitchConfig.helix.baseUrl}${endpoint}`,
             {
                 ...options,
@@ -18,13 +23,14 @@ function buildTwitchApiClient({
             }
         );
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const error = await response.json();
-            console.error("Twitch API Error:", error)
-            throw new Error(`Twitch API Error: ${response.status} ${JSON.stringify(error)}`);
+            console.error("Twitch API Error:", data)
+            // throw new Error(`Twitch API Error: ${response.status} ${JSON.stringify(error)}`);
         }
 
-        return await response.json();
+        return data;
     }
 
     async function getCurrentUser() {

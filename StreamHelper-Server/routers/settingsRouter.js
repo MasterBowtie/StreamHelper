@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { EVENTS } from "../websocket/events";
+import { EVENTS } from "../websocket/events.js";
 
 export function buildSettingsRouter(components) {
     const router = Router();
