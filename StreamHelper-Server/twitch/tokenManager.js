@@ -8,19 +8,30 @@ export function buildTokenManager({db, twitchAuthService}) {
         if (!broadcaster) {
             return {
                 success: false,
-                reason: "No broadcaster configured"
+                message: "No broadcaster configured"
             };
+        } else if (!broadcaster.refresh_token) {
+            return {
+                success: false,
+                message: "No refresh token"
+            }
         }
 
         const expiresAt = new Date(broadcaster.expires_at);
         
         if (expiresAt.getTime() > Date.now() + REFRESH_BUFFER_MS) {
-            return broadcaster.access_token;
+            return {
+                success: true,
+                accessToken: broadcaster.access_token
+            };
         }
+
+        console.log("Token Manager:", broadcaster)
 
         const token = await twitchAuthService.refreshAccessToken(broadcaster.refresh_token);
 
         if (!token.success) {
+            console.log("Token Manager Error:", token);
             return token;
         }
         
@@ -30,7 +41,10 @@ export function buildTokenManager({db, twitchAuthService}) {
             expiresIn: token.expiresIn
         });
 
-        return token;
+        return {
+            success: true,
+            ...token
+        }
     }
 
     return {getValidAccessToken};

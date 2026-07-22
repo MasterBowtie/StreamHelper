@@ -3,26 +3,26 @@ export function getSubscriptions(broadcaster) {
         {
             type: "stream.online",
             version: "1",
-            condition: { broadcaster_user_id: broadcaster.twitchId }
+            condition: { broadcaster_user_id: broadcaster.twitch_id }
         },
         {
             type: "stream.offline",
             version: "1",
-            condition: { broadcaster_user_id: broadcaster.twitchId }
+            condition: { broadcaster_user_id: broadcaster.twitch_id }
         },
         {
             type: "channel.follow",
             version: "2",
             condition: {
-                broadcaster_user_id: broadcaster.twitchId,
-                moderator_user_id: broadcaster.twitchId
+                broadcaster_user_id: broadcaster.twitch_id,
+                moderator_user_id: broadcaster.twitch_id
             }
         },
         {
             type: "channel.subscribe",
             version: "1",
             condition: {
-                broadcaster_user_id: broadcaster.twitchId
+                broadcaster_user_id: broadcaster.twitch_id
             },
         }
     ]

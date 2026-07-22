@@ -12,25 +12,31 @@ export function buildEvents({twitch, db, services, websocket}) {
 
     const eventDispatcher = buildEventDispatcher({eventLogger});
     
-    const eventSubService = buildEventSubService({twitch, eventDispatcher});
+    const eventSubService = buildEventSubService({twitch, websocket, eventDispatcher});
     
-    const handlers = buildHandlers({db, twitch, websocket, services, eventDispatcher})
+    
+    async function initialize() {
+        const broadcaster = await db.twitchUserRepository.getBroadcaster();
 
-    async function initialize(broadcaster) {
         if (!broadcaster) {
-
             twitch.setEventSubStatus({
                 connected: false,
-                reason: "No broadcaster"
+                message: "No broadcaster"
             })
             return;
         }
+        
+        // console.log("Event Init:", broadcaster);
 
         await eventSubService.start();
 
         await eventSubService.registerSubscriptions(broadcaster);
-
+        
+        await buildHandlers({db, twitch, websocket, services, eventDispatcher})
+        
         twitch.setEventSubStatus({connected: true});
+
+        console.log("EventSub Initialized...");
     }
 
     return {

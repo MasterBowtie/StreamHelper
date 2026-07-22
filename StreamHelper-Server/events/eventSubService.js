@@ -3,7 +3,8 @@ import { getSubscriptions } from "./subscriptions.js";
 
 function buildEventSubService({
     twitch,
-    eventDispatcher
+    eventDispatcher,
+    websocket,
 }) {
     let socket = null;
     let sessionId = null;
@@ -81,12 +82,14 @@ function buildEventSubService({
         await readyPromise;
         const subscriptions = getSubscriptions(broadcaster);
 
-        console.log("Broadcaster:",broadcaster)
-        console.log("Subscription:", JSON.stringify(subscriptions, null, 2))
-
         for (const sub of subscriptions) {
-            await twitch.twitchApiClient.createEventSubSubscription({...sub, sessionId});
-            console.log("Registered:", sub.type);
+            const data = await twitch.twitchApiClient.createEventSubSubscription({...sub, sessionId});
+            if (data.success === false) {
+                return data;
+            }
+
+            console.log("EventSub Subscribed:", sub.type);
+            websocket.notifier.notify("app.eventsub.subscribed", sub.type);
         }
     }
 

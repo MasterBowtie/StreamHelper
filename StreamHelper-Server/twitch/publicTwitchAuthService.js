@@ -1,6 +1,6 @@
 import { twitchConfig } from "./twitchConfig.js";
 
-export function buildPublicTwitchAuthService({services}) {
+export function buildPublicTwitchAuthService({db, services}) {
     async function startDeviceAuth() {
         const clientId = await services.settingService.get("twitch.clientId");
 
@@ -91,7 +91,7 @@ export function buildPublicTwitchAuthService({services}) {
 
             if (result.success === true) {
                 return result;
-            } else if (!result.success) {
+            } else if (result.success === false) {
                 return result;
             }
 

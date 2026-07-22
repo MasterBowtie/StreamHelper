@@ -6,10 +6,6 @@ export function buildMainRouter({twitch, websocket}) {
     router.get("/setup-complete", (req, res) =>{
         res.send("Twitch setup complete. You may close this window")
     })
-
-    router.get("/status", (req, res) => {
-        res.send(twitch.getStatus())
-    })
     
     router.get("/test", (req, res) => {
         websocket.notifier.notify("test");

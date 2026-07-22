@@ -59,13 +59,21 @@ export function buildTwitchAuthService({publicTwitchAuth, privateTwitchAuth, ser
         const clientType = await services.settingService.get("twitch.clientType")
         const clientId = await services.settingService.get("twitch.clientId");
 
+        if (clientType.success === false) {
+            console.log("Twitch Auth Error:", clientType.message);
+            return clientType;
+        } else if (clientId.success === false) {
+            console.log("Twitch Auth Error:", clientId.message);
+            return clientId;
+        }
+
         const params = new URLSearchParams({
-                    client_id: clientId,
+                    client_id: clientId.data,
                     grant_type: 'refresh_token',
                     refresh_token: refreshToken
                 });
         
-        if (clientType === AUTH_CLIENT_TYPES.PRIVATE) {
+        if (clientType.data === AUTH_CLIENT_TYPES.PRIVATE) {
             params.append("client_secret", await services.settingService.get("twitch.clientSecret"));
         }
 
@@ -84,10 +92,10 @@ export function buildTwitchAuthService({publicTwitchAuth, privateTwitchAuth, ser
         const tokenData = await response.json();
 
         if (!response.ok) {
-                console.log("refreshAccessToken", tokenData)
+                // console.log("refreshAccessToken", tokenData)
                 return {
                     success: false,
-                    reason: tokenData.message
+                    message: tokenData.message
                 };
         }
 

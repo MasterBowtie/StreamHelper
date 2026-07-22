@@ -30,19 +30,14 @@ components.services = buildServices(components);
 await components.services.initialize();
 components.websocket = buildWebsocket();
 components.twitch = await buildTwitch(components);
-const {initialized, reason, broadcaster} = await components.twitch.initialize();
-components.events = buildEvents(components);
+const data = await components.twitch.initialize();
+components.events = await buildEvents(components);
 
-if (initialized) {
-  await components.events.initialize(broadcaster);
+if (data.initialized) {
+  await components.events.initialize(data.broadcaster);
 }
 
 components.routers = buildRouters(components);
-
-// Initialize Express and middlewares
-
-
-
 
 app.use(bodyParser.json());
 app.use((req, res, next) => {
@@ -58,9 +53,6 @@ app.use('/', components.routers.mainRouter);
 app.use("/twitch", components.routers.twitchRouter);
 app.use('/settings', components.routers.settingsRouter);
 // app.use("/house", buildHouseRouter(house_repository));
-
-
-// await initialize({db, events});
 
 server.listen(process.env.S_PORT || 3141, () => {
   console.log(`Stream Helper-Server listening on port ${process.env.S_PORT || 3141}...`);
