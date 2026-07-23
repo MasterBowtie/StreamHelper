@@ -13,7 +13,7 @@ function buildEventSubService({
 
     async function start() {
         if (socket) {
-            return;
+            return {success: false, message: "EventSub: Already Connected"};
         }
         readyPromise = new Promise((resolve)=> {
             resolveReady = resolve;
@@ -27,6 +27,8 @@ function buildEventSubService({
             'message',
             handleMessage
         );
+
+        return { success: true }
     }
 
     function stop() {
@@ -42,7 +44,7 @@ function buildEventSubService({
         readyPromise = null;
         resolveReady = null;
         
-        console.log("EventSub stopped")
+        return { success: true }
     }
 
     async function handleMessage(event) {
@@ -81,15 +83,21 @@ function buildEventSubService({
     async function registerSubscriptions(broadcaster) {
         await readyPromise;
         const subscriptions = getSubscriptions(broadcaster);
+        const result = [];
 
         for (const sub of subscriptions) {
             const data = await twitch.twitchApiClient.createEventSubSubscription({...sub, sessionId});
+            
             if (data.success === false) {
-                return data;
+                result.push(data)
             }
+        
+            result.push({success: true, data: sub.type});
+        }
 
-            console.log("EventSub Subscribed:", sub.type);
-            websocket.notifier.notify("app.eventsub.subscribed", sub.type);
+        return {
+            success: true,
+            data: result,
         }
     }
 

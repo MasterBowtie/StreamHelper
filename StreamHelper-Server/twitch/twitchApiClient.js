@@ -13,12 +13,11 @@ function buildTwitchApiClient({
             return {success: false, message: "No Access Token"};
         }
 
-        // FIXME twitchConfig Error
         const response = await fetch(`${twitchConfig.helix.baseUrl}${endpoint}`,
             {
                 ...options,
                 headers: {
-                    'Authorization': `Bearer ${token.accessToken}`,
+                    'Authorization': `Bearer ${token.data.accessToken}`,
                     'Client-Id': clientId.data,
                     'Content-Type': 'application.json',
                     ...options.headers

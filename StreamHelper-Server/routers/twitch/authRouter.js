@@ -1,32 +1,39 @@
 import { Router } from "express";
 
-function buildAuthRouter({twitch, db, events, services}) {
+function buildAuthRouter({twitch, db, events, services, websocket}) {
     const router = Router();
 
 
     router.get('/connect', async (req, res) => {
-        const result = await twitch.connect();
-        res.json(result);
+        const {success, data, message} = await twitch.connect();
+
+        if (success && data.mode === "private") {
+            return res.redirect(data.mode.url);
+        }
+
+        return res.json(data || message);
     });
 
     router.get('/disconnect', async (req, res) => {
         const result = await twitch.disconnect(events);
-        res.json(result);
+        return res.json(result);
     })
 
     // Twitch Oauth callback
     router.get("/callback", async (req, res) => {
         try {
-            const auth = await twitch.twitchAuthService.authenticateBroadcaster(req.query.code);
-        
+            const {success, data, message} = await twitch.twitchAuthService.authenticateBroadcaster(req.query.code);
+            if (!success) {
+                console.warn("OAuth Callback:", message);
+                return;
+            }
+
             await db.twitchUserRepository.updateBroadcaster({
-                twitchUser: auth.twitchUser,
-                token: auth.token
+                twitchUser: data.twitchUser,
+                token: data.token
             })
             
-            // Start EventSub AFTER DB is ready
-            await events.eventSubService.start()
-            await events.eventSubService.registerSubscriptions(auth.twitchUser);
+            await events.initialize();
 
             return res.redirect('/setup-complete')
         } catch (error) {

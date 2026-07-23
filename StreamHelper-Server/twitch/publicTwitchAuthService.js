@@ -26,17 +26,19 @@ export function buildPublicTwitchAuthService({db, services}) {
         if (!response.ok) {
             return {
                 success: false,
-                message: data.message
+                message: data.message,
             };
         }
 
         return {
             success: true,
-            deviceCode: data.device_code,
-            userCode: data.user_code,
-            verificationUrl: data.verification_url,
-            expiresIn: data.expires_in,
-            interval: data.interval
+            data: {
+                deviceCode: data.device_code,
+                userCode: data.user_code,
+                verificationUrl: data.verification_url,
+                expiresIn: data.expires_in,
+                interval: data.interval
+            }
         };
     }
 
@@ -79,20 +81,22 @@ export function buildPublicTwitchAuthService({db, services}) {
 
         return {
             success: true,
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token,
-            expiresIn: data.expires_in
+            data: {
+                accessToken: data.access_token,
+                refreshToken: data.refresh_token,
+                expiresIn: data.expires_in
+            }
         }
     }
 
     async function awaitDeviceToken(deviceCode, interval) {
         while(true) {
-            const result = await pollDeviceToken(deviceCode);
+            const {success, data, message} = await pollDeviceToken(deviceCode);
 
-            if (result.success === true) {
-                return result;
-            } else if (result.success === false) {
-                return result;
+            if (success && data) {
+                return {success, data};
+            } else if (success === false) {
+                return {success, message};
             }
 
             await sleep(interval);

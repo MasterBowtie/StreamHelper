@@ -56,11 +56,13 @@ export async function buildTwitch({ db, services, websocket }) {
 
     async function connect(events) {
         if (state.authenticated && state.eventSub.connected) {
+            console.warn("Twitch: Already authenticated");
             return {
                 success: true,
                 message: "Already authenticated."
             };
         } else if (state.authentication.polling) {
+            console.warn("Twitch: Authentication already in progress");
             return {
                 success: false,
                 message: "Authentication already in progress"
@@ -74,7 +76,7 @@ export async function buildTwitch({ db, services, websocket }) {
 
             return {
                 success: true,
-                mode: "public"
+                data: {mode: "public"}
             }
         } else if (state.clientType === "private") {
             const url = await privateTwitchAuth.getLoginUrl();
@@ -85,33 +87,35 @@ export async function buildTwitch({ db, services, websocket }) {
 
             return {
                 success: true,
-                mode: "private",
-                authorizationUrl: url
+                data: {
+                    mode: "private",
+                    authorizationUrl: url
+                }
             }
         }
         return {success: false, message: "It Broke!"}
     }
 
     async function runPolling(events) {
-        const data = await publicTwitchAuth.startDeviceAuth();
+        const result = await publicTwitchAuth.startDeviceAuth();
 
         
-        if (!data.success) {
-            websocket.notifier.notify("error.twitch.connect", {payload: data});
+        if (!result.success) {
+            websocket.notifier.notify("error.twitch.connect", {payload: result.data});
             return;
         }
-        websocket.notifier.notify(EVENTS.APP.AUTH_REQUIRED, data);
+        websocket.notifier.notify(EVENTS.APP.AUTH_REQUIRED, result.data);
 
-        const token = await publicTwitchAuth.awaitDeviceToken(data.deviceCode, 1000);
+        const token = await publicTwitchAuth.awaitDeviceToken(result.data.deviceCode, 1000);
 
         if (!token.success) {
             websocket.notifier.notify(EVENTS.ERRORS.CLIENT_INVALID);
+            return;
         }
 
         state.authentication.polling = 'false';
-        websocket.notifier.notify("auth.token", token);
 
-        const dbStatus = await db.twitchUserRepository.updateToken(token);
+        const dbStatus = await db.twitchUserRepository.updateToken(token.data);
 
         console.log("Polling: ", dbStatus);
     }

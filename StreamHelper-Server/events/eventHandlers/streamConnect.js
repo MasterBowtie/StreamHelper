@@ -10,12 +10,10 @@ function buildStreamOnlineHandler({twitch, db, websocket}) {
             console.log("Hello! Stream is online!");
             await websocket.notifier.notify(EVENTS.ONLINE);
         } else {
-            // FIXME
-            // Check twitch when last stream was...
+            // FIXME: Check twitch when last stream was...
             console.warn("There seems to already be a stream running")
             console.warn(activeStream);
         } 
-
     }
     return handler;
 }

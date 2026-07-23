@@ -2,6 +2,7 @@ import { buildEventDispatcher } from "../events/eventDispatcher.js";
 import { buildEventLogger } from "../events/eventLogger.js";
 import { buildEventSubService } from "../events/eventSubService.js";
 import { buildHandlers } from "./buildHandlers.js";
+import { EVENTS } from "../websocket/events.js";
 
 
 export function buildEvents({twitch, db, services, websocket}) {
@@ -25,18 +26,31 @@ export function buildEvents({twitch, db, services, websocket}) {
             })
             return;
         }
-        
-        // console.log("Event Init:", broadcaster);
 
         await eventSubService.start();
 
-        await eventSubService.registerSubscriptions(broadcaster);
+        const result = await eventSubService.registerSubscriptions(broadcaster);
+        if (!result.success) {
+            console.warn("EventSub Error:", result.message)
+            websocket.notifier.notify(EVENTS.ERRORS.EVENTSUB, result.message)
+            return;
+        }
+        
+        for (const sub of result.data) {
+            if (sub.success) {
+                console.log("EventSub Subscribed:", sub.data);
+                websocket.notifier.notify(EVENTS.APP.EVENTSUB.SUBSCRIBED, sub.data);
+            } else {
+                console.warn("EventSub Error:", sub.message);
+            }
+        }
         
         await buildHandlers({db, twitch, websocket, services, eventDispatcher})
         
         twitch.setEventSubStatus({connected: true});
 
         console.log("EventSub Initialized...");
+        websocket.notifier.notify(EVENTS.APP.EVENTSUB.READY);
     }
 
     return {

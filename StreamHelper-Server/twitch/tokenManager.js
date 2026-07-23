@@ -22,11 +22,11 @@ export function buildTokenManager({db, twitchAuthService}) {
         if (expiresAt.getTime() > Date.now() + REFRESH_BUFFER_MS) {
             return {
                 success: true,
-                accessToken: broadcaster.access_token
+                data: {
+                    accessToken: broadcaster.access_token
+                }
             };
         }
-
-        console.log("Token Manager:", broadcaster)
 
         const token = await twitchAuthService.refreshAccessToken(broadcaster.refresh_token);
 
@@ -41,10 +41,7 @@ export function buildTokenManager({db, twitchAuthService}) {
             expiresIn: token.expiresIn
         });
 
-        return {
-            success: true,
-            ...token
-        }
+        return token;
     }
 
     return {getValidAccessToken};

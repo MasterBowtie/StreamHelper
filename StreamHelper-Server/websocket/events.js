@@ -1,21 +1,31 @@
 export const EVENTS = {
     TWITCH: {
-        ONLINE: "stream.online",
-        OFFLINE: "stream.offline",
-        FOLLOW: "channel.follow",
-        SUBSCRIBE: "channel.subscribe",
-        RAID: "channel.raid",
+        ALERTS: {
+            ONLINE: "twitch.stream.online",
+            OFFLINE: "twitch.stream.offline",
+            FOLLOW: "twitch.channel.follow",
+            SUBSCRIBE: "twitch.channel.subscribe",
+            RAID: "twitch.channel.raid",
+        },
+        STATUS: {
+            STATUS_CHANGE: "twitch.status.changed",
+            CONNECT: "twitch.connect",
+        }
     },
     APP: {
-        TWITCH_STATUS_CHANGE: "twitch.status.changed",
         CONNECTED: "app.connected",
         SETTINGS_UPDATED: "app.settings.updated",
         AUTH_REQUIRED: "app.auth.required",
         READY: "app.ready",
-        TWITCH_CONNECT: "twitch.connect",
+        EVENTSUB: {
+            READY: "eventsub.connected",
+            SUBSCRIBED: "eventsub.subscribed",
+            STOP: 'eventsub.stopped',
+        },
     },
     ERRORS: {
-        CLIENT_ID_ERROR: "error.client.id.invalid",
-        CLIENT_INVALID: "error.client.invalid",
+        CLIENT_ID: "error.auth.clientid",
+        AUTH: "error.auth",
+        EVENTSUB: 'error.eventsub',
     },
 }

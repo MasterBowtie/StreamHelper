@@ -7,9 +7,11 @@ export function buildTwitchAuthService({publicTwitchAuth, privateTwitchAuth, ser
         let token;
         switch (authRequest.type) {
             case "public":
+                // FIXME: handle new data
                 token = await publicTwitchAuth.pollDeviceToken(authRequest.deviceCode);
                 break;
             case "private":
+                // FIXME: handle new data
                 token = await privateTwitchAuth.exchangeCodeForToken(authRequest.code);
                 break;
             
@@ -19,9 +21,16 @@ export function buildTwitchAuthService({publicTwitchAuth, privateTwitchAuth, ser
 
         const twitchUser = await fetchTwitchUser(token.accessToken);
 
+        if (!twitchUser.success) {
+            return twitchUser;
+        }
+
         return {
-            twitchUser,
-            token
+            success: true,
+            data: {
+                twitchUser,
+                token
+            }
         };
     }
     
@@ -49,9 +58,12 @@ export function buildTwitchAuthService({publicTwitchAuth, privateTwitchAuth, ser
         }
 
         return {
-            twitchId: data.data[0].id,
-            login: data.data[0].login,
-            displayName: data.data[0].display_name
+            success: true,
+            data: {
+                twitchId: data.data[0].id,
+                login: data.data[0].login,
+                displayName: data.data[0].display_name
+            }
         };
     }
 
@@ -101,9 +113,11 @@ export function buildTwitchAuthService({publicTwitchAuth, privateTwitchAuth, ser
 
         return {
             success: true,
-            accessToken: tokenData.access_token,
-            refreshToken: tokenData.refresh_token,
-            expiresIn: tokenData.expires_in
+            data: {
+                accessToken: tokenData.access_token,
+                refreshToken: tokenData.refresh_token,
+                expiresIn: tokenData.expires_in
+            }
         }
     }
 
