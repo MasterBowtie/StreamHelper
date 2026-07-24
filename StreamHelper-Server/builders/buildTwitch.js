@@ -26,7 +26,7 @@ export async function buildTwitch({ db, services, websocket }) {
 
     const privateTwitchAuth = buildPrivateTwitchAuthService({services});
 
-    const twitchAuthService = buildTwitchAuthService({privateTwitchAuth, publicTwitchAuth, services});
+    const twitchAuthService = buildTwitchAuthService({db, privateTwitchAuth, publicTwitchAuth, services});
 
     const tokenManager = buildTokenManager({ db, twitchAuthService , services});
 
@@ -37,9 +37,11 @@ export async function buildTwitch({ db, services, websocket }) {
         await db.twitchUserRepository.updateToken({accessToken: null, refreshToken: null, expiresIn: 0});
 
         state.authenticated = false;
+        state.authentication.polling = false;
         state.broadcaster = null;
         state.eventSub.connected = false;
-        state.clientType = await services.settingService.get("twitch.clientType");
+        let clientType = await services.settingService.get("twitch.clientType");
+        state.clientType = clientType.data;
 
         websocket.notifier.notify(EVENTS.APP.TWITCH_STATUS_CHANGE, getStatus())
 
@@ -70,14 +72,19 @@ export async function buildTwitch({ db, services, websocket }) {
         }
 
         if (state.clientType === "public") {
-            void runPolling(events);
+            const result = await publicTwitchAuth.startDeviceAuth();
+        
+            if (!result.success) {
+                websocket.notifier.notify("error.twitch.connect", {payload: result.data});
+                return;
+            }
+            websocket.notifier.notify(EVENTS.APP.AUTH_REQUIRED, result.data);
+
+            void runPolling(events, result.data.deviceCode);
 
             state.authentication.polling = true;
 
-            return {
-                success: true,
-                data: {mode: "public"}
-            }
+            return result;
         } else if (state.clientType === "private") {
             const url = await privateTwitchAuth.getLoginUrl();
 
@@ -89,24 +96,15 @@ export async function buildTwitch({ db, services, websocket }) {
                 success: true,
                 data: {
                     mode: "private",
-                    authorizationUrl: url
+                    url
                 }
             }
         }
         return {success: false, message: "It Broke!"}
     }
 
-    async function runPolling(events) {
-        const result = await publicTwitchAuth.startDeviceAuth();
-
-        
-        if (!result.success) {
-            websocket.notifier.notify("error.twitch.connect", {payload: result.data});
-            return;
-        }
-        websocket.notifier.notify(EVENTS.APP.AUTH_REQUIRED, result.data);
-
-        const token = await publicTwitchAuth.awaitDeviceToken(result.data.deviceCode, 1000);
+    async function runPolling(events, deviceCode) {
+        const token = await publicTwitchAuth.awaitDeviceToken(deviceCode, 1000);
 
         if (!token.success) {
             websocket.notifier.notify(EVENTS.ERRORS.CLIENT_INVALID);
@@ -117,7 +115,8 @@ export async function buildTwitch({ db, services, websocket }) {
 
         const dbStatus = await db.twitchUserRepository.updateToken(token.data);
 
-        console.log("Polling: ", dbStatus);
+        events.initialize();
+        websocket.notifier.notify(EVENTS.APP.CONNECTED);
     }
 
     async function initialize() {
@@ -136,14 +135,14 @@ export async function buildTwitch({ db, services, websocket }) {
         const token = await tokenManager.getValidAccessToken();
         if (!token.success) {
             state.message = "No token";
-            console.warn("Twitch Init", token.message);
+            console.warn(token.message);
             return {...state};
         }
 
         state.authenticated = true;
         state.initialized = true;
 
-        websocket.notifier.notify(EVENTS.APP.CONNECTED);
+        websocket.notifier.notify(EVENTS.TWITCH.STATUS.CONNECT);
         console.log("Twitch Initialized...");
         return {...state};
     }

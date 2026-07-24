@@ -31,14 +31,13 @@ export function buildTokenManager({db, twitchAuthService}) {
         const token = await twitchAuthService.refreshAccessToken(broadcaster.refresh_token);
 
         if (!token.success) {
-            console.log("Token Manager Error:", token);
             return token;
         }
         
         await db.twitchUserRepository.updateToken({
-            accessToken: token.accessToken,
-            refreshToken: token.refreshToken,
-            expiresIn: token.expiresIn
+            accessToken: token.data.accessToken,
+            refreshToken: token.data.refreshToken,
+            expiresIn: token.data.expiresIn
         });
 
         return token;

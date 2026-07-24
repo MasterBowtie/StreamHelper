@@ -1,7 +1,7 @@
 import { twitchConfig } from "./twitchConfig.js";
 import { AUTH_CLIENT_TYPES } from "../server/constants.js"
 
-export function buildTwitchAuthService({publicTwitchAuth, privateTwitchAuth, services}) {
+export function buildTwitchAuthService({db, publicTwitchAuth, privateTwitchAuth, services}) {
 
     async function authenticateBroadcaster(authRequest) {
         let token;
@@ -16,20 +16,32 @@ export function buildTwitchAuthService({publicTwitchAuth, privateTwitchAuth, ser
                 break;
             
             default:
-                throw new Error(`Unsupported authentication type: ${authRequest.type}`)
+                return {
+                    success: false,
+                    message: `Twitch Auth: Unsupported authentication type ${authRequest.type}`
+                }
         }
 
-        const twitchUser = await fetchTwitchUser(token.accessToken);
+        if (!token.success) {
+            return token;
+        }
+
+        const twitchUser = await fetchTwitchUser(token.data.accessToken);
 
         if (!twitchUser.success) {
             return twitchUser;
         }
 
+        await db.twitchUserRepository.updateBroadcaster({
+                twitchUser: twitchUser.data,
+                token: token.data,
+            })
+
         return {
             success: true,
             data: {
-                twitchUser,
-                token
+                twitchUser: twitchUser.data,
+                token: token.data,
             }
         };
     }
@@ -107,7 +119,7 @@ export function buildTwitchAuthService({publicTwitchAuth, privateTwitchAuth, ser
                 // console.log("refreshAccessToken", tokenData)
                 return {
                     success: false,
-                    message: tokenData.message
+                    message: `RefreshAccessToken: ${tokenData.message}`
                 };
         }
 

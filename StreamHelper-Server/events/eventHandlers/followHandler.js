@@ -1,6 +1,6 @@
 import { EVENTS } from "../../websocket/events.js";
 
-function buildFollowHandler({db, services, websocket}) {
+export function buildFollowHandler({db, services, websocket}) {
     async function handler(event, eventId) {
         await services.twitchUserService(event);
 
@@ -24,10 +24,9 @@ function buildFollowHandler({db, services, websocket}) {
             displayName: event.user_name
         });
 
-        console.log(`${event.user_name} followed`);
+        console.log(`Twitch ALert: ${event.user_name} Followed!`);
+        websocket.notifier.notify(EVENTS.TWITCH.ALERTS.FOLLOW, event);
     }
 
     return handler;
 }
-
-export { buildFollowHandler }

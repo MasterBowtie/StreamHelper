@@ -1,4 +1,5 @@
 import { twitchConfig } from "./twitchConfig.js";
+import { sleep } from "../server/sleep.js";
 
 export function buildPublicTwitchAuthService({db, services}) {
     async function startDeviceAuth() {
@@ -101,12 +102,6 @@ export function buildPublicTwitchAuthService({db, services}) {
 
             await sleep(interval);
         }
-    }
-
-    function sleep(ms) {
-        return new Promise(resolve => {
-            setTimeout(resolve, ms)
-        });
     }
 
     return {

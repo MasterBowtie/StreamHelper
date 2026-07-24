@@ -24,6 +24,29 @@ export function getSubscriptions(broadcaster) {
             condition: {
                 broadcaster_user_id: broadcaster.twitch_id
             },
+        },
+        {
+            type: "channel.raid",
+            version: "1",
+            condition: {
+                to_broadcaster_user_id: broadcaster.twitch_id
+            }
+        },
+        {
+            type: "channel.chat.message",
+            version: "1",
+            condition: {
+                broadcaster_user_id: broadcaster.twitch_id,
+                user_id: broadcaster.twitch_id
+            }
+        },
+        {
+            type: "channel.chat.notification",
+            version: "1",
+            condition: {
+                broadcaster_user_id: broadcaster.twitch_id,
+                user_id: broadcaster.twitch_id
+            }
         }
     ]
 }

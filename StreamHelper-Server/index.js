@@ -34,15 +34,15 @@ const data = await components.twitch.initialize();
 components.events = await buildEvents(components);
 
 if (data.initialized) {
-  await components.events.initialize(data.broadcaster);
+    await components.events.initialize(data.broadcaster);
 }
 
 components.routers = buildRouters(components);
 
 app.use(bodyParser.json());
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`)
-  next()
+    console.log(`${req.method} ${req.url}`)
+    next()
 });
 
 
@@ -55,6 +55,8 @@ app.use('/settings', components.routers.settingsRouter);
 // app.use("/house", buildHouseRouter(house_repository));
 
 server.listen(process.env.S_PORT || 3141, () => {
-  console.log(`Stream Helper-Server listening on port ${process.env.S_PORT || 3141}...`);
-  components.websocket.websocketServer.start(server);
+    console.log(`Stream Helper-Server listening on port ${process.env.S_PORT || 3141}...`);
+    components.websocket.websocketServer.start(server);
 });
+
+components.websocket.notifier.notify(EVENTS.APP.READY);

@@ -9,6 +9,7 @@ export function buildServices({db}) {
     
     const twitchUserService = buildTwitchUserService({db});
 
+
     async function initialize() {
         await settingService.initialize();
 

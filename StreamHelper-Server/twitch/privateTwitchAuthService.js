@@ -18,14 +18,20 @@ export function buildPrivateTwitchAuthService({services}) {
         const data = await response.json();
     
         if (!response.ok) {
-            console.error(data)
-            throw new Error("Failed to exchange code for token:", JSON.stringify(data));
+            return {
+                success: false,
+                message: "Private Auth: Failed to exchange code for token",
+                data: JSON.stringify(data),
+            }
         }
         
-        return {
+        return{
+            success: true,
+            data: {
             accessToken: data.access_token,
             refreshToken: data.refresh_token,
             expiresIn: data.expires_in
+            },
         }
     }
 

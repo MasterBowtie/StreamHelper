@@ -24,7 +24,7 @@ export function buildEvents({twitch, db, services, websocket}) {
                 connected: false,
                 message: "No broadcaster"
             })
-            return;
+            return {success: false};
         }
 
         await eventSubService.start();
@@ -33,7 +33,7 @@ export function buildEvents({twitch, db, services, websocket}) {
         if (!result.success) {
             console.warn("EventSub Error:", result.message)
             websocket.notifier.notify(EVENTS.ERRORS.EVENTSUB, result.message)
-            return;
+            return {success: false};
         }
         
         for (const sub of result.data) {
@@ -42,6 +42,8 @@ export function buildEvents({twitch, db, services, websocket}) {
                 websocket.notifier.notify(EVENTS.APP.EVENTSUB.SUBSCRIBED, sub.data);
             } else {
                 console.warn("EventSub Error:", sub.message);
+                websocket.notifier.notify(EVENTS.TWITCH.STATUS.STATUS_CHANGE);
+                websocket.notifier.notify(EVENTS.APP.AUTH_REQUIRED);
             }
         }
         
@@ -51,6 +53,8 @@ export function buildEvents({twitch, db, services, websocket}) {
 
         console.log("EventSub Initialized...");
         websocket.notifier.notify(EVENTS.APP.EVENTSUB.READY);
+
+        return {success: true}
     }
 
     return {

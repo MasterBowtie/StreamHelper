@@ -21,7 +21,7 @@ export const twitchConfig = {
         'channel:read:subscriptions',
         'moderator:read:followers',
         'channel:read:redemptions',
-        'chat:read',
-        'chat:edit',
+        'user:read:chat',
+        'user:write:chat',
     ]
 }

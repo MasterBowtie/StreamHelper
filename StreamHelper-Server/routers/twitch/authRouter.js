@@ -5,16 +5,16 @@ function buildAuthRouter({twitch, db, events, services, websocket}) {
 
 
     router.get('/connect', async (req, res) => {
-        const {success, data, message} = await twitch.connect();
+        const {success, data, message} = await twitch.connect(events);
 
         if (success && data.mode === "private") {
-            return res.redirect(data.mode.url);
+            return res.redirect(data.url);
         }
 
         return res.json(data || message);
     });
 
-    router.get('/disconnect', async (req, res) => {
+    router.post('/disconnect', async (req, res) => {
         const result = await twitch.disconnect(events);
         return res.json(result);
     })
@@ -27,11 +27,6 @@ function buildAuthRouter({twitch, db, events, services, websocket}) {
                 console.warn("OAuth Callback:", message);
                 return;
             }
-
-            await db.twitchUserRepository.updateBroadcaster({
-                twitchUser: data.twitchUser,
-                token: data.token
-            })
             
             await events.initialize();
 

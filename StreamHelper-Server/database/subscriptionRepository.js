@@ -147,6 +147,8 @@ export class SubscriptionRepository {
         return rows[0] ?? null;
     }
 
+    
+
     async getTopGifters({ streamId = null, tier = null, limit = 3 } = {}) {
         let query = `
             SELECT 

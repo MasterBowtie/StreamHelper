@@ -8,7 +8,7 @@ function buildStreamOnlineHandler({twitch, db, websocket}) {
         if (!activeStream) {
             await db.streamRepository.startStream(new Date(event.started_at));
             console.log("Hello! Stream is online!");
-            await websocket.notifier.notify(EVENTS.ONLINE);
+            await websocket.notifier.notify(EVENTS.TWITCH.ALERTS.ONLINE);
         } else {
             // FIXME: Check twitch when last stream was...
             console.warn("There seems to already be a stream running")
@@ -29,7 +29,7 @@ function buildStreamOfflineHandler({db, websocket}) {
             const streamEnd = new Date(stream.end_at);
             console.log(`Stream duration: ${streamEnd - streamStart}`);
 
-            await websocket.notifier.notify(EVENTS.OFFLINE, {
+            await websocket.notifier.notify(EVENTS.TWITCH.ALERTS.OFFLINE, {
                 duration: streamEnd - streamStart
             });
         } else {
