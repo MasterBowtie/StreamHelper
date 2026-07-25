@@ -1,0 +1,33 @@
+.block {
+    height: 100px;
+    width: 100px;
+}
+
+#container {
+    height:100px; 
+    position:relative; 
+    overflow:hidden;
+  }
+  
+  .photobanner {
+    position:absolute; 
+    overflow:hidden; 
+    white-space: nowrap;
+    animation: bannermove 10s linear infinite;
+    width: 100px;
+  }
+
+  .photobanner_2 {
+    animation-delay: 5s;
+  }
+  
+  @keyframes bannermove {
+    0% {
+        transform: translateY(-100%)
+    }
+    100% {
+        transform: translateY(100%)
+    }
+  }
+
+  /* https://codepen.io/cnbkts/pen/QMXPZM */

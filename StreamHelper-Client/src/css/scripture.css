@@ -1,0 +1,84 @@
+.main {
+    display: flex;
+    width: 100%;
+    margin: 20px;
+}
+
+.crud-section {
+    flex-grow: 1;
+}
+
+.view-section {
+    flex-grow: 2;
+    max-width: 50%;
+    margin-inline: 100px;
+}
+
+.verse-view{
+    column-width: 200px;
+    column-gap: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.verse-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    overflow-y: scroll;
+    justify-content: flex-start;
+}
+
+.scripture {
+    text-indent: 40px;
+    padding: 20px;
+    border-radius: 10px;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    padding: 20px;
+    height: fit-content;
+}
+
+.scripture.preview {
+    display: inline-block;
+    box-sizing: border-box;
+    background-color: rgba(0, 0, 0, 0.2);
+    font-size: large;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.scripture.display {
+    margin: auto;
+    width: min(400px, 90%);
+    font-size: x-large;
+    position: absolute;
+    top: 30%;
+    left: 200px;
+    /* right: 0px; */
+    color: #f0f8ff;
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    text-align: left; 
+}
+
+.scripture.display.intermission {
+    top: 40%;
+}
+
+textarea {
+    resize: none;
+    width: 80%;
+    margin-left: 20px;
+}
+
+input {
+    width: 60%;
+}
+
+button {
+    block-size: 100%;
+}
+
+#submit {
+    margin: 20px;
+}

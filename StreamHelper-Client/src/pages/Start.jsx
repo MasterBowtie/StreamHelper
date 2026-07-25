@@ -1,0 +1,25 @@
+import Title from "../components/Title"
+import { Timer } from "../components/Timer"
+import { ScriptureView } from "../components/Scripture"
+
+function Start() {
+
+    // Need to find out how to detect video end in React
+    // let video = document.getElementById("introVideo");
+    // video.addEventListener("ended", (event) => {
+    //     //Have the Starting Soon Title appear
+    // })
+
+    return (
+        <>
+            {/* <img className="container" src="src/assets/background_photo.png"></img> */}
+            <video id="introVideo" className="container" autoPlay src="src/assets/temple_timelapse.mp4" muted type="video/mp4"></video>
+            {/* <h3>Starting Soon!</h3> */}
+            <ScriptureView className="display"/>
+            <Title title={["Stream Starts in: "]}/>
+            <Timer/>
+            {/* <img id="bowtie" src="src/assets/Events.gif" type="image/gif"/> */}
+        </>
+    )
+}
+export default Start
