@@ -1,4 +1,4 @@
-import { EVENTS } from "../../websocket/events";
+import { EVENTS } from "../../websocket/events.js";
 
 function buildChatHandler({websocket}) {
     async function handler(event) {

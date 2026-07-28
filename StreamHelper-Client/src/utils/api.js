@@ -39,11 +39,11 @@ export class Api {
         return this.makeRequest(uri, "POST", body)
     }
 
-    put (uri, body) {
+    put(uri, body) {
         return this.makeRequest(uri, "PUT", body) 
     }
 
-    del (uri, body) {
+    del(uri, body) {
         return this.makeRequest(uri, "DELETE", body)
     }
 }

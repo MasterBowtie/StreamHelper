@@ -20,7 +20,7 @@ export function buildEventSubRouter({twitch, events, websocket}) {
     })
 
     router.get("/status", (req, res) => {
-        res.send(twitch.getStatus().eventSub);
+        res.send(events.getStatus());
     })
 
     return router;

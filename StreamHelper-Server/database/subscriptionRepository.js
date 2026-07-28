@@ -7,7 +7,7 @@ export class SubscriptionRepository {
         const [result] = await this.pool.execute(
             `INSERT INTO subscriptions
             (twitch_id, event_id, tier, months, is_gift)
-            VALUES (?, ?, ?, ?, ?, ?)`,
+            VALUES (?, ?, ?, ?, ?)`,
             [twitchId, eventId, tier, months, isGift]
         );
 

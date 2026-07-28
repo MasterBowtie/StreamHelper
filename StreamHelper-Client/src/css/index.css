@@ -1,79 +1,22 @@
-.container {
-  width: 100%;
+.flex-container {
   height: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 2px;
+}
+
+.border {
+  border: 4px solid #000000;
+  border-radius: 1em;
+}
+
+.title {
+  width: 100%;
+  text-align: center;
 }
 
 p {
   margin: 0;
-}
-
-#bowtie {
-  height: 20%;
-  width: auto;
-  position:absolute;
-  top: 5%;
-  left: 5%;
-}
-
-.title {
-  text-transform: uppercase;
-  font-size: 90px;
-  font-family:'Verdana';
-  font-weight: 900;
-  position: absolute;
-  top: 16%;
-  width: 100%;
-  text-align: center;
-  color: #f0f8ff;
-  
-}
-
-.adTitle {
-  font-size: 200px !important;
-}
-
-.title
-{
-  text-transform: uppercase;
-  background-image: linear-gradient(
-    -225deg,
-    #0400ff 0%,
-    #00560d 25%,
-    #fff800 50%,
-    #00560d 75%,
-    #0400ff 100%
-  );
-  background-size: auto auto;
-  background-clip: text;
-  background-size: 200% auto;
-  color: transparent;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: 3px rgb(0, 78, 4);
-  animation: textclip 4s linear infinite;
-  position: absolute;
-  font-size: 90px;
-  font-family:'Verdana';
-  font-weight: 900;
-  position: absolute;
-  top: 16%;
-  width: 100%;
-  text-align: center;
-}
-
-@keyframes textclip {
-  to {
-    background-position: 200% center;
-  }
-}
-
-.widget {
-  margin: auto; 
-  width: fit-content;
-  background-color: grey; 
-  padding: 20px; 
-  border-radius: 10px;
 }
 
 button {
@@ -103,52 +46,7 @@ label {
   font-weight: bold;
 }
 
-.vote.widget {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 500px; 
-}
 
-#vote_title {
-  font-size: 24px;
-  border-radius: 10px;
-  background-color: lightgray;
-  border-width: 0;
-  padding: 7px;
-}
-
-#vote_title:disabled {
-  color: #000000;
-  background-color: rgba(0,0,0,0);
-  font-size: 30px;
-}
-
-.vote_option {
-  border-radius: 10px;
-  background-color: rgba(0,0,0,0.25);
-  border-width: 0;
-  padding: 7px;
-  flex-grow: 1;
-  z-index: 2;
-}
-
-.vote_option:disabled {
-  color: #000000;
-  background-color: rgba(0,0,0,0);
-}
-
-label.vote {
-  padding-left: 10px;
-  z-index: 2;
-}
-
-.vote_options_container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
 
 #add_div {
   overflow-y: hidden;

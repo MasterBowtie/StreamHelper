@@ -8,11 +8,12 @@ import { Route, RouterProvider, createHashRouter } from 'react-router-dom'
 import { StyleHouse } from './components/HouseStyle.jsx'
 
 import Intermission from './pages/Intermission.jsx'
+import MainDashboard from './pages/MainDashboard.jsx'
 
 
 
 const router = createHashRouter([
-  {path: "", element: <App/>},
+  {path: "", element: <MainDashboard/>},
   {path: "scripture", element: <Scripture/>, children: [
     {path: "crud", element: <ScriptureCrud/>},
     {path: "view", element: <ScriptureView/>}

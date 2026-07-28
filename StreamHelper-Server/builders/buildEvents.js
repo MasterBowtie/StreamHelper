@@ -6,6 +6,11 @@ import { EVENTS } from "../websocket/events.js";
 
 
 export function buildEvents({twitch, db, services, websocket}) {
+    const status = {
+        connected: true,
+        subscriptions: [],
+    }
+
     const eventLogger = buildEventLogger({
         eventRepository: db.eventRepository,
         streamRepository: db.streamRepository
@@ -39,9 +44,11 @@ export function buildEvents({twitch, db, services, websocket}) {
         for (const sub of result.data) {
             if (sub.success) {
                 console.log("EventSub Subscribed:", sub.data);
+                status.subscriptions.push({sub_type: sub.data, sub_connected: true});
                 websocket.notifier.notify(EVENTS.APP.EVENTSUB.SUBSCRIBED, sub.data);
             } else {
                 console.warn("EventSub Error:", sub.message);
+                status.subscriptions.push({sub_type: sub.data, sub_connected: false});
                 websocket.notifier.notify(EVENTS.TWITCH.STATUS.STATUS_CHANGE);
                 websocket.notifier.notify(EVENTS.APP.AUTH_REQUIRED);
             }
@@ -49,7 +56,7 @@ export function buildEvents({twitch, db, services, websocket}) {
         
         await buildHandlers({db, twitch, websocket, services, eventDispatcher})
         
-        twitch.setEventSubStatus({connected: true});
+        status.connected = true;
 
         console.log("EventSub Initialized...");
         websocket.notifier.notify(EVENTS.APP.EVENTSUB.READY);
@@ -57,9 +64,14 @@ export function buildEvents({twitch, db, services, websocket}) {
         return {success: true}
     }
 
+    function getStatus() {
+        return {...status};
+    }
+
     return {
         initialize,
         eventLogger,
+        getStatus,
         eventDispatcher,
         eventSubService
     };

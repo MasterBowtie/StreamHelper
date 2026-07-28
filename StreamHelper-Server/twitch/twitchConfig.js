@@ -2,6 +2,7 @@ export const twitchConfig = {
     redirectUri: process.env.TWITCH_REDIRECT_URI ?? "http://localhost:3141/twitch/auth/callback",
 
     oauth: {
+        activateUrl: "https://twitch.tv/activate",
         authUrl: "https://id.twitch.tv/oauth2/device",
         tokenUrl: 'https://id.twitch.tv/oauth2/token',
         validateUrl: 'https://id.twitch.tv/oauth2/validate'

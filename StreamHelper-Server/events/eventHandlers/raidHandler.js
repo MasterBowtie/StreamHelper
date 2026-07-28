@@ -1,4 +1,4 @@
-import { EVENTS } from "../../websocket/events";
+import { EVENTS } from "../../websocket/events.js";
 
 export function buildRaidHandler({db, services, websocket}) {
     async function handler(event, eventId) {

@@ -36,7 +36,7 @@ export function buildPublicTwitchAuthService({db, services}) {
             data: {
                 deviceCode: data.device_code,
                 userCode: data.user_code,
-                verificationUrl: data.verification_url,
+                url: twitchConfig.oauth.activateUrl,
                 expiresIn: data.expires_in,
                 interval: data.interval
             }

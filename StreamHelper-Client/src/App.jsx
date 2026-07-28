@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { Timer } from './components/Timer'
-import WebSocketLog from './components/WebSocketLog'
+import WebSocketLog from './components/status/WebSocketLog'
 
 
 

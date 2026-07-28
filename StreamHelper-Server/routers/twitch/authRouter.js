@@ -5,13 +5,8 @@ function buildAuthRouter({twitch, db, events, services, websocket}) {
 
 
     router.get('/connect', async (req, res) => {
-        const {success, data, message} = await twitch.connect(events);
-
-        if (success && data.mode === "private") {
-            return res.redirect(data.url);
-        }
-
-        return res.json(data || message);
+        const connect = await twitch.connect(events);
+        return res.json(connect);
     });
 
     router.post('/disconnect', async (req, res) => {

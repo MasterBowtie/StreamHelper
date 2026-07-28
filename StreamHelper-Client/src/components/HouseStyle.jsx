@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
 import { useApi } from "../utils/use_api";
 
+
+// FIXME
 export function StyleHouse() {
     const [wall, setWall] = useState("");
     const [roof, setRoof] = useState("");

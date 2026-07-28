@@ -14,9 +14,6 @@ export async function buildTwitch({ db, services, websocket }) {
         authenticated: false,
         clientType: clientType.data,
         broadcaster: null,
-        eventSub: {
-            connected: false
-        },
         authentication: {
             polling: false
         }
@@ -52,22 +49,24 @@ export async function buildTwitch({ db, services, websocket }) {
         return {...state};
     }
 
-    function setEventSubStatus(eventStatus) {
-        state.eventSub = eventStatus;
-    }
-
     async function connect(events) {
         if (state.authenticated && state.eventSub.connected) {
             console.warn("Twitch: Already authenticated");
             return {
                 success: true,
-                message: "Already authenticated."
+                message: "Already authenticated.",
+                data: {
+                    mode: state.clientType,
+                }
             };
         } else if (state.authentication.polling) {
             console.warn("Twitch: Authentication already in progress");
             return {
                 success: false,
-                message: "Authentication already in progress"
+                message: "Authentication already in progress",
+                data: {
+                    mode: state.clientType,
+                }
             }
         }
 
@@ -150,7 +149,6 @@ export async function buildTwitch({ db, services, websocket }) {
     return {
         initialize,
         getStatus,
-        setEventSubStatus,
         connect,
         disconnect,
         runPolling,
