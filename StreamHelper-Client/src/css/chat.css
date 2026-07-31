@@ -1,0 +1,8 @@
+.chat-feed {
+    margin: 10px;
+    flex-direction: column;
+    font-family: monospace;
+    text-align: left;
+    justify-content: start;
+    padding: 10px;
+}

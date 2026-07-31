@@ -1,5 +1,6 @@
 import { useEffectEvent } from "react";
 import { useEffect, useState } from "react";
+import "../../css/chat.css";
 
 export default function WebSocketLog({className, style}) {
     const [messages, setMessages] = useState([]);
@@ -43,13 +44,7 @@ export default function WebSocketLog({className, style}) {
     return (
         <div className={className} style={{width: "100%", ...style}}>
             <h2>WebSocket Log</h2>
-            <div className="flex-container border" style={{
-                margin: "10px",
-                flexDirection: "column",
-                fontFamily: "monospace",
-                textAlign: "left",
-                alignContent: "start"
-            }}>
+            <div className="chat-feed flex-container border ">
                 {messages.map((entry, index)=> (
                     <div key={index} style={{ margin: "2px"}}>
                         [{entry.time}] {entry.message}

@@ -1,0 +1,111 @@
+.dialog-backdrop {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.55);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 1000;
+}
+
+.dialog {
+    width: 420px;
+    max-width: 90vw;
+
+    background: #242424;
+    color: white;
+
+    border-radius: 10px;
+
+    padding: 24px;
+
+    box-shadow: 0 10px 25px rgba(0,0,0,.4);
+}
+
+.dialog h2 {
+    margin-top: 0;
+}
+
+.activation-code {
+    margin: 24px 0;
+
+    padding: 16px;
+
+    text-align: center;
+
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: .2rem;
+
+    background: #111;
+
+    border: 2px solid #9147ff;
+
+    border-radius: 8px;
+}
+
+.dialog-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.primary-button {
+    background: #9147ff;
+    color: white;
+}
+
+.dialog-status {
+    margin: 20px 0;
+    color: #cccccc;
+    font-style: italic;
+}
+
+.cancel-button {
+    width: 100%;
+}
+
+.disconnect-button {
+    background-color: #e91916;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.disconnect-button:hover {
+    background-color: #b91c1c;
+}
+
+.disconnect-button.disabled {
+    background-color: #888;
+    color: #ddd;
+    cursor: not-allowed;
+}
+
+.auth-button {
+    background-color: #9147ff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.auth-button:hover {
+    background-color: #772ce8;
+}
+
+.auth-button.disabled {
+    background-color: #888;
+    color: #ddd;
+    cursor: not-allowed;
+}

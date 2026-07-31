@@ -14,6 +14,7 @@ export async function buildTwitch({ db, services, websocket }) {
         authenticated: false,
         clientType: clientType.data,
         broadcaster: null,
+        tokenExpires: null,
         authentication: {
             polling: false
         }
@@ -30,13 +31,12 @@ export async function buildTwitch({ db, services, websocket }) {
     const twitchApiClient = buildTwitchApiClient({ tokenManager, services });
 
     async function disconnect(events) {
-        await events.eventSubService.stop();
+        await events.disconnect();
         await db.twitchUserRepository.updateToken({accessToken: null, refreshToken: null, expiresIn: 0});
 
         state.authenticated = false;
         state.authentication.polling = false;
         state.broadcaster = null;
-        state.eventSub.connected = false;
         let clientType = await services.settingService.get("twitch.clientType");
         state.clientType = clientType.data;
 
@@ -62,10 +62,10 @@ export async function buildTwitch({ db, services, websocket }) {
         } else if (state.authentication.polling) {
             console.warn("Twitch: Authentication already in progress");
             return {
-                success: false,
+                success: true,
                 message: "Authentication already in progress",
                 data: {
-                    mode: state.clientType,
+                    ...state.authentication,
                 }
             }
         }
@@ -78,10 +78,11 @@ export async function buildTwitch({ db, services, websocket }) {
                 return;
             }
             websocket.notifier.notify(EVENTS.APP.AUTH_REQUIRED, result.data);
+            console.log(result.data);
+
+            state.authentication = {polling: true, ...result.data}
 
             void runPolling(events, result.data.deviceCode);
-
-            state.authentication.polling = true;
 
             return result;
         } else if (state.clientType === "private") {
@@ -110,11 +111,12 @@ export async function buildTwitch({ db, services, websocket }) {
             return;
         }
 
-        state.authentication.polling = 'false';
+        state.authentication = {polling: 'false'};
 
         const dbStatus = await db.twitchUserRepository.updateToken(token.data);
 
-        events.initialize();
+        await initialize();
+        await events.initialize();
         websocket.notifier.notify(EVENTS.APP.CONNECTED);
     }
 
@@ -129,6 +131,7 @@ export async function buildTwitch({ db, services, websocket }) {
             twitchId: broadcaster.twitch_id,
             login: broadcaster.login,
             displayName: broadcaster.display_name,
+            tokenExpires: broadcaster.expires_at,
         };
 
         const token = await tokenManager.getValidAccessToken();

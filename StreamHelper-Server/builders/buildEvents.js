@@ -44,7 +44,7 @@ export function buildEvents({twitch, db, services, websocket}) {
         for (const sub of result.data) {
             if (sub.success) {
                 console.log("EventSub Subscribed:", sub.data);
-                status.subscriptions.push({sub_type: sub.data, sub_connected: true});
+                status.subscriptions.push({type: sub.data, connected: true});
                 websocket.notifier.notify(EVENTS.APP.EVENTSUB.SUBSCRIBED, sub.data);
             } else {
                 console.warn("EventSub Error:", sub.message);
@@ -68,10 +68,19 @@ export function buildEvents({twitch, db, services, websocket}) {
         return {...status};
     }
 
+    async function disconnect() {
+        await eventSubService.stop();
+        status: {
+            connected: false,
+            subscriptions = []
+        }
+    }
+
     return {
         initialize,
         eventLogger,
         getStatus,
+        disconnect,
         eventDispatcher,
         eventSubService
     };
