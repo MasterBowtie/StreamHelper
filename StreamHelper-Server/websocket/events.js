@@ -12,12 +12,11 @@ export const EVENTS = {
         STATUS: {
             STATUS_CHANGE: "twitch.status.changed",
             CONNECT: "twitch.connect",
+            AUTH_REQUIRED: "twitch.auth.required",
         }
     },
     APP: {
-        CONNECTED: "app.connected",
         SETTINGS_UPDATED: "app.settings.updated",
-        AUTH_REQUIRED: "app.auth.required",
         READY: "app.ready",
         EVENTSUB: {
             READY: "eventsub.connected",
@@ -27,6 +26,7 @@ export const EVENTS = {
     },
     ERRORS: {
         CLIENT_ID: "error.auth.clientid",
+        TWITCH_CONNECT: "error.twitch.connect",
         AUTH: "error.auth",
         EVENTSUB: 'error.eventsub',
     },

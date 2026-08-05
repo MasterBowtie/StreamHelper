@@ -50,7 +50,7 @@ export function buildEvents({twitch, db, services, websocket}) {
                 console.warn("EventSub Error:", sub.message);
                 status.subscriptions.push({sub_type: sub.data, sub_connected: false});
                 websocket.notifier.notify(EVENTS.TWITCH.STATUS.STATUS_CHANGE);
-                websocket.notifier.notify(EVENTS.APP.AUTH_REQUIRED);
+                websocket.notifier.notify(EVENTS.TWITCH.STATUS.AUTH_REQUIRED);
             }
         }
         
@@ -70,10 +70,10 @@ export function buildEvents({twitch, db, services, websocket}) {
 
     async function disconnect() {
         await eventSubService.stop();
-        status: {
-            connected: false,
-            subscriptions = []
-        }
+        status.connected = false;
+        status.subscriptions = [];
+
+        websocket.notifier.notify(EVENTS.APP.EVENTSUB.STOP, getStatus())
     }
 
     return {

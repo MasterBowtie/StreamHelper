@@ -40,7 +40,7 @@ export async function buildTwitch({ db, services, websocket }) {
         let clientType = await services.settingService.get("twitch.clientType");
         state.clientType = clientType.data;
 
-        websocket.notifier.notify(EVENTS.APP.TWITCH_STATUS_CHANGE, getStatus())
+        websocket.notifier.notify(EVENTS.TWITCH.STATUS.STATUS_CHANGE, getStatus())
 
         return {...state};
     }
@@ -74,15 +74,15 @@ export async function buildTwitch({ db, services, websocket }) {
             const result = await publicTwitchAuth.startDeviceAuth();
         
             if (!result.success) {
-                websocket.notifier.notify("error.twitch.connect", {payload: result.data});
+                websocket.notifier.notify(EVENTS.ERRORS.TWITCH_CONNECT, {payload: result.data});
                 return;
             }
-            websocket.notifier.notify(EVENTS.APP.AUTH_REQUIRED, result.data);
-            console.log(result.data);
+            websocket.notifier.notify(EVENTS.TWITCH.STATUS.AUTH_REQUIRED, result.data);
 
             state.authentication = {polling: true, ...result.data}
 
-            void runPolling(events, result.data.deviceCode);
+            // console.log("BUILD TWITCH", result.data);
+            void runPolling(events, result.data.deviceCode, result.data.interval, result.data.expiresIn);
 
             return result;
         } else if (state.clientType === "private") {
@@ -103,11 +103,11 @@ export async function buildTwitch({ db, services, websocket }) {
         return {success: false, message: "It Broke!"}
     }
 
-    async function runPolling(events, deviceCode) {
-        const token = await publicTwitchAuth.awaitDeviceToken(deviceCode, 1000);
+    async function runPolling(events, deviceCode, interval, expiresIn) {
+        const token = await publicTwitchAuth.awaitDeviceToken(deviceCode, interval, expiresIn);
 
         if (!token.success) {
-            websocket.notifier.notify(EVENTS.ERRORS.CLIENT_INVALID);
+            websocket.notifier.notify(EVENTS.ERRORS.AUTH, {message: token.message});
             return;
         }
 
@@ -117,7 +117,6 @@ export async function buildTwitch({ db, services, websocket }) {
 
         await initialize();
         await events.initialize();
-        websocket.notifier.notify(EVENTS.APP.CONNECTED);
     }
 
     async function initialize() {

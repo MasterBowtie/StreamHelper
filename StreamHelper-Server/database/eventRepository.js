@@ -6,7 +6,7 @@ export class EventRepository {
     async createEvent({eventType, twitchId, streamId=null, occurredAt, metadata=null}) {
         const [result] = await this.pool.execute(
             `INSERT INTO events
-            (event_type, twitch_id, streamid, occurred_at, meta_data)
+            (event_type, twitch_id, stream_id, occurred_at, meta_data)
             VALUES (?, ?, ?, ?, ?)`,
             [eventType, twitchId, streamId, occurredAt, metadata]
         );

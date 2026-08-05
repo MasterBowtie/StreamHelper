@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useRef } from "react"
-import { useApi } from "../utils/use_api";
+import { useApi } from "../utils/api.js";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import "../css/scripture.css";

@@ -9,21 +9,24 @@ import { StyleHouse } from './components/HouseStyle.jsx'
 
 import Intermission from './pages/Intermission.jsx'
 import MainDashboard from './pages/MainDashboard.jsx'
+import { WebSocketProvider } from './contexts/WebSocketContext.jsx'
 
 
 
 const router = createHashRouter([
-  {path: "", element: <MainDashboard/>},
-  {path: "scripture", element: <Scripture/>, children: [
-    {path: "crud", element: <ScriptureCrud/>},
-    {path: "view", element: <ScriptureView/>}
-  ]},
-  {path: "start", element: <Start/>},
-  {path: "house", element: <StyleHouse/>},
-  {path: "intermission", element: <Intermission/>},
+    {path: "", element: <MainDashboard/>},
+    {path: "scripture", element: <Scripture/>, children: [
+        {path: "crud", element: <ScriptureCrud/>},
+        {path: "view", element: <ScriptureView/>}
+    ]},
+    {path: "start", element: <Start/>},
+    {path: "house", element: <StyleHouse/>},
+    {path: "intermission", element: <Intermission/>},
 
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-      <RouterProvider router={router}/>
+    <WebSocketProvider>
+        <RouterProvider router={router}/>
+    </WebSocketProvider>
 )

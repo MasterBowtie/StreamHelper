@@ -91,8 +91,11 @@ export function buildPublicTwitchAuthService({db, services}) {
         }
     }
 
-    async function awaitDeviceToken(deviceCode, interval) {
-        while(true) {
+    // FIXME Handle token expiration
+    async function awaitDeviceToken(deviceCode, interval, expiresIn) {
+        let remainingTime = expiresIn;
+        while(remainingTime > 0) { //Can this watch state.expired?
+            // console.log("POLLING:", remainingTime > 0, remainingTime, interval);
             const {success, data, message} = await pollDeviceToken(deviceCode);
 
             if (success && data) {
@@ -101,7 +104,12 @@ export function buildPublicTwitchAuthService({db, services}) {
                 return {success, message};
             }
 
-            await sleep(interval);
+            await sleep(interval * 1000); //Convert sec to ms
+            remainingTime -= (interval);
+        }
+
+        return {success: false,
+            message: "The token has expired"
         }
     }
 

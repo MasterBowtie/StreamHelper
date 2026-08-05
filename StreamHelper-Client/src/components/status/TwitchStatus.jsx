@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react"
-import { useApi } from "../../utils/use_api.js";
+import { useApi } from "../../utils/api.js";
 import "../../css/twitchAuth.css";
+import { useWebSocket } from "../../contexts/WebSocketContext.jsx";
 
 export default function TwitchStatus() {
     const [status, setStatus] = useState();
@@ -10,9 +11,15 @@ export default function TwitchStatus() {
     const [privateConnect, setPrivate] = useState();
     const pollTimer = useRef(null);
     const api = useApi();
+    const websocket = useWebSocket();
     
     useEffect(()=> {
         updateStatus();
+        websocket.connect();
+
+        websocket.on("twitch.connect", ()=>{updateStatus()})
+
+        return () => websocket.disconnect();
     }, [])
 
     function updateStatus() {
@@ -20,9 +27,6 @@ export default function TwitchStatus() {
             setStatus(res)
 
             if (res.authenticated) {
-                clearInterval(pollTimer.current);
-                pollTimer.current = null;
-
                 setPrivate(null);
                 setPublic(null);
                 setDialogOpen(false);
@@ -47,10 +51,6 @@ export default function TwitchStatus() {
                 setPublic(null);
                 window.open(res.data.url, "_blank")
                 // TODO: trigger waiting status
-            }
-
-            if (!pollTimer.current) {
-                pollTimer.current = setInterval(updateStatus, 1000);
             }
         })
     }

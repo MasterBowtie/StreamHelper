@@ -1,42 +1,34 @@
 import { useEffectEvent } from "react";
 import { useEffect, useState } from "react";
 import "../../css/chat.css";
+import { useWebSocket } from "../../contexts/WebSocketContext";
 
 export default function WebSocketLog({className, style}) {
     const [messages, setMessages] = useState([]);
+    const websocket = useWebSocket();
 
     useEffect(()=>{
+        websocket.connect();
 
-        const socket = new WebSocket("ws://localhost:3141");
+        websocket.on("*", (message)=> {
+            addMessage(message);
+        });
         
-        socket.onopen = () => {
-            addMessage({type: "CONNECTED"})
-        }
-
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            addMessage(data);
-        }
-
-        socket.onerror = (error) => {
-            addMessage(`ERROR: ${error.message}`);
-        }
-
-        socket.onclose = () => {
-            addMessage({type: "DISCONNECTED"});
-        }
-        
-        return () => socket.close();
-    }, [])
+        return () => { websocket.disconnect() };
+    }, []);
 
     function addMessage(data) {
         let date = data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString()
-        setMessages((prev) => [
-            {
-                time: date,
-                message: data.type,
-            }, ...prev
-        ]);
+        setMessages((prev) => {
+            const updated = [
+                {
+                    time: date,
+                    message: data.type,
+                }, ...prev
+            ]
+            return updated.slice(100);
+        });
+
     }
 
 

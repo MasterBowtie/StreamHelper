@@ -2,6 +2,7 @@ import { EVENTS } from "../../websocket/events.js";
 
 function buildChatHandler({websocket}) {
     async function handler(event) {
+        // console.log("Message", event);
         websocket.notifier.notify(EVENTS.TWITCH.ALERTS.CHAT, event);
     }
 

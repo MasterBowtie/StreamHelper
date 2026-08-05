@@ -1,6 +1,6 @@
-import { createContext } from "react";
+import { createContext, useContext } from "react";
 
-export class Api {
+class Api {
 
     constructor(initialToken) {
         this.authToken = initialToken
@@ -48,4 +48,8 @@ export class Api {
     }
 }
 
-export const ApiContext = createContext(new Api());
+const ApiContext = createContext(new Api());
+
+export const useApi = () => {
+    return useContext(ApiContext);
+}
