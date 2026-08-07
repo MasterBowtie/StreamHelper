@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react"
 import { useApi } from "../../utils/api.js";
-import "../../css/twitchAuth.css";
 import { useWebSocket } from "../../contexts/WebSocketContext.jsx";
+import Button from "../Button.jsx";
 
 export default function TwitchStatus() {
     const [status, setStatus] = useState();
@@ -80,27 +80,27 @@ export default function TwitchStatus() {
             onCopy={()=>navigator.clipboard.writeText(publicConnect?.userCode)}
             onCancel={()=> setDialogOpen(false)}
         />
-        <h2>Twitch Status:</h2>
-        <div className="border flex-container" style={{justifyContent: "space-between"}}>
-            <div style={{textAlign: "left", padding: "10px"}}>
+        <h2>Twitch Status</h2>
+        <div className="border-black outline-4 rounded-xl flex justify-between">
+            <div className="text-left p-4">
                 <p>Status: {status?.authenticated ? "Connected" : "Not Connected"}</p>
                 <p>Broadcaster: {status?.broadcaster?.displayName}</p>
                 <p>Twitch ID: {status?.broadcaster?.twitchId}</p>
                 <p>Token Expires: {status?.broadcaster?.tokenExpires ? new Date(status.broadcaster.tokenExpires).toLocaleString(): "Unknown"}</p>
             </div>
-            <div style={{display:"flex", margin: "20px", flexDirection: "column"}}>
-                <button
+            <div className="flex m-4 flex-col">
+                <Button
                     disabled={status?.authenticated}
                     onClick={connect}
-                    className={status?.authenticated ? "auth-button disabled" : "auth-button"}>
-                    {status?.authenticated ? "Authenticated" : "Authenticate Twitch"}
-                </button>
-                <button
+                    className={status?.authenticated ? "twitch-button disabled" : "twitch-button"}
+                    text={status?.authenticated ? "Authenticated" : "Authenticate Twitch"}
+                    />
+                <Button
                     disabled={!status?.authenticated}
                     onClick={disconnect}
-                    className={status?.authenticated ? "disconnect-button" : "disconnect-button disabled"}>
-                    Disconnect Twitch
-                </button>
+                    className={status?.authenticated ? "warning-button" : "warning-button disabled"}
+                    text={"Disconnect Twitch"}
+                    />
             </div>
         </div>
         </>
@@ -119,24 +119,22 @@ function TwitchAuthDialog({
 
     return (
         <div className="dialog-backdrop">
-            <div className="dialog">
+            <div className="dialog text-center w-[420px] max-w-[90vw]">
                 <h2>Connect Twitch Account</h2>
                 <p>Open Twitch and enter the following activation code.</p>
 
-                <div className="activation-code">
+                <div className="m-5 p-3 text-center text-3xl font-bold tracking-[0.2rem]">
                     {code ?? "--------"}
                 </div>
 
                 <div className="dialog-buttons">
-                    <button
-                        className="primary-button"
-                        onClick={() => window.open(verificationUrl, "_blank")}>
-                        Open Twitch
-                    </button>
+                    <Button
+                        className="twitch-button"
+                        onClick={() => window.open(verificationUrl, "_blank")}
+                        text={"Open Twitch"}
+                        />
 
-                    <button onClick={onCopy}>
-                        Copy Code
-                    </button>
+                    <Button className={"twitch-button"} onClick={onCopy} text={"Copy Code"}/>
                 </div>
 
                 <div className="dialog-status">
@@ -145,9 +143,7 @@ function TwitchAuthDialog({
                         : "Waiting to begin..."}
                 </div>
 
-                <button className="cancel-button" onClick={onCancel}>
-                    Cancel
-                </button>
+                <Button className="warning-button" onClick={onCancel} text={"Cancel"}/>
             </div>
         </div>
     );

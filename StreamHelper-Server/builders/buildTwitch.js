@@ -7,7 +7,7 @@ import { AUTH_CLIENT_TYPES } from "../server/constants.js"
 import { EVENTS } from "../websocket/events.js";
 
 export async function buildTwitch({ db, services, websocket }) {
-    const clientType = await services.settingService.get("twitch.clientType");
+    const clientType = await services.settingService.get("clientType", "twitch");
 
     const state = {
         initialized: false,
@@ -37,7 +37,7 @@ export async function buildTwitch({ db, services, websocket }) {
         state.authenticated = false;
         state.authentication.polling = false;
         state.broadcaster = null;
-        let clientType = await services.settingService.get("twitch.clientType");
+        let clientType = await services.settingService.get("clientType", "twitch");
         state.clientType = clientType.data;
 
         websocket.notifier.notify(EVENTS.TWITCH.STATUS.STATUS_CHANGE, getStatus())
@@ -50,7 +50,7 @@ export async function buildTwitch({ db, services, websocket }) {
     }
 
     async function connect(events) {
-        if (state.authenticated && state.eventSub.connected) {
+        if (state.authenticated && events.getStatus().connected) {
             console.warn("Twitch: Already authenticated");
             return {
                 success: true,
@@ -107,6 +107,7 @@ export async function buildTwitch({ db, services, websocket }) {
         const token = await publicTwitchAuth.awaitDeviceToken(deviceCode, interval, expiresIn);
 
         if (!token.success) {
+            state.authentication = {polling: 'false'};
             websocket.notifier.notify(EVENTS.ERRORS.AUTH, {message: token.message});
             return;
         }

@@ -1,6 +1,5 @@
 import { useEffectEvent } from "react";
 import { useEffect, useState } from "react";
-import "../../css/chat.css";
 import { useWebSocket } from "../../contexts/WebSocketContext";
 
 export default function WebSocketLog({className, style}) {
@@ -11,32 +10,27 @@ export default function WebSocketLog({className, style}) {
         websocket.connect();
 
         websocket.on("*", (message)=> {
-            addMessage(message);
+            let date = new Date(message.timestamp).toLocaleTimeString();
+            setMessages(current => {
+                const updated = [
+                    {
+                        time: date,
+                        message: message.type
+                    },
+                    ...current
+                ];
+
+                return updated.slice(0, 100);
+            });
         });
         
         return () => { websocket.disconnect() };
     }, []);
 
-    function addMessage(data) {
-        let date = data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString()
-        setMessages((prev) => {
-            const updated = [
-                {
-                    time: date,
-                    message: data.type,
-                }, ...prev
-            ]
-            return updated.slice(100);
-        });
-
-    }
-
-
-
     return (
-        <div className={className} style={{width: "100%", ...style}}>
+        <div className={`${className}`}>
             <h2>WebSocket Log</h2>
-            <div className="chat-feed flex-container border ">
+            <div className="log">
                 {messages.map((entry, index)=> (
                     <div key={index} style={{ margin: "2px"}}>
                         [{entry.time}] {entry.message}

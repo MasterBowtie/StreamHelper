@@ -3,7 +3,7 @@ import { sleep } from "../server/sleep.js";
 
 export function buildPublicTwitchAuthService({db, services}) {
     async function startDeviceAuth() {
-        const clientId = await services.settingService.get("twitch.clientId");
+        const clientId = await services.settingService.get("clientId", "twitch");
 
         if (!clientId.success) {
             return clientId;
@@ -45,7 +45,7 @@ export function buildPublicTwitchAuthService({db, services}) {
     }
 
     async function pollDeviceToken(deviceCode) {
-        const clientId = await services.settingService.get("twitch.clientId");
+        const clientId = await services.settingService.get("clientId", "twitch");
 
         if (!clientId.success) {
             return clientId;

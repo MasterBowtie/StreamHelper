@@ -1,8 +1,64 @@
-.flex-container {
+@import "tailwindcss";
+
+
+button {
+  @apply m-1 p-2 rounded-lg font-bold text-center;
+}
+
+button:hover {
+  @apply cursor-pointer;
+}
+
+button:disabled {
+  @apply cursor-not-allowed;
+  background-color: #b6b6b6;
+  color: rgb(0, 0, 0);
+}
+
+.warning-button{
+  background-color: #ff0000;
+  color: rgb(255, 255, 255);
+}
+
+.twitch-button {
+  background-color: #9147ff;
+  color: rgb(255, 255, 255);
+}
+
+.twitch-button:hover {
+  background-color: rgb(204, 255, 203);
+  color: rgb(0, 0, 0);
+}
+
+.log {
+  @apply flex flex-col border-black outline-4 rounded-xl min-h-9/10 max-h-screen overflow-y-auto;
+}
+
+h2 {
+  @apply text-lg m-3 font-semibold;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.dialog {
+  @apply rounded-xl p-3 shadow-xl;
+  background-color: white;
+}
+
+/* .flex-container {
   height: 100%;
   display: flex;
   margin: 2px;
-}
+  }
+  
 
 .border {
   border: 4px solid #000000;
@@ -61,4 +117,23 @@ label {
   top: 0px;
   left: 0px;
   z-index: 1;
+
+  
+.activation-code {
+    margin: 24px 0;
+
+    padding: 16px;
+
+    text-align: center;
+
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: .2rem;
+
+    background: #111;
+
+    border: 2px solid #9147ff;
+
+    border-radius: 8px;
 }
+} */

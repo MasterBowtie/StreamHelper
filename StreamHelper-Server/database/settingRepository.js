@@ -3,20 +3,17 @@ export class SettingRepository {
         this.pool = pool;
     }
 
-    async createSetting({key, value, type, description}) {
+    async createSetting({key, section, value, type, description}) {
         const [result] = await this.pool.execute(
             `INSERT INTO settings
-            (setting_key, setting_value, setting_type, description)
-            VALUES (?, ?, ?, ?)`, 
-            [key, value, type, description]);
+            (setting_key, section, setting_value, setting_type, description)
+            VALUES (?, ?, ?, ?, ?)`, 
+            [key, section, value, type, description]);
 
-        return {
-            success: true,
-            data: result.insertId
-        };
+        return result.insertId;
     }
 
-    async updateSetting({key, value, type, description}) {
+    async updateSetting({key, section, value, type, description}) {
         let query = `UPDATE settings SET `
         const values = [value];
         const updates = ['setting_value = ?'];
@@ -31,51 +28,58 @@ export class SettingRepository {
         }
 
         query += updates.join(", ");
-        query += " WHERE setting_key = ?"
+        query += " WHERE setting_key = ? AND section = ?"
         values.push(key);
+        values.push(section)
         const result = await this.pool.execute(query, values);
 
-        return {
-            success: true,
-            data: result.affectedRows === 1
-        };
+        return  result.affectedRows === 1;
     }
 
-    async findByKey(settingKey) {
+    async findByKey(settingKey, section) {
         const [rows] = await this.pool.execute(
             `SELECT setting_value, setting_type, description
             FROM settings
-            WHERE setting_key = ?`,
-            [settingKey]
+            WHERE setting_key = ? AND section = ?`,
+            [settingKey, section]
         );
 
-        return {
-            success: true,
-            data: rows[0] ?? null
-        };
+        return rows[0] ?? null;
+    }
+
+    async getBySection(section) {
+        const [rows] = await this.pool.execute(
+            `SELECT section, setting_key, setting_value, setting_type, description
+            FROM settings WHERE section = ?
+            ORDER by section, setting_key`,
+            [section]
+        );
+
+        return rows 
+    } 
+
+    async getSections() {
+        const [rows] = await this.pool.execute(
+            `SELECT section FROM settings GROUP BY section`
+        )
+        return rows;
     }
 
     async getAllSettings() {
         const [rows] = await this.pool.execute(
-            `SELECT setting_key, setting_value, setting_type, description
-            FROM settings`);
+            `SELECT section, setting_key, setting_value, setting_type, description
+            FROM settings ORDER BY section, setting_key`);
     
-        return {
-            data: rows,
-            success: true
-        };
+        return rows;
     }
 
-    async removeByKey(settingKey) {
+    async removeByKey(settingKey, section) {
         const result = await this.pool.execute(
             `DELETE FROM settings 
-            WHERE setting_key = ?`,
-            [settingKey]
+            WHERE setting_key = ? AND section = ?`,
+            [settingKey, section]
         );
 
-        return {
-            success: true,
-            data: result.affectedRows === 1
-        };
+        return result.affectedRows === 1;
     }
 }

@@ -10,29 +10,22 @@ function buildSettingsService({ db, encryptionService }) {
 
     async function ensureDefaults() {
         for (const setting of SETTINGS_DEFAULTS) {
-            const {success, data, message} = await db.settingRepository.findByKey(setting.key);
-        
-            if (success && !data) {
+            const data = await db.settingRepository.findByKey(setting.key, setting.section);
+            if (!data) {
                 await db.settingRepository.createSetting(setting);
             }
         }
     }
 
     async function load() {
-        const {success, data, message} = await db.settingRepository.getAllSettings();
-
-        if (!success) {
-            return {
-                success,
-                message
-            };
-        }
+        const data = await db.settingRepository.getAllSettings();
 
         cache.clear();
 
         for (const setting of data) {
-            cache.set(setting.setting_key, 
+            cache.set(`${setting.section}.${setting.setting_key}`, 
                 {
+                    section: setting.section,
                     settingValue: setting.setting_value,
                     settingKey: setting.setting_key,
                     settingType: setting.setting_type,
@@ -46,8 +39,8 @@ function buildSettingsService({ db, encryptionService }) {
         }
     }
 
-    async function get(key) {
-        const setting = cache.get(key);
+    async function get(key, section) {
+        const setting = cache.get(`${section}.${key}`);
 
         if (!setting) {
             return {
@@ -90,8 +83,40 @@ function buildSettingsService({ db, encryptionService }) {
         }
     }
 
-    async function set({key, value}) {
-        const setting = cache.get(key);
+    async function getAll() {
+        const results = [];
+
+        for (const key of cache.keys()) {
+            let k = key.split(".")
+            let data = await get(k[1], k[0]);
+            let value = cache.get(key)
+            if (data.success) {
+                value.settingValue = data.data
+                results.push(value);
+            }
+        }
+        return results;
+    }
+
+    async function getSection(section) {
+        const results = [];
+
+        for (const key of cache.keys()) {
+            let value = cache.get(key);
+            if (section === value.section) {
+                let k = key.split(".")
+                let data = await get(k[1], k[0]);
+                if (data.success) {
+                    value.settingValue = data.data
+                    results.push(value);
+                }
+            }
+        }
+        return results;
+    }
+
+    async function set({key, section, value}) {
+        const setting = cache.get(`${key}.${section}`);
 
         if (!setting) {
             return {
@@ -125,17 +150,23 @@ function buildSettingsService({ db, encryptionService }) {
                 break;
         }
 
-        const dbData = await db.settingRepository.updateSetting({key, value: storedValue})
+        // FIXME
+        let data = {key: setting.settingKey, section: setting.section, value: storedValue}
+        console.log(data);
+
+        // const dbData = await db.settingRepository.updateSetting()
         setting.value = storedValue;
 
-        return dbData;
+        // return dbData;
     }
 
     return {
         initialize,
         load,
         get,
-        set
+        getAll,
+        getSection,
+        set,
     }
 }
 

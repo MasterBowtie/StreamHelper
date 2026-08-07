@@ -6,7 +6,7 @@ function buildTwitchApiClient({
 }) {
     async function request(endpoint, options = {}) {
         const token = await tokenManager.getValidAccessToken();
-        const clientId = await services.settingService.get("twitch.clientId");
+        const clientId = await services.settingService.get("clientId", "twitch");
 
         if (!token && token.success === false) {
             console.error("Error:", token.message);

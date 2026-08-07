@@ -7,13 +7,13 @@ export default function MainDashboard() {
 
 
     return (
-        <div className="title">
-            <h1>Stream Helper Dashboard</h1>
+        <>
+            <h1 className="text-4xl text-center font-semibold">Stream Helper Dashboard</h1>
             <TwitchStatus/>
-            <div className="flex-container" style={{flexDirection: "row"}}>
-                <WebSocketLog style={{minHeight: "200px"}}/>
-                <EventSubStatus/>
+            <div className="flex flex-row gap-5">
+                <WebSocketLog className={"grow"}/>
+                <EventSubStatus className={"grow"}/>
             </div>
-        </div>
+        </>
     )
 }

@@ -38,6 +38,10 @@ export function buildEncryptionService({key}) {
     }
 
     function decrypt(cipherText) {
+        if (!cipherText) {
+            return "";
+        }
+
         const buffer = Buffer.from(cipherText, "base64");
 
         const iv = buffer.subarray(0, IV_LENGTH);

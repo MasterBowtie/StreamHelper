@@ -4,25 +4,24 @@ import { EVENTS } from "../websocket/events.js";
 export function buildSettingsRouter(components) {
     const router = Router();
 
-    // handle requests and posts
-    router.put("/:key", async(req, res, next) => {
+    router.get("/all", async (req, res, next )=> {
+        const results = await components.services.settingService.getAll();
+        return res.json({success: true, data: results});
+    })
+
+    router.get("/:section", async(req, res, next) => {
         try {
-            const { key } = req.params;
-            const { value } = req.body;
+            const { section } = req.params;
 
-            await components.services.settingService.set({key, value});
-
-            await components.twitch.onSettingChange(key);
-
-            components.websocket.notifier.notify(EVENTS.APP.TWITCH_STATUS_CHANGE);
-
-            res.json({
-                success: true
-            })
-
+            const results = await components.services.settingService.getSection(section);
+            return res.json({success: true, data: results});
         } catch (err) {
             next(err);
         }
+    })
+
+    router.post("/save", async(req, res, next) => {
+
     })
 
     return router;

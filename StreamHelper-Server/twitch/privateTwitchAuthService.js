@@ -1,7 +1,7 @@
 export function buildPrivateTwitchAuthService({services}) {
 
     async function exchangeCodeForToken(code) {
-        const clientId = await services.settingService.get("twitch.clientId");
+        const clientId = await services.settingService.get("clientId", "twitch");
         const response = await fetch(twitchConfig.oauth.tokenUrl, {
         method: 'POST',
         headers: {
@@ -36,7 +36,7 @@ export function buildPrivateTwitchAuthService({services}) {
     }
 
     async function getLoginUrl() {
-        const clientId = await services.settingService.get("twitch.clientId");
+        const clientId = await services.settingService.get("clientId", "twitch");
         const params = new URLSearchParams ({
             client_id: clientId,
             redirect_uri: twitchConfig.redirectUri,

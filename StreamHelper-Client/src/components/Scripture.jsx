@@ -3,9 +3,6 @@ import { useRef } from "react"
 import { useApi } from "../utils/api.js";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import "../css/scripture.css";
-
-
 
 function ScriptureCrud() {
       const api = useApi();
