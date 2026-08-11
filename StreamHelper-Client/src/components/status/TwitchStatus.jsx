@@ -41,6 +41,7 @@ export default function TwitchStatus() {
             if (!res.success) {
                 return;
             }
+            console.log(res.data);
 
             if (res.data.mode === "public") {
                 setDialogOpen(true);
@@ -49,6 +50,7 @@ export default function TwitchStatus() {
             } else if (res.data.mode === "private") {
                 setPrivate(res.data);
                 setPublic(null);
+                console.log(res.data);
                 window.open(res.data.url, "_blank")
                 // TODO: trigger waiting status
             }

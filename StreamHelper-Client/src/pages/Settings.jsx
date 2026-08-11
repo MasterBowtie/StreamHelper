@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "../components/Input";
 import { useEffect } from "react";
 import { useApi } from "../utils/api.js";
+import Button from "../components/Button.jsx";
 
 export function Settings() {
     const api = useApi();
@@ -9,11 +10,15 @@ export function Settings() {
 
     useEffect(()=> {
         api.get("api/settings/all").then((res)=> {
+            if (!res.success) {
+                return;
+            }
             for (const s of res.data) {
+                // console.log(s);
                 updateSetting(`${s.section}.${s.settingKey}`, s.settingValue);
             }
         })
-    },[])
+    }, [])
 
     function updateSetting(key, value) {
         setSettings(current=> {
@@ -23,16 +28,26 @@ export function Settings() {
         })
     }
 
+    function save() {
+        const data = Object.fromEntries(settings);
+        api.post("api/settings/save", data).then((res)=> {
+            console.log(res);
+        })
+    }
+
     return (
-        <div className="settings-page">
+        <div className="page">
             <h1>Settings</h1>
 
-            <section className="settings-section">
-                <h2>Twitch</h2>
-
-                <div className="setting-row">
-                    <Input id={"clientId"} label={"Client Id:"} type={"text"} placeholder={"Client Id for Twitch"} onChange={(value)=>{updateSetting("twitch.clientId", value)}} value={settings?.get("twitch.clientId")}/>
-                </div>
+            <h2>Twitch</h2>
+            <section className="max-w-[800px] border-black outline-4 rounded-xl p-4">
+                <Input 
+                    id={"clientId"} 
+                    label={"Client Id:"} 
+                    type={"text"} 
+                    placeholder={"Client Id for Twitch"} 
+                    onChange={(value)=>{updateSetting("twitch.clientId", value)}} 
+                    value={settings?.get("twitch.clientId")}/>
 
                 <div className="setting-row">
                     <label>Authentication Mode</label>
@@ -43,8 +58,9 @@ export function Settings() {
                                 type="radio"
                                 name="authMode"
                                 value="private"
-                                defaultChecked
-                            />
+                                checked={settings.get("twitch.clientType") === "private"}
+                                onChange={e=>updateSetting("twitch.clientType", e.target.value)}
+                                />
                             Private
                         </label>
 
@@ -53,28 +69,24 @@ export function Settings() {
                                 type="radio"
                                 name="authMode"
                                 value="public"
+                                checked={settings.get("twitch.clientType") === "public"}
+                                onChange={e=>updateSetting("twitch.clientType", e.target.value)}
                             />
                             Public
                         </label>
                     </div>
                 </div>
 
-                <div className="setting-row">
-                    <label htmlFor="clientSecret">
-                        Client Secret
-                    </label>
-
-                    <input
-                        id="clientSecret"
-                        type="password"
-                        placeholder="Enter your Twitch Client Secret"
-                    />
-                </div>
+                <Input 
+                    id={"clientSecret"} 
+                    label={"Client Secret:"} 
+                    type={"password"} 
+                    placeholder={"Client Secret for Private Twitch"} 
+                    onChange={(value)=>{updateSetting("twitch.clientSecret", value)}} 
+                    value={settings?.get("twitch.clientSecret")}/>
 
                 <div className="settings-actions">
-                    <button>
-                        Save
-                    </button>
+                    <Button text={"Save"} className={"warning-button"} onClick={save}/>
                 </div>
             </section>
         </div>

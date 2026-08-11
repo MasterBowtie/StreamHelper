@@ -31,7 +31,7 @@ export class SettingRepository {
         query += " WHERE setting_key = ? AND section = ?"
         values.push(key);
         values.push(section)
-        const result = await this.pool.execute(query, values);
+        const [result] = await this.pool.execute(query, values);
 
         return  result.affectedRows === 1;
     }

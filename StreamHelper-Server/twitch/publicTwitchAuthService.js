@@ -9,7 +9,7 @@ export function buildPublicTwitchAuthService({db, services}) {
             return clientId;
         }
 
-        const response = await fetch(twitchConfig.oauth.authUrl,
+        const response = await fetch(twitchConfig.oauth.deviceUrl,
             {
                 method: "POST",
                 headers: {

@@ -1,3 +1,5 @@
+import { twitchConfig } from "./twitchConfig.js";
+
 export function buildPrivateTwitchAuthService({services}) {
 
     async function exchangeCodeForToken(code) {
@@ -37,8 +39,9 @@ export function buildPrivateTwitchAuthService({services}) {
 
     async function getLoginUrl() {
         const clientId = await services.settingService.get("clientId", "twitch");
+
         const params = new URLSearchParams ({
-            client_id: clientId,
+            client_id: clientId.data,
             redirect_uri: twitchConfig.redirectUri,
             response_type: 'code',
             scope: twitchConfig.scopes.join(' ')

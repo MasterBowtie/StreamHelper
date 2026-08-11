@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  height: 100vh;
+  padding: clamp(1em, 3vw, 2em);
+  box-sizing: border-box;
+}
+
+.page {
+  height: 100%;
+  padding-inline: .75em;
+  overflow-y: scroll;
+}
 
 button {
   @apply m-1 p-2 rounded-lg font-bold text-center;
@@ -25,7 +44,7 @@ button:disabled {
   color: rgb(255, 255, 255);
 }
 
-.twitch-button:hover {
+.twitch-button:hover:not(:disabled) {
   background-color: rgb(204, 255, 203);
   color: rgb(0, 0, 0);
 }
@@ -34,8 +53,20 @@ button:disabled {
   @apply flex flex-col border-black outline-4 rounded-xl min-h-9/10 max-h-screen overflow-y-auto;
 }
 
+h1 {
+  @apply text-4xl text-center font-semibold;
+}
+
 h2 {
   @apply text-lg m-3 font-semibold;
+}
+
+label {
+  @apply mr-3 w-[7em] font-semibold;
+}
+
+input:not([type=radio]):not([type=checkbox]) {
+  @apply border-black outline-1 px-2 rounded-sm min-w-[200px] w-full; 
 }
 
 .dialog-backdrop {
@@ -52,6 +83,7 @@ h2 {
   @apply rounded-xl p-3 shadow-xl;
   background-color: white;
 }
+
 
 /* .flex-container {
   height: 100%;

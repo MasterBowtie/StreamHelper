@@ -116,7 +116,9 @@ function buildSettingsService({ db, encryptionService }) {
     }
 
     async function set({key, section, value}) {
-        const setting = cache.get(`${key}.${section}`);
+
+        console.log("SETTINGS SET:", `${section}.${key}`);
+        const setting = cache.get(`${section}.${key}`);
 
         if (!setting) {
             return {
@@ -152,12 +154,11 @@ function buildSettingsService({ db, encryptionService }) {
 
         // FIXME
         let data = {key: setting.settingKey, section: setting.section, value: storedValue}
-        console.log(data);
 
-        // const dbData = await db.settingRepository.updateSetting()
-        setting.value = storedValue;
+        const dbData = await db.settingRepository.updateSetting(data)
+        cache.set(`${section}.${key}`, storedValue);
 
-        // return dbData;
+        return dbData;
     }
 
     return {

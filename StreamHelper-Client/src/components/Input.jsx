@@ -14,7 +14,7 @@ import { useState } from "react"
 
 export function Input({id, type="string", label, placeholder, value="", onChange=()=>{}}) {
     return (
-        <>
+        <div className="flex my-2">
             <label htmlFor={id}>
                 {label}
             </label>
@@ -26,6 +26,6 @@ export function Input({id, type="string", label, placeholder, value="", onChange
                 value={value}
                 onChange={e=>{onChange(e.target.value)}}
             />
-        </>
+        </div>
     )
 }

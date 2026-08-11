@@ -3,7 +3,8 @@ export const twitchConfig = {
 
     oauth: {
         activateUrl: "https://twitch.tv/activate",
-        authUrl: "https://id.twitch.tv/oauth2/device",
+        authUrl: "https://twitch.tv/oauth2/authorize",
+        deviceUrl: "https://id.twitch.tv/oauth2/device",
         tokenUrl: 'https://id.twitch.tv/oauth2/token',
         validateUrl: 'https://id.twitch.tv/oauth2/validate'
     },

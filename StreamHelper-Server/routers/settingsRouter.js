@@ -21,7 +21,13 @@ export function buildSettingsRouter(components) {
     })
 
     router.post("/save", async(req, res, next) => {
-
+        await components.twitch.disconnect(components.events);
+        let data = req.body;
+        for (const key of Object.keys(data)) {
+            let save = await components.services.settingService.set({key: key.split(".")[1], section: key.split(".")[0], value: data[key]})
+            data[key] = save;
+        }
+        return res.json(data);
     })
 
     return router;
