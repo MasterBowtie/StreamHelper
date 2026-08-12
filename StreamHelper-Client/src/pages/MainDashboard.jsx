@@ -8,7 +8,7 @@ export default function MainDashboard() {
 
     return (
         <div className="page">
-            <h1>Stream Helper Dashboard</h1>
+            <h1 className="pt-4">Dashboard</h1>
             <TwitchStatus/>
             <div className="flex flex-row gap-5">
                 <WebSocketLog className={"grow"}/>

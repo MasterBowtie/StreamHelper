@@ -3,29 +3,7 @@ import { useEffect, useState } from "react";
 import { useWebSocket } from "../../contexts/WebSocketContext";
 
 export default function WebSocketLog({className, style}) {
-    const [messages, setMessages] = useState([]);
-    const websocket = useWebSocket();
-
-    useEffect(()=>{
-        websocket.connect();
-
-        websocket.on("*", (message)=> {
-            let date = new Date(message.timestamp).toLocaleTimeString();
-            setMessages(current => {
-                const updated = [
-                    {
-                        time: date,
-                        message: message.type
-                    },
-                    ...current
-                ];
-
-                return updated.slice(0, 100);
-            });
-        });
-        
-        return () => { websocket.disconnect() };
-    }, []);
+    const {messages} = useWebSocket();
 
     return (
         <div className={`${className}`}>

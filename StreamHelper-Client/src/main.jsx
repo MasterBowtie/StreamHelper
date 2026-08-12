@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
 import { Scripture, ScriptureView, ScriptureCrud } from './components/Scripture.jsx'
 import Start from './pages/Start.jsx'
 import "./css/index.css"
@@ -11,12 +10,15 @@ import Intermission from './pages/Intermission.jsx'
 import MainDashboard from './pages/MainDashboard.jsx'
 import { WebSocketProvider } from './contexts/WebSocketContext.jsx'
 import { Settings } from './pages/Settings.jsx'
-
-
+import Layout from './pages/Layout.jsx'
+import Draw from './pages/Draw.jsx'
 
 const router = createHashRouter([
-    {path: "", element: <MainDashboard/>},
-    {path: "settings", element: <Settings/>}
+    {path: "/", element: <Layout/>, children: [
+        {index: true, element: <MainDashboard/>},
+        {path: "settings", element: <Settings/>},
+        {path: "draw", element: <Draw/>},
+    ]}
     // {path: "scripture", element: <Scripture/>, children: [
     //     {path: "crud", element: <ScriptureCrud/>},
     //     {path: "view", element: <ScriptureView/>}

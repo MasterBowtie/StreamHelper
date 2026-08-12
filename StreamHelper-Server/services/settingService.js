@@ -89,7 +89,7 @@ function buildSettingsService({ db, encryptionService }) {
         for (const key of cache.keys()) {
             let k = key.split(".")
             let data = await get(k[1], k[0]);
-            let value = cache.get(key)
+            let value = {...cache.get(key)}
             if (data.success) {
                 value.settingValue = data.data
                 results.push(value);
@@ -102,7 +102,7 @@ function buildSettingsService({ db, encryptionService }) {
         const results = [];
 
         for (const key of cache.keys()) {
-            let value = cache.get(key);
+            let value = { ...cache.get(key) };
             if (section === value.section) {
                 let k = key.split(".")
                 let data = await get(k[1], k[0]);
@@ -117,7 +117,6 @@ function buildSettingsService({ db, encryptionService }) {
 
     async function set({key, section, value}) {
 
-        console.log("SETTINGS SET:", `${section}.${key}`);
         const setting = cache.get(`${section}.${key}`);
 
         if (!setting) {
@@ -156,7 +155,7 @@ function buildSettingsService({ db, encryptionService }) {
         let data = {key: setting.settingKey, section: setting.section, value: storedValue}
 
         const dbData = await db.settingRepository.updateSetting(data)
-        cache.set(`${section}.${key}`, storedValue);
+        setting.settingValue = storedValue;
 
         return dbData;
     }

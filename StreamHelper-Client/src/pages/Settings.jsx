@@ -37,7 +37,7 @@ export function Settings() {
 
     return (
         <div className="page">
-            <h1>Settings</h1>
+            <h1 className="pt-4">Settings</h1>
 
             <h2>Twitch</h2>
             <section className="max-w-[800px] border-black outline-4 rounded-xl p-4">

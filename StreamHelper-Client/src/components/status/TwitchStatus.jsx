@@ -11,15 +11,11 @@ export default function TwitchStatus() {
     const [privateConnect, setPrivate] = useState();
     const pollTimer = useRef(null);
     const api = useApi();
-    const websocket = useWebSocket();
+    const { websocket } = useWebSocket();
     
     useEffect(()=> {
         updateStatus();
-        websocket.connect();
-
         websocket.on("twitch.connect", ()=>{updateStatus()})
-
-        return () => websocket.disconnect();
     }, [])
 
     function updateStatus() {

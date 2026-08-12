@@ -5,16 +5,12 @@ import { useWebSocket } from "../../contexts/WebSocketContext.jsx";
 export default function EventSubStatus({className, style}) {
     const [subs, setSubs] = useState([]);
     const api = useApi();
-    const websocket = useWebSocket();
+    const { websocket } = useWebSocket();
 
     useEffect(()=> {
         getSubs();
-        websocket.connect();
-
         websocket.on("eventsub.connected", ()=>{getSubs()})
         websocket.on("eventsub.stopped", ()=>{setSubs([])})
-
-        return () => websocket.disconnect();
     }, []);
 
     function getSubs() {
