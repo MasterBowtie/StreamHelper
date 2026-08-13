@@ -1,25 +1,26 @@
-#main {
+.draw {
     display: flex;
-    width: 100%;
+    flex-direction: row;
+    box-sizing: border-box;
+    padding-inline: .75em;
 }
+
 label {
     vertical-align: top;
 }
 
 #canvas-main {
     border: 2px solid black;
-    width: 800px;
-    height: 800px;
+    width: 100%;
 }
 
 #input-section {
     display: flex;
     flex-direction: column;
     margin-left: 10px;
+    padding-inline: 2px;
     border: 2px solid black;
-    width: 100%;
     overflow-y: scroll;
-    height: 800px;
 }
 
 .collapsible {
@@ -27,7 +28,6 @@ label {
     color: white;
     cursor: pointer;
     padding: 18px;
-    width: 100%;
     border: none;
     text-align: left;
     outline: none;

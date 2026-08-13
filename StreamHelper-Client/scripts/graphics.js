@@ -3,7 +3,7 @@ import { MyElements, MyGraphics } from "./objects.js";
 MyGraphics.graphics = (function(matrix) {
     'use strict';
     var canvas = document.getElementById('canvas-main');
-    var context = canvas.getContext('2d', { alpha: false});
+    var context = canvas.getContext('2d');
     var zoom = 1;
     var grid = 1;
     var printing = false;
@@ -43,7 +43,8 @@ MyGraphics.graphics = (function(matrix) {
     }
 
     function labelBoundry() {
-        context.strokeStyle = "rgb(255, 0, 255)";
+        // console.log("Boundry:", context.width, context.height);
+        context.strokeStyle = "rgb(4, 134, 0)";
         context.lineWidth = 2/zoom;
         
 
@@ -484,26 +485,36 @@ MyGraphics.graphics = (function(matrix) {
         return endPrint();
     }
 
+    function resize() {
+        canvas = document.getElementById('canvas-main');
+        context = canvas.getContext('2d');
+        
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+    }
+
     let api = {
-        clear: clear,
-        drawRectangle: drawRectangle,
-        drawEllipse: drawEllipse,
-        drawText: drawText,
-        drawBoundry: drawBoundry,
-        detectCursor: detectCursor,
-        drawImage: drawImage,
-        drawTextBox: drawTextBox,
-        transformPoint: transformPoint,
-        drawGrid: drawGrid,
-        printLabel: printLabel,
-        labelBoundry: labelBoundry,
-        drawMouse: drawMouse,
+        clear,
+        drawRectangle,
+        drawEllipse,
+        drawText,
+        drawBoundry,
+        detectCursor,
+        drawImage,
+        drawTextBox,
+        transformPoint,
+        drawGrid,
+        printLabel,
+        labelBoundry,
+        drawMouse,
         setZoom(newZoom) { zoom = Number(newZoom)},
         get getZoom() { return zoom },
         setGrid(newGrid) {grid = Number(newGrid)},
         get getGrid() { return grid },
         get getLabel() {return label},
         get getTranslate() {return translate},
+        resize,
+
     }
 
     return api;

@@ -3,7 +3,7 @@ import { MyElements, MyGraphics } from "./objects.js";
 MyElements.main = (function(graphics, mouse_input, keyboard) {
 
     var canvas = document.getElementById("canvas-main");
-    var context = canvas.getContext('2d', { alpha: false});
+    var context = canvas.getContext('2d');
     var cursors = ["se-resize", "sw-resize", "ne-resize", "nw-resize"];
 
     var currentElement = null;
@@ -504,7 +504,7 @@ MyElements.main = (function(graphics, mouse_input, keyboard) {
         let mouseState = mouse_input.getState();
         if (translate) {
             if (!mouseState.leftIsDown) {
-                console.log("Translate!")
+                // console.log("Translate!")
                 canvas.style.cursor = "grab";
             } else {
                 canvas.style.cursor = "grabbing";

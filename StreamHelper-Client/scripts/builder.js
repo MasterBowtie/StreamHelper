@@ -2,24 +2,37 @@ import { MyElements, MyGraphics } from "./objects.js";
 
 MyElements.input = (function(elements, graphics) {
 
+    const MARGIN = 100;
     var container;
     var count = 0;
 
+    graphics.resize();
+
     var canvas = document.getElementById("canvas-main");
-    var context = canvas.getContext('2d', { alpha: false});
+    var context = canvas.getContext('2d');
+
+    const observer = new ResizeObserver(entries => {
+        graphics.resize()
+        adjustZoom();
+    });
+
+    observer.observe(canvas);
 
     initialize();
-
 
     // Get the GUI Setup
     function initialize() {
         console.log("Initializing Inputs...")
         container = document.getElementById("input-section");
+        // Clears and Resets the Container
+        container.replaceChildren();
+
         buildLabelSection();
         container.appendChild(buildCanvasControls());
 
 
         let createSection = document.createElement("div");
+        createSection.classList.add("create-section");
         
         // Build the New Element Buttons
         createSection.appendChild(createButton("box"));
@@ -27,8 +40,6 @@ MyElements.input = (function(elements, graphics) {
         createSection.appendChild(createButton("image"));
         createSection.appendChild(createButton("text"));
         createSection.appendChild(createButton("textBox"));
-        createSection.appendChild(createButton("qR_Code"));
-        createSection.appendChild(createButton("barcode"));
         
         container.appendChild(createSection);
 
@@ -39,7 +50,7 @@ MyElements.input = (function(elements, graphics) {
         let col_button = document.createElement("button");
         col_button.classList.add("collapsible");
         col_button.id = "collapse_button_" + count;
-        col_button.innerHTML = "Label Information";
+        col_button.innerHTML = "Alert Information";
         count += 1;
         container.appendChild(col_button);
         let section = document.createElement("div");
@@ -68,7 +79,7 @@ MyElements.input = (function(elements, graphics) {
         
         let div = document.createElement("div");
         let label = document.createElement("label")
-        label.innerHTML = "Label Name: ";
+        label.innerHTML = "Alert Name: ";
         label.htmlFor = input.id;
         
         div.appendChild(label);
@@ -88,10 +99,10 @@ MyElements.input = (function(elements, graphics) {
         input.id = "labelWidth";
         input.name = "labelWidth";
         input.type = "number";
-        input.step = "0.001";
-        input.min = "0.250";
-        input.max = "6.000";
-        input.value = "2.000";
+        input.step = "1";
+        input.min = "200";
+        input.max = "2560"; //OBS Max Screen
+        input.value = "600";
 
         // Change label size and canvas tranformation inputs
         input.oninput = (event) => {
@@ -102,24 +113,8 @@ MyElements.input = (function(elements, graphics) {
                 event.target.value = event.target.min
             }
             let label = graphics.getLabel;
-            label.w = Number(event.target.value * 300);
-            let rl = document.getElementById("shiftLR");
-            let ud = document.getElementById("shiftUD");
-            let zoom = document.getElementById("zoom");
-            let zoomMin = document.getElementById("zoomMin")
-            if (label.w >= label.h) {
-                zoom.min = 2/event.target.value;
-                rl.min = Math.round(-100/zoom.min);
-                ud.min = Math.round(-100/zoom.min);
-                zoomMin.innerHTML = "Zoom:   " + Math.round(zoom.min * 100) + "% ";
-                graphics.setZoom(zoom.value);
-            }
-            rl.max = Math.round((label.w * zoom.value + 100 - canvas.width)/zoom.value);
-            ud.max = Math.round((label.h * zoom.value + 100 - canvas.height)/zoom.value);
-            // console.log("Min: " + rl.min + " Max: " + rl.max + " Value: " + rl.value);
-            let translate = graphics.getTranslate
-            translate.x = -rl.value;
-            translate.y = -ud.value;
+            label.w = Number(event.target.value);
+            adjustZoom();
         }
         label = document.createElement("label");
         label.innerHTML = "Width: "
@@ -127,14 +122,7 @@ MyElements.input = (function(elements, graphics) {
         
         div.appendChild(label);
         div.appendChild(input);
-        
-        label = document.createElement("label");
-        label.id = "labelWidthUnits";
-        label.innerHTML = " inches";
-        label.htmlFor = input.id;
-        div.appendChild(label);
         span.appendChild(div);
-        
         
         // Height Section
         div = document.createElement("div");
@@ -142,10 +130,10 @@ MyElements.input = (function(elements, graphics) {
         input.id = "labelHeight";
         input.name = "labelHeight";
         input.type = "number";
-        input.step = "0.001";
-        input.min = "0.250";
-        input.max = "6.000";
-        input.value = "2.000";
+        input.step = "1";
+        input.min = "200";
+        input.max = "1600"; //OBS Max Screen
+        input.value = "600";
         input.oninput = (event) => {
             if (Number(event.target.value) > Number(event.target.max)) {
                 event.target.value = event.target.max
@@ -154,24 +142,8 @@ MyElements.input = (function(elements, graphics) {
                 event.target.value = event.target.min
             }
             let label = graphics.getLabel;
-            label.h = Number(event.target.value * 300);
-            let rl = document.getElementById("shiftLR");
-            let ud = document.getElementById("shiftUD");
-            let zoom = document.getElementById("zoom");
-            let zoomMin = document.getElementById("zoomMin")
-            if (label.h >= label.w) {
-                zoom.min = (2/event.target.value);
-                zoomMin.innerHTML = "Zoom:   " + Math.round(zoom.min * 100) + "% ";
-                rl.min = Math.round(-100/zoom.min);
-                ud.min = Math.round(-100/zoom.min);
-                graphics.setZoom(zoom.value);
-            }
-            rl.max = Math.round((label.w * zoom.value + 100 - canvas.width)/zoom.value);
-            ud.max = Math.round((label.h * zoom.value + 100 - canvas.height)/zoom.value);
-            // console.log("Min: " + rl.min + " Max: " + rl.max + " Value: " + rl.value);
-            let translate = graphics.getTranslate
-            translate.x = -rl.value;
-            translate.y = -ud.value;
+            label.h = Number(event.target.value);
+            adjustZoom();
         }
         label = document.createElement("label");
         label.innerHTML = "Height: "
@@ -179,187 +151,6 @@ MyElements.input = (function(elements, graphics) {
         
         div.appendChild(label);
         div.appendChild(input);
-    
-        label = document.createElement("label");
-        label.id = "labelHeightUnits";
-        label.innerHTML = " inches";
-        label.htmlFor = input.id;
-        div.appendChild(label);
-        span.appendChild(div);
-        
-
-        // Radio Buttons
-        div = document.createElement("div");
-        label = document.createElement("label");
-        label.innerHTML = "Units: ";
-        div.appendChild(label);
-        
-        // Inches Radio Button
-        input = document.createElement("input")
-        input.type = "radio";
-        input.name = "labelUnits";
-        input.id = "inchesRadio";
-        input.value = "inches";
-        input.checked = true;
-
-        // Change Inputs on switch
-        input.onchange = (event) => {
-            let w = document.getElementById("labelWidth");
-            w.max = "6.000";
-            w.min = "0.250";
-            w.value = Math.round((Number(w.value) * 0.3937008) * 1000)/1000;
-            w.oninput = (event) => {
-                if (Number(event.target.value) > Number(event.target.max)) {
-                    event.target.value = event.target.max
-                }
-                if (Number(event.target.value) < Number(event.target.min)) {
-                    event.target.value = event.target.min
-                }
-                let label = graphics.getLabel;
-                label.w = Number(event.target.value * 300);
-                let rl = document.getElementById("shiftLR");
-                let ud = document.getElementById("shiftUD");
-                let zoom = document.getElementById("zoom");
-                let zoomMin = document.getElementById("zoomMin")
-                if (label.w >= label.h) {
-                    zoom.min = 2/event.target.value;
-                    rl.min = Math.round(-100/zoom.min);
-                    ud.min = Math.round(-100/zoom.min);
-                    zoomMin.innerHTML = "Zoom:   " + Math.round(zoom.min * 100) + "% ";
-                    graphics.setZoom(zoom.value);
-                }
-                rl.max = Math.round((label.w * zoom.value + 100 - canvas.width)/zoom.value);
-                ud.max = Math.round((label.h * zoom.value + 100 - canvas.height)/zoom.value);
-                // console.log("Min: " + rl.min + " Max: " + rl.max + " Value: " + rl.value);
-                let translate = graphics.getTranslate
-                translate.x = -rl.value;
-                translate.y = -ud.value;
-            }
-            let wl = document.getElementById("labelWidthUnits");
-            wl.innerHTML = " " + event.target.value;
-            let h = document.getElementById("labelHeight");
-            h.max = "6.000";
-            h.min = "0.250";
-            h.value = Math.round((Number(h.value) * 0.3937008) * 1000)/1000;
-            h.oninput = (event) => {
-                if (Number(event.target.value) > Number(event.target.max)) {
-                    event.target.value = event.target.max
-                }
-                if (Number(event.target.value) < Number(event.target.min)) {
-                    event.target.value = event.target.min
-                }
-                let label = graphics.getLabel;
-                label.h = Number(event.target.value * 300);
-                let rl = document.getElementById("shiftLR");
-                let ud = document.getElementById("shiftUD");
-                let zoom = document.getElementById("zoom");
-                let zoomMin = document.getElementById("zoomMin")
-                if (label.h >= label.w) {
-                    zoom.min = (2/event.target.value);
-                    zoomMin.innerHTML = "Zoom:   " + Math.round(zoom.min * 100) + "% ";
-                    rl.min = Math.round(-100/zoom.min);
-                    ud.min = Math.round(-100/zoom.min);
-                    graphics.setZoom(zoom.value);
-                }
-                rl.max = Math.round((label.w * zoom.value + 100 - canvas.width)/zoom.value);
-                ud.max = Math.round((label.h * zoom.value + 100 - canvas.height)/zoom.value);
-                // console.log("Min: " + rl.min + " Max: " + rl.max + " Value: " + rl.value);
-                let translate = graphics.getTranslate
-                translate.x = -rl.value;
-                translate.y = -ud.value;
-            }
-            let hl = document.getElementById("labelHeightUnits");
-            hl.innerHTML = " " + event.target.value;
-        }
-        label = document.createElement("label");
-        label.innerHTML = " inches";
-        label.htmlFor = input.id;
-        div.appendChild(input);
-        div.appendChild(label);
-
-
-        // Centimeters Radio
-        input = document.createElement("input")
-        input.type = "radio";
-        input.name = "labelUnits";
-        input.id = "cmRadio";
-        input.value = "centimeters";
-
-        // Change Inputs on switch
-        input.onchange = (event) => {
-            let w = document.getElementById("labelWidth");
-            w.max = "15.24";
-            w.min = "0.635";
-            w.value = Math.round((Number(w.value) * 2.54) * 1000)/1000;
-            w.oninput = (event) => {
-                if (Number(event.target.value) > Number(event.target.max)) {
-                    event.target.value = event.target.max
-                }
-                if (Number(event.target.value) < Number(event.target.min)) {
-                    event.target.value = event.target.min
-                }
-                let label = graphics.getLabel;
-                label.w = Number(event.target.value * 118);
-                let rl = document.getElementById("shiftLR");
-                let ud = document.getElementById("shiftUD");
-                let zoom = document.getElementById("zoom");
-                let zoomMin = document.getElementById("zoomMin")
-                if (label.w >= label.h) {
-                    zoom.min = 5.08/event.target.value;
-                    rl.min = Math.round(-100/zoom.min);
-                    ud.min = Math.round(-100/zoom.min);
-                    zoomMin.innerHTML = "Zoom:   " + Math.round(zoom.min * 100) + "% ";
-                    graphics.setZoom(zoom.value);
-                }
-                rl.max = Math.round((label.w * zoom.value + 100 - canvas.width)/zoom.value);
-                ud.max = Math.round((label.h * zoom.value + 100 - canvas.height)/zoom.value);
-                // console.log("Min: " + rl.min + " Max: " + rl.max + " Value: " + rl.value);
-                let translate = graphics.getTranslate
-                translate.x = -rl.value;
-                translate.y = -ud.value;
-            }
-            let wl = document.getElementById("labelWidthUnits");
-            wl.innerHTML = " " + event.target.value;
-            let h = document.getElementById("labelHeight");
-            h.max = "15.24";
-            h.min = "0.635";
-            h.value = Math.round((Number(h.value) * 2.54) * 1000)/1000;
-            h.oninput = (event) => {
-                if (Number(event.target.value) > Number(event.target.max)) {
-                    event.target.value = event.target.max
-                }
-                if (Number(event.target.value) < Number(event.target.min)) {
-                    event.target.value = event.target.min
-                }
-                let label = graphics.getLabel;
-                label.h = Number(event.target.value * 300);
-                let rl = document.getElementById("shiftLR");
-                let ud = document.getElementById("shiftUD");
-                let zoom = document.getElementById("zoom");
-                let zoomMin = document.getElementById("zoomMin")
-                if (label.h >= label.w) {
-                    zoom.min = (5.08/event.target.value);
-                    zoomMin.innerHTML = "Zoom:   " + Math.round(zoom.min * 100) + "% ";
-                    rl.min = Math.round(-100/zoom.min);
-                    ud.min = Math.round(-100/zoom.min);
-                    graphics.setZoom(zoom.value);
-                }
-                rl.max = Math.round((label.w * zoom.value + 100 - canvas.width)/zoom.value);
-                ud.max = Math.round((label.h * zoom.value + 100 - canvas.height)/zoom.value);
-                // console.log("Min: " + rl.min + " Max: " + rl.max + " Value: " + rl.value);
-                let translate = graphics.getTranslate
-                translate.x = -rl.value;
-                translate.y = -ud.value;
-            }
-            let hl = document.getElementById("labelHeightUnits");
-            hl.innerHTML = " " + event.target.value;
-        }
-        label = document.createElement("label");
-        label.innerHTML = " centimeters";
-        label.htmlFor = input.id;
-        div.appendChild(input);
-        div.appendChild(label);
-        
         span.appendChild(div);
         form.appendChild(span);
         
@@ -432,6 +223,27 @@ MyElements.input = (function(elements, graphics) {
         form.appendChild(button);
 
         return section;
+    }
+
+    function adjustZoom() {
+        let label = graphics.getLabel;
+        let zoom = document.getElementById("zoom");
+        let zoomMin = document.getElementById("zoomMin")
+        let widthMin = (canvas.width - MARGIN * 2) / label.w; 
+        let heightMin = (canvas.height - MARGIN * 2) / label.h; 
+        zoom.min = Math.min(widthMin, heightMin);
+        zoomMin.innerHTML = "Zoom:   " + Math.round(zoom.min * 1000)/10 + "% ";
+
+        let rl = document.getElementById("shiftLR");
+        let ud = document.getElementById("shiftUD");
+
+        rl.min = Math.round(-100/zoom.min);
+        ud.min = Math.round(-100/zoom.min);
+
+        let translate = graphics.getTranslate
+        translate.x = -rl.value;
+        translate.y = -ud.value;
+        graphics.setZoom(zoom.value);
     }
 
     function checkReady(list) {
@@ -552,6 +364,7 @@ MyElements.input = (function(elements, graphics) {
         input = document.createElement("input");
         input.id = "zoom";
         input.type = "range";
+        // FIX ME
         input.min = "1";
         input.max = "8";
         input.value = "1";
@@ -668,7 +481,7 @@ MyElements.input = (function(elements, graphics) {
                 element.color = "black";
                 element.font = "Arial";
                 element.size = 20;
-                var context = canvas.getContext('2d', { alpha: false});
+                var context = canvas.getContext('2d');
                 context.font = element.size + "px " + element.font;
                 element.h = context.measureText("m").width;
                 element.w = context.measureText(element.content).width;

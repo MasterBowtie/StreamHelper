@@ -2,7 +2,6 @@
 
 html,
 body,
-main,
 #root {
   @apply dark:bg-[#212121] dark:text-white;
   width: 100%;
@@ -10,15 +9,23 @@ main,
   margin: 0;
 }
 
+main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 body {
-  height: 100vh;
-  box-sizing: border-box;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
 }
 
 .page {
-  height: 100%;
   padding-inline: .75em;
-  overflow-y: scroll;
 }
 
 button {

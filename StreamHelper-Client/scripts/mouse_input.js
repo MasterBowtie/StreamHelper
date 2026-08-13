@@ -4,7 +4,7 @@ MyGraphics.mouse_input = (function(graphics) {
     'use strict';
 
     var mainCanvas = document.getElementById("canvas-main");
-    var context = mainCanvas.getContext('2d', { alpha: false});     
+    var context = mainCanvas.getContext('2d');     
     var mouseState = {
         x: 0,
         y: 0,
@@ -37,20 +37,10 @@ MyGraphics.mouse_input = (function(graphics) {
         event.preventDefault();
         let zoom = graphics.getZoom
         if (event.deltaY > 0) {
-            zoom -= .1;
-            if (zoom < .33) {
-                graphics.setZoom(.33);
-            } else {
-                graphics.setZoom(zoom);
-            }
+            zoom -= zoom*.1;
         } 
         if (event.deltaY < 0) {            
-            zoom += .1;
-            if (zoom > 8) {
-                graphics.setZoom(8);
-            } else {
-                graphics.setZoom(zoom);
-            }
+            zoom += zoom*.1;
         }
         let input = document.getElementById("zoom");
         input.value = zoom;

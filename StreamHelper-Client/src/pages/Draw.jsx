@@ -7,7 +7,6 @@ import "../css/draw.css";
 export default function Draw() {
     const canvasRef = useRef(null);
     const [initialized, setInitialized] = useState(false);
-    const canvasSize = {h: 800, w: 800}
 
 
     useEffect(()=> {
@@ -26,8 +25,8 @@ export default function Draw() {
         initialize();
     }, []);
     return (
-        <div className="flex">
-            <canvas ref={canvasRef} id="canvas-main" width={canvasSize.w} height={canvasSize.h}></canvas>
+        <div className="page draw">
+            <canvas id="canvas-main"></canvas>
             <div id="input-section"></div>
         </div>
     )
