@@ -1,5 +1,9 @@
-export default function DrawTools(elements) {
+import { useEffect, useState } from "react";
 
+export default function DrawTools({elements, graphics, canvas}) {
+    const [translate, setTranslate] = useState({x: -100, y: -100})
+    const [zoom, setZoom] = useState(1);
+    const [label, setLabel] = useState({w: 600, h: 600});
     function createElement(type) {
         const element = { 
             name: `New ${type}`,
@@ -40,6 +44,26 @@ export default function DrawTools(elements) {
         elements.push(element);
     }
 
+    useEffect(()=> {
+        graphics.graphics.setOnTranslateChange(setTranslate);
+        graphics.graphics.setOnZoomChange(setZoom);
+        graphics.graphics.setOnLabelChange(setLabel);
+    }, [])
+
+    useEffect(() => {
+        graphics.graphics.setZoom(zoom);
+    }, [zoom]);
+
+    useEffect(() => {
+        graphics.graphics.setTranslate(translate);
+    }, [translate]);
+
+    useEffect(()=> {
+        graphics.graphics.setLabel(label);
+    },[label])
+
+
+
     return (
         <div id="input-section">
                 <button>Alert Information</button>
@@ -52,11 +76,11 @@ export default function DrawTools(elements) {
                         <span>
                             <div>
                                 <label htmlFor="alertWidth">Alert Width:</label>
-                                <input id="alertWidth" name="alertWidth" type="number" step="1" min="100" max="5000"/>
+                                <input id="alertWidth" name="alertWidth" type="number" step="1" min="100" max="2560" value={label.w} onChange={(e)=> {setLabel({...label, w: Number(e.target.value)})}}/>
                             </div>
                             <div>
                                 <label htmlFor="alertHeight">Alert Height:</label>
-                                <input id="alertHeight" name="alertHeight" type="number" step="1" min="100" max="5000"/>
+                                <input id="alertHeight" name="alertHeight" type="number" step="1" min="100" max="1600" value={label.h} onChange={(e)=> {setLabel({...label, h: Number(e.target.value)})}}/>
                             </div>
                         </span>
                         <button name="save" value="save">Save Alert</button>
@@ -69,19 +93,21 @@ export default function DrawTools(elements) {
                     <p>Shift Canvas</p>
                     <div className="indent">
                         <label htmlFor="shiftUD">UP</label>
-                        <input id="shiftUD" type="range" min="-20" max="5020" step="1"/>
+                        {/* FIXME Dynamic sizing */}
+                        <input id="shiftUD" type="range" min="-100" max={canvas.h - label.h - 100} step="1" onChange={(e)=> {console.log(e.target.value); setTranslate({...translate, y: Number(-e.target.value)})}}/>
                         <label htmlFor="shiftUD">Down</label>
                     </div>
 
                     <div className="indent">
-                        <label htmlFor="shiftLR">UP</label>
-                        <input id="shiftLR" type="range" min="-20" max="5020" step="1"/>
-                        <label htmlFor="shiftLR">Down</label>
+                        <label htmlFor="shiftLR">Left</label>
+                        {/* FIXME Dynamic sizing */}
+                        <input id="shiftLR" type="range" min="-100" max={canvas.w - label.w - 100} step="1" onChange={(e)=> {setTranslate({...translate, x: Number(-e.target.value)})}}/>
+                        <label htmlFor="shiftLR">Right</label>
                     </div>
 
                     <div>
                         <label htmlFor="Zoom">100%</label>
-                        <input id="Zoom" type="range" min="1" max="8" step="0.001"/>
+                        <input value={zoom} id="Zoom" type="range" min="1" max="8" step="0.001" onChange={(e)=> {setZoom(Number(e.target.value))}}/>
                         <label htmlFor="Zoom">800%</label>
                     </div>
 

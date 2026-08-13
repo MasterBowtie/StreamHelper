@@ -162,8 +162,8 @@ MyElements.main = (function(graphics, mouse_input, keyboard) {
                 element.h = element.w;
             }
 
-            keys = []
-            for (key in element) {
+            var keys = []
+            for (const key in element) {
                 keys.push(key);
             }
             for (let i = 0; i < keys.length; i++) {
@@ -514,25 +514,16 @@ MyElements.main = (function(graphics, mouse_input, keyboard) {
                 diff.y = mouseState.y;
             } 
             if (mouseState.leftIsDown && mouseState.x != previousState.x) {
-                const translate = graphics.getTranslate;
-                if (Math.round(diff.x - mouseState.x) != translate.x) {
-                    translate.x = translate.x - (diff.x - mouseState.x);
-                    if (translate.x > 600) {
-                        translate.x = 600
-                    }
-                    if (translate.x < -600) {
-                        translate.x = -600
-                    }
+                let udInput = document.getElementById("shiftUD");
+                let lrInput = document.getElementById("shiftLR");
+                if (Math.round(diff.x - mouseState.x) != lrInput.value) {
+                    lrInput.value = Number(lrInput.value) + (diff.x - mouseState.x);
                 }
-                if (Math.round(diff.y - mouseState.y) != translate.y) {
-                    translate.y = translate.y - (diff.y - mouseState.y);
-                    if (translate.y > 600) {
-                        translate.y = 600
-                    }
-                    if (translate.y < -600) {
-                        translate.y = -600
-                    }
+                if (Math.round(diff.y - mouseState.y) != udInput.value) {
+                    udInput.value = Number(udInput.value) + (diff.y - mouseState.y);
                 }
+                lrInput.dispatchEvent(new InputEvent("input"));
+                udInput.dispatchEvent(new InputEvent("input"));
             }
         } else {
         // Normal controls

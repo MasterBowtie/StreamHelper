@@ -1,4 +1,4 @@
-import { MyGraphics, MyElements } from "./objects.js";
+import { MyElements, MyGraphics } from "./objects.js";
 
 MyGraphics.mouse_input = (function(graphics) {
     'use strict';
@@ -52,11 +52,9 @@ MyGraphics.mouse_input = (function(graphics) {
                 graphics.setZoom(zoom);
             }
         }
-
-        // FIXME
-        // let input = document.getElementById("zoom");
-        // input.value = zoom;
-        // input.dispatchEvent(new InputEvent("input"));
+        let input = document.getElementById("zoom");
+        input.value = zoom;
+        input.dispatchEvent(new InputEvent("input"));
     })
 
     function getMousePosition(canvas, event) {

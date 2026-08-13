@@ -1,4 +1,4 @@
-import { MyGraphics, MyElements } from "./objects.js";
+import { MyElements, MyGraphics } from "./objects.js";
 
 MyElements.input = (function(elements, graphics) {
 
@@ -8,7 +8,7 @@ MyElements.input = (function(elements, graphics) {
     var canvas = document.getElementById("canvas-main");
     var context = canvas.getContext('2d', { alpha: false});
 
-    // initialize();
+    initialize();
 
 
     // Get the GUI Setup
@@ -638,7 +638,7 @@ MyElements.input = (function(elements, graphics) {
 
     // Builds the Buttons to create new Elements
     function createButton(name) {
-        let button = document.createElement("input");
+        var button = document.createElement("input");
         button.type = "button";
         button.id = "add_" + name;
         button.value="Create New " + name.charAt(0).toUpperCase() + name.slice(1).replace("_", " ");

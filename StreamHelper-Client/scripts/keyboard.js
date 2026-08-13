@@ -1,4 +1,4 @@
-import { MyGraphics, MyElements } from "./objects.js";
+import { MyElements, MyGraphics } from "./objects.js";
 
 MyGraphics.keyboard = (function() {
     'use-strict';

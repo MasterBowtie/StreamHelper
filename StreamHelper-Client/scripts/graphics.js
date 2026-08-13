@@ -1,4 +1,4 @@
-import { MyGraphics } from "./objects.js";
+import { MyElements, MyGraphics } from "./objects.js";
 
 MyGraphics.graphics = (function(matrix) {
     'use strict';
@@ -43,7 +43,7 @@ MyGraphics.graphics = (function(matrix) {
     }
 
     function labelBoundry() {
-        context.strokeStyle = "rgb(0, 129, 11)";
+        context.strokeStyle = "rgb(255, 0, 255)";
         context.lineWidth = 2/zoom;
         
 
