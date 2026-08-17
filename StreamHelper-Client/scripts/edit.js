@@ -1,5 +1,7 @@
 import { MyElements, MyGraphics } from "./objects.js";
 
+// TODO
+
 MyElements.main = (function(graphics, mouse_input, keyboard) {
 
     var canvas = document.getElementById("canvas-main");

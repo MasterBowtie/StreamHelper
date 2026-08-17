@@ -1,5 +1,7 @@
 import { MyElements, MyGraphics } from "./objects.js";
 
+// TODO
+
 MyElements.input = (function(elements, graphics) {
 
     const MARGIN = 100;

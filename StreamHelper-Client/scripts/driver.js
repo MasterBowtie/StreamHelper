@@ -1,31 +1,28 @@
-import { MyElements, MyGraphics } from "./objects.js";
+import { MyDraw } from "./objects.js";
 
-MyGraphics.main = (function(graphics, state) {
+MyDraw.driver = (function(state) {
     'use strict';
 
-    var prevTime = 0;
+    let renderPending = false;
 
-    function update(elapsedTime) {
-        state.update(elapsedTime, graphics);
-    }
-    
-    function render(elapsedTime) {
-        graphics.clear();
-        
-        state.render(elapsedTime, graphics);
+    function requestUpdate() {
+        if (renderPending) return;
+
+        renderPending = true;
+        requestAnimationFrame(frame);
     }
 
-    function animationLoop(time) {
-        var elapsedTime = time - prevTime;
+    function frame(time) {
+        renderPending = false;
 
-        update(elapsedTime);
-        render(elapsedTime);
-
-        prevTime = time;
-        requestAnimationFrame(animationLoop);
+        state.update(time);
+        state.render(time);
     }
 
-    console.log("Initializing Canvas...")
-    requestAnimationFrame(animationLoop);
+    const api = {
+        requestUpdate
+    }
 
-}(MyGraphics.graphics, MyElements.main));
+    return api;
+
+}(null));
