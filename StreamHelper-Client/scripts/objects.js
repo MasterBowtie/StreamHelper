@@ -1,4 +1,3 @@
-const MyGraphics = {}
-const MyElements = {}
+const MyDraw = {};
 
-export { MyElements, MyGraphics};
+export { MyDraw };

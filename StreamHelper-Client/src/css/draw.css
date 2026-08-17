@@ -3,6 +3,7 @@
     flex-direction: row;
     box-sizing: border-box;
     padding-inline: .75em;
+    height: 100%;
 }
 
 label {

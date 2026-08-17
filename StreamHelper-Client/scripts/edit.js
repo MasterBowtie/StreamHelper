@@ -474,7 +474,7 @@ MyElements.main = (function(graphics, mouse_input, keyboard) {
             console.log("Skip!")
             return;
         }
-        console.log("DiffR: " + diffR + "\t MouseR: " + mouseR);
+        // console.log("DiffR: " + diffR + "\t MouseR: " + mouseR);
         element.rotation = diff.rotation - (diffR - mouseR) * 180/Math.PI;
         if (mouseR > 1 && diffR < -1) {
             element.rotation += 180;
@@ -612,10 +612,10 @@ MyElements.main = (function(graphics, mouse_input, keyboard) {
         }
 
         if (currentElement) {
-            graphics.drawBoundry(currentElement);
+            graphics.drawBoundary(currentElement);
             // graphics.drawMouse(currentElement, mouseState);
         }
-        graphics.labelBoundry();
+        graphics.labelBoundary();
     }
 
     function saveElements() {
