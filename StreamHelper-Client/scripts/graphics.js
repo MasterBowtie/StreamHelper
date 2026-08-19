@@ -23,7 +23,6 @@ MyDraw.graphics = (function() {
     // ---------------------------------
     
     var zoom = 1;
-    var grid = 1;
     var boundary = {h: 600, w: 600}
     var translate = {x: 100, y: 100}
     
@@ -32,7 +31,6 @@ MyDraw.graphics = (function() {
     // ---------------------------------
 
     var onZoomChange = null;
-    var onGridChange = null;
     var onBoundaryChange = null;
     var onTranslateChange = null;
 
@@ -50,22 +48,6 @@ MyDraw.graphics = (function() {
     
     function setOnZoomChange(callback) {
         onZoomChange = callback;
-    }
-
-    function getGrid() {
-        return grid;
-    }
-
-    function setGrid(value) {
-        grid = value;
-
-        if (onGridChange) {
-            onGridChange(value);
-        }
-    }
-
-    function setOnGridChange(callback) {
-        onGridChange = callback;
     }
 
     function getBoundary() {
@@ -144,7 +126,7 @@ MyDraw.graphics = (function() {
         context.setTransform(zoom, 0, 0, zoom, translate.x * zoom, translate.y * zoom);
     }
 
-    function drawGrid() {
+    function drawGrid(grid) {
         if (grid <= 1) return;
         
         context.save();
@@ -418,10 +400,6 @@ MyDraw.graphics = (function() {
         getZoom,
         setZoom,
         setOnZoomChange,
-
-        getGrid,
-        setGrid,
-        setOnGridChange,
 
         getBoundary,
         setBoundary,

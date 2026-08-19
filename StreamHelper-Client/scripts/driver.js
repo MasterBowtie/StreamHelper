@@ -1,6 +1,6 @@
 import { MyDraw } from "./objects.js";
 
-MyDraw.driver = (function(state) {
+MyDraw.driver = (function(state, logic) {
     'use strict';
 
     let renderPending = false;
@@ -15,7 +15,7 @@ MyDraw.driver = (function(state) {
     function frame(time) {
         renderPending = false;
 
-        state.update(time);
+        logic.update(time);
         state.render(time);
     }
 
@@ -25,4 +25,4 @@ MyDraw.driver = (function(state) {
 
     return api;
 
-}(null));
+}(null, null));

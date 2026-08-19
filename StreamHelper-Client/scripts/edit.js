@@ -6,7 +6,7 @@ MyElements.main = (function(graphics, mouse_input, keyboard) {
 
     var canvas = document.getElementById("canvas-main");
     var context = canvas.getContext('2d');
-    var cursors = ["se-resize", "sw-resize", "ne-resize", "nw-resize"];
+    const cursors = ["se-resize", "sw-resize", "ne-resize", "nw-resize"];
 
     var currentElement = null;
     var elements = []
@@ -47,25 +47,25 @@ MyElements.main = (function(graphics, mouse_input, keyboard) {
 
     function bumpUp() {
         if (currentElement) {
-            currentElement.y -= graphics.getGrid;
+            currentElement.y -= graphics.getGrid();
         }
     }
 
     function bumpDown() {
         if (currentElement) {
-            currentElement.y += graphics.getGrid;
+            currentElement.y += graphics.getGrid();
         }
     }
     
     function bumpLeft() {
         if (currentElement) {
-            currentElement.x -= graphics.getGrid;
+            currentElement.x -= graphics.getGrid();
         }
     }
 
     function bumpRight() {
         if (currentElement) {
-            currentElement.x += graphics.getGrid;
+            currentElement.x += graphics.getGrid();
         }
     }
     

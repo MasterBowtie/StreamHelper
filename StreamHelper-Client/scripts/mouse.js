@@ -8,6 +8,7 @@ MyDraw.mouse = (function() {
     const mouseState = {
         x: 0,
         y: 0,
+        cursor: "auto",
         buttons: [],
     }
 
@@ -70,10 +71,16 @@ MyDraw.mouse = (function() {
             buttons: [...mouseState.buttons]};
     }
 
+    function setCursor(value) {
+        canvas.style.cursor = value;
+        mouseState.cursor = value;
+    }
+
     const api = {
         update,
         registerCommand,
         getState,
+        setCursor,
     }
 
 }()); 
