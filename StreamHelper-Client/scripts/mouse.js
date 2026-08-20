@@ -44,7 +44,7 @@ MyDraw.mouse = (function() {
             if (event.type === command.type &&
                 (command.button === null || event.button === command.button)
             ) {
-                command.callback(event, mouseState);
+                command.callback(event, getState());
             }
         }
     }

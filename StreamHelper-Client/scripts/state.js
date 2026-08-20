@@ -1,14 +1,17 @@
 import { MyDraw } from "./objects.js";
 
-MyDraw.state = (function () {
+MyDraw.state = (function (graphics) {
     // Document State
     const elements = [];
     
     // Editor State
     var currentElement = null;
+    var nextId = 0;
+    var nextOrder = 0;
 
     var grid = 1;
     var onGridChange = null;
+    var nextId = 0;
 
     function getGrid() {
         return grid;
@@ -27,64 +30,169 @@ MyDraw.state = (function () {
     }
 
     function getElements() {
-        return elements;
+        return elements.map(element => ({
+            id: element.id,
+            order: element.order,
+            x: element.x,
+            y: element.y,
+            w: element.w,
+            h: element.h,
+            rotation: element.rotation
+        }));
     }
 
     function getCurrentElement() {
-        return {...currentElement};
-    }
+        if (!currentElement) return;
 
-    function setCurrentElement(value) {
-
-    }
-
-    // FIXME
-    function moveCurrentElement(dx, dy) {
-
-    }
-
-    function addElement(element) {
-        elements.push(element);
-    }
-
-    function deleteElement(element) {
-        let index = elements.indexOf(element);
-
-        if (index !== -1) {
-            elements.splice(index, 1);
+        return {
+            id: currentElement.id,
+            order: currentElement.order,
+            type: currentElement.type,
+            x: currentElement.x,
+            y: currentElement.y,
+            w: currentElement.w,
+            h: currentElement.h,
+            rotation: currentElement.rotation,
         }
+    }
+
+    function setCurrentElement(id) {
+        currentElement = elements.find(element => element.id === id) || null;
+    }
+
+    function updateElement(id, changes) {
+        const element = elements.find(element => element.id === id);
+
+        if (!element) {
+            return false;
+        }
+
+        const {properties, ...elementChanges} = changes;
+
+        Object.assign(element, elementChanges);
+
+        if (properties) {
+            Object.assign(element.properties, properties);
+        }
+
+        normalizeElement(element)
+        render();
+        return true;
+    }
+
+    function addElement(type) {
+        const element = {
+            id: `${type}_${nextId}`,
+            order: nextId++,
+            name: "New " + type.charAt(0).toUpperCase() + type.slice(1).replace("_", " "),
+            type: type,
+            x: 0,
+            y: 0,
+            w: 100,
+            h: 100,
+            rotation: 0,
+        }
+
+        const properties = {};
+
+        switch(type) {
+            case "box":
+                properties.radii = 0;
+                properties.color = "black";
+
+                break;
+            
+            case "circle":
+                properties.color = "black";
+                break;
+
+            case "text":
+                properties.content = "New " + type.charAt(0).toUpperCase() + type.slice(1).replace("_", " ");
+                properties.color = "black";
+                properties.font = "Arial";
+                properties.text_size = 20;
+                const measured = graphics.measureText(properties);
+                element.w = measured.w;
+                element.h = measured.h;
+                break;
+
+            case "image":
+                properties.alpha = 100;
+                properties.filepath = "";
+                element.imageElement = document.createElement("img");
+                element.imageElement.src = properties.filepath;
+                break;
+
+            case "textBox":
+                properties.content = "New " + type.charAt(0).toUpperCase() + type.slice(1).replace("_", " ");
+                properties.color = "black";
+                properties.font = "Arial";
+                properties.text_size = 20;
+                properties.spacing = 0;
+                break;
+
+            case "video":
+                properties.alpha = 100;
+                properties.filepath = "";
+                properties.autoplay = true;
+                properties.loop = false;
+                properties.muted = false;
+
+                element.videoElement = document.createElement("video");
+                element.videoElement.src = properties.filepath;
+                break;
+        }
+        element.properties = properties;
+        elements.push(element);
+        return element.id;
+    }
+
+    function deleteElement(id) {
+        const index = elements.findIndex(element => element.id === id);
+
+        if (index === -1) return;
+
+        const deleteOrder = elements[index].order;
+         
+        elements.splice(index, 1);
         
-        if (currentElement === element) {
+        for (const elements of elements) {
+            if (element.order > deleteOrder) {
+                element.order--;
+            }
+        }
+
+        if (currentElement?.id === id) {
             currentElement = null;
         }
     }
 
-    function shiftForward(element) {
-        const index = elements.indexOf(element);
+    function shiftForward(id) {
+        const element = elements.find(element => element.id === id);
 
-        if (index === -1) {
-            return;
-        }
+        if (!element) return;
+
+        const next = elements.find(candidate => candidate.order === element.order + 1);
+
+        if (!next) return;
 
         currentElement = element;
 
-        if (index < elements.length - 1) {
-            [elements[index], elements[index + 1]] = [elements[index+1], elements[index]];
-        }
+        [element.order, next.order] = [next.order, element.order];
     }
 
-    function shiftBack(element) {
-        const index = elements.indexOf(element);
+    function shiftBackward(element) {
+        const element = elements.find(element => element.id === id);
 
-        if (index === -1) {
-            return;
-        }
+        if (!element) return;
+
+        const next = elements.find(candidate => candidate.order === element.order - 1);
+
+        if (!next) return;
 
         currentElement = element;
 
-        if (index > 0) {
-            [elements[index], elements[index-1]] = [elements[index-1], elements[index]];
-        }
+        [element.order, next.order] = [next.order, element.order];
     }
 
     function normalizeElement(element) {
@@ -106,16 +214,86 @@ MyDraw.state = (function () {
         }
     }
 
+    function render() {
+        graphics.drawGrid(grid);
+
+        const renderElements = [...elements].sort((a,b) => a.order - b.order);
+
+        for (const element of renderElements) {
+            switch(element.type) {
+                case "box":
+                    graphics.drawRectangle(element)
+                    break;
+
+                case "circle":
+                    graphics.drawEllipse(element);
+                    break;
+
+                case "text":
+                    graphics.drawText(element);
+                    break;
+
+                case "textbox":
+                    graphics.drawTextbox(element);
+                    break;
+                
+                case "image":
+                    graphics.drawImage(element);
+                    break;
+
+                case "video":
+                    graphics.drawVideo(element);
+                    break;
+            }
+        }
+        
+        if (currentElement) {
+            graphics.objectBoundary(currentElement);
+        }
+
+        graphics.drawBoundary();
+    }
+
+    function exportElements() {
+        const newElements = [];
+
+        for (const element of elements) {
+            const newElement = {};
+
+            for (const key of Object.keys(element)) {
+                if (key !== "imageElement" && key !== "videoElement") {
+                    newElement[key] = element[key];
+                }
+            }
+
+            newElements.push(newElement);
+        }
+
+        return JSON.stringify(newElements);
+    }
+
     const api = {
+        // Grid
         getGrid,
         setGrid,
         setOnGridChange,
+
+        // Elements
         getElements,
         getCurrentElement,
         setCurrentElement,
+        updateElement,
         addElement,
         deleteElement,
+        shiftForward,
+        shiftBackward,
+        normalizeElement,
+
+        // Extra
+        exportElements,
+        render,
+
     }
 
     return api;
-}());
+}(MyDraw.graphics));

@@ -215,13 +215,12 @@ MyDraw.graphics = (function() {
         context.textBaseline = "top";
         context.fillStyle = element.properties.color;
         context.font = `${element.properties.text_size}px ${element.properties.font}`;
-        context.fillText(element.content, element.x - centerX, element.y - centerY);
+        context.fillText(element.properties.content, element.x - centerX, element.y - centerY);
         
         context.restore();
     }
     
-    // TODO:
-    function drawTextBox(element) {
+    function drawTextbox(element) {
         context.save();
         
         const rotation = element.rotation * Math.PI/180;
@@ -315,17 +314,18 @@ MyDraw.graphics = (function() {
         context.translate(centerX, centerY);
         context.rotate(rotation);
 
-        if (element.properties.videoElement && element.properties.videoElement.readyState >= 2) {
-            context.drawImage(element.properties.videoElement,
+        if (element.videoElement && element.videoElement.readyState >= 2) {
+            context.drawImage(element.videoElement,
                 -element.w/2,
                 -element.h/2,
                 element.w,
                 element.h
             );
         } else {
-            let temp = {x: -element.w/2, y: -element.h/2, h: element.h, w: element.h, rotation: 0, properties: {color: "black"}}
+            let temp = {x: -element.w/2, y: -element.h/2, h: element.h, w: element.w, rotation: 0, properties: {color: "black"}}
             drawRectangle(temp);
         }
+        context.restore();
     }
         
     function objectBoundary(element) {
@@ -377,6 +377,10 @@ MyDraw.graphics = (function() {
         context.restore();
     }
 
+    // ---------------------------------
+    // Helpers
+    // ---------------------------------
+
     function drawPolygon(points) {
         if (points.length === 0) return;
         context.beginPath();
@@ -387,6 +391,15 @@ MyDraw.graphics = (function() {
         }
 
         context.closePath()
+    }
+
+    function measureText({ font, text_size, content }) {
+        context.font = `${text_size}px ${font}`;
+
+        return {
+            w: context.measureText(content).width,
+            h: context.measureText("m").width,
+        }
     }
 
     // ---------------------------------
@@ -420,7 +433,7 @@ MyDraw.graphics = (function() {
         drawGrid,
         drawText,
         drawImage,
-        drawTextBox,
+        drawTextbox,
         drawVideo,
         objectBoundary,
     }

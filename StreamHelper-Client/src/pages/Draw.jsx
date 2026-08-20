@@ -12,11 +12,11 @@ export default function Draw() {
     useEffect(()=> {
         async function initialize() {
             await import("../../scripts/graphics.js")
-            // await import("../../scripts/keyboard.js")
-            // await import("../../scripts/mouse_input.js")
-            // await import("../../scripts/edit.js")
-            // await import("../../scripts/builder.js")
-            // await import("../../scripts/driver.js")
+            await import("../../scripts/keyboard.js")
+            await import("../../scripts/mouse.js")
+            await import("../../scripts/state.js")
+            await import("../../scripts/logic.js")
+            await import("../../scripts/driver.js")
 
             setInitialized(true);
         }
