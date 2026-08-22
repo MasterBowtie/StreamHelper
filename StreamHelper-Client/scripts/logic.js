@@ -139,15 +139,14 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
     }
 
     // TODO: Handle Inputs
-    function zoomOut() {
+    function zoom(value) {
         const zoom = graphics.getZoom();
-        graphics.setZoom(zoom * 0.9);
-    }
-    
-    // TODO: Handle Inputs
-    function zoomIn() {
-        const zoom = graphics.getZoom();
-        graphics.setZoom(zoom * 1.1);
+        const increment = zoom * 0.1 * value;
+
+        
+        console.log(value,zoom + increment);
+        graphics.setZoom(zoom + increment);
+        state.render()
     }
 
     function getCorner(element, corner) {
@@ -573,8 +572,8 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         keyboard.registerCommand("a", "keydown", false, bumpLeft);
         keyboard.registerCommand("d", "keydown", false, bumpRight);
 
-        keyboard.registerCommand("=", "keydown", false, zoomIn);
-        keyboard.registerCommand("-", "keydown", false, zoomOut);
+        keyboard.registerCommand("=", "keydown", false, ()=> zoom(1));
+        keyboard.registerCommand("-", "keydown", false, ()=>zoom(-1));
 
         keyboard.registerCommand(" ", "keydown", true, startTranslate);
         keyboard.registerCommand(" ", "keyup", true, endTranslate);
@@ -591,6 +590,7 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         mouse.registerCommand("mousedown", 0, (_, mouseState) => onMouseDown(mouseState))
         mouse.registerCommand("mousemove", null, (_, mouseState) => onMouseMove(mouseState))
         mouse.registerCommand("mouseup", 0, (_, mouseState) => onMouseUp(mouseState))
+        mouse.registerCommand("wheel", null, (e, mouseState) => zoom(-Math.round(e.deltaY/100)))
 
     }
 
