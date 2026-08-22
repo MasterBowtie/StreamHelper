@@ -21,13 +21,14 @@ MyDraw.keyboard = (function() {
     });
 
     function registerCommand(key, type, keyPressOnly, callback) {
-        let dictKey = `${key},${type}`;
+        let dictKey = `${key}-${type}`;
         commandEntries[dictKey] = {key, type, keyPressOnly, callback};
         previousState[key] = true;
     }
 
     function update(event) {
-        for (const command of Object.entries(commandEntries)) {
+        for (const [dictKey, command] of Object.entries(commandEntries)) {
+            
             if (event.key !== command.key || event.type !== command.type) {
                 continue;
             }

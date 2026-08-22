@@ -376,7 +376,6 @@ MyElements.main = (function(graphics, mouse_input, keyboard) {
         }
     }
     
-
     // Working
     function seResize(element, mouseState) {
         // mouseState = graphics.transformPoint(mouseState, element, true);
@@ -500,7 +499,6 @@ MyElements.main = (function(graphics, mouse_input, keyboard) {
         }
         return false;
     }
-
 
     function update(elapsedTime, graphics) {
         let mouseState = mouse_input.getState();

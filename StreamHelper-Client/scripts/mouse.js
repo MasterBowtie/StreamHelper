@@ -31,7 +31,7 @@ MyDraw.mouse = (function() {
         update(event);
     })
 
-    function registerCommand(button, type, callback) {
+    function registerCommand(type, button, callback) {
         commandEntries.push({
             button, type, callback
         });
@@ -83,4 +83,5 @@ MyDraw.mouse = (function() {
         setCursor,
     }
 
+    return api;
 }()); 

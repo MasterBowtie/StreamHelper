@@ -33,11 +33,11 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
     const translateState = {
         active: false,
         dragging: false,
-        startMouse: {
+        diff: {
             x: 0,
             y: 0,
         },
-        startTranslate: {
+        translate: {
             x: 0,
             y: 0,
         }
@@ -100,46 +100,55 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         state.updateElement(current.id, {x: current.x + state.getGrid()})
     }
 
-    function startTranslate(mouseState) {
+    function startTranslate(mousePosition) {
         translateState.active = true;
-        hoverState.cursor = "grab";
+        mouse.setCursor("grab");
     }
 
-    function startTranslateDrag(mouseState) {
+    function startTranslateDrag(mousePosition, mouseState) {
         translateState.dragging = true;
 
-        translateState.startMouse = {
-            x: mouseState.x,
-            y: mouseState.y,
+        translateState.diff = {
+            x: mousePosition.x,
+            y: mousePosition.y,
         };
 
-        translateState.startTranslate = { ...graphics.getTranslate() }
+        translateState.startTranslate = graphics.getTranslate()       
 
-        hoverState.cursor = "grabbing";
+        mouse.setCursor("grabbing");
     }
 
-    function translate(mouseState) {
+    function translate(mousePosition, mouseState) {
         if (!translateState.active || !translateState.dragging) {
             return;
         }
 
-        const dx = mouseState.x - translateState.startMouse.x;
-        const dy = mouseState.y - translateState.startMouse.y;
+        
+        const dx = translateState.diff.x - mousePosition.x;
+        const dy = translateState.diff.y - mousePosition.y;
 
-        graphics.setTranslate({
-            x: translateState.startTranslate.x + dx,
-            y: translateState.startTranslate.y + dy,
-        })
+        translateState.translate.x += dx;
+        translateState.translate.y += dy;
+  
+        graphics.setTranslate({x: translateState.translate.x, y: translateState.translate.y});
+
+        console.log(`TRANSLATE
+            raw: ${mouseState.x}, ${mouseState.y}
+            world: ${mousePosition.x}, ${mousePosition.y}
+            translate: ${graphics.getTranslate().x}, ${graphics.getTranslate().y}
+            input: ${-graphics.getTranslate().x},${-graphics.getTranslate().y}`)
+        state.render();
     } 
 
-    function endTranslateDrag() {
+    function endTranslateDrag() {  
         translateState.dragging = false;
+        mouse.setCursor("grab");
     }
     
     function endTranslate() {
         translateState.active = false;
         translateState.dragging = false;
-        hoverState.cursor = "auto";
+        mouse.setCursor("auto");
     }
 
     // TODO: Handle Inputs
@@ -230,7 +239,7 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         resizeState.fixedPoint = fixedPoint;
     }
 
-    function resizeFromCorner(element, mouseState, corner) {
+    function resizeFromCorner(element, mousePosition, corner) {
         mouse.setCursor(cornerData[corner].cursor);
 
         const grid = state.getGrid();
@@ -241,8 +250,8 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         const rotation = element.rotation * Math.PI/180;
 
         // Mouse relative to the fixed world-space corner
-        const dx = mouseState.x - fixedPoint.x;
-        const dy = mouseState.y - fixedPoint.y;
+        const dx = mousePosition.x - fixedPoint.x;
+        const dy = mousePosition.y - fixedPoint.y;
 
         // Convert the mouse vector into the element's local axis
         const localX = dx * Math.cos(rotation) + dy * Math.sin(rotation);
@@ -315,29 +324,29 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         resizeState.fixedPoint = null;
     }
 
-    function resize(element, mouseState) {
+    function resize(element, mousePosition) {
         if (!resizeState.active) return;
 
-        resizeFromCorner(element, mouseState, resizeState.corner);
+        resizeFromCorner(element, mousePosition, resizeState.corner);
     }
 
-    function startRotate(element, mouseState) {
+    function startRotate(element, mousePosition) {
         rotationState.active = true,
         rotationState.startRotation = element.rotation;
 
         const centerX = element.x + element.w/2;
         const centerY = element.y + element.h/2;
 
-        rotationState.startMouseAngle = Math.atan2(mouseState.y - centerY, mouseState.x - centerX);
+        rotationState.startMouseAngle = Math.atan2(mousePosition.y - centerY, mousePosition.x - centerX);
     }
 
-    function rotate(element, mouseState) {
+    function rotate(element, mousePosition) {
         if (!rotationState.active) return;
 
         const centerX = element.x + element.w/2;
         const centerY = element.y + element.h/2;
 
-        const mouseAngle = Math.atan2(mouseState.y - centerY, mouseState.x - centerX);
+        const mouseAngle = Math.atan2(mousePosition.y - centerY, mousePosition.x - centerX);
         const angleDifference = mouseAngle - rotationState.startMouseAngle;
 
         const rotation = rotationState.startRotation + angleDifference * 180/Math.PI;
@@ -349,22 +358,22 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         rotationState.active = false;
     };
 
-    function startMove(element, mouseState) {
+    function startMove(element, mousePosition) {
         moveState.active = true;
         moveState.offset = {
-            x: mouseState.x - element.x,
-            y: mouseState.y - element.y,
+            x: mousePosition.x - element.x,
+            y: mousePosition.y - element.y,
         }
 
     }
 
-    function move(element, mouseState) {
+    function move(element, mousePosition) {
         if (!moveState.active) return;
 
         const grid = state.getGrid();
 
-        const x = Math.round((mouseState.x - moveState.offset.x)/ grid) * grid;
-        const y = Math.round((mouseState.y - moveState.offset.y)/ grid) * grid;
+        const x = Math.round((mousePosition.x - moveState.offset.x)/ grid) * grid;
+        const y = Math.round((mousePosition.y - moveState.offset.y)/ grid) * grid;
 
         state.updateElement(element.id, {x, y});
     }
@@ -373,13 +382,13 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         moveState.active = false;
     }
 
-    function selectElement() {
+    function selectElement(mousePosition) {
         const elements = state.getElements();
 
         for (let i = elements.length - 1; i >= 0; i--) {
             const element = elements[i];
 
-            const localMouse = graphics.transformPoint(mouseState, element, true);
+            const localMouse = graphics.transformPoint(mousePosition, element, true);
 
             if (localMouse.x >= element.x &&
                 localMouse.x <= element.x + element.w &&
@@ -387,11 +396,8 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
                 localMouse.y <= element.y + element.h
             ) {
                 state.setCurrentElement(element);
-                return true;
             }
         }
-
-        state.setCurrentElement(null);
         return false;
     }
 
@@ -402,19 +408,18 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         point.y >= y &&
         point.y <= y + h
     );
-}
+    }
 
-    function updateHover(mouseState) {
+    function updateHover(mousePosition) {
         hoverState.type = null;
         hoverState.corner = null;
-
         const element = state.getCurrentElement();
 
         if (!element) {
             return;
         }
 
-        const localMouse = graphics.transformPoint(mouseState, element, true);
+        const localMouse = graphics.transformPoint(mousePosition, element, true);
         const s = 5/graphics.getZoom();
 
         const corners = {
@@ -439,9 +444,10 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         // Resize handles
         for (const [corner, point] of Object.entries(corners)) {
             if (pointInBox(localMouse, point.x - s, point.y - s, s*2, s*2)) {
+
                 hoverState.type = "resize";
                 hoverState.corner = corner;
-                hoverState.cursor = cornerData[corner].cursor;
+                mouse.setCursor(cornerData[corner].cursor);
                 return;
             }
         }
@@ -466,10 +472,11 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         }
 
         // Rotation Handles
-                for (const [corner, point] of Object.entries(rotationAreas)) {
+        for (const [corner, point] of Object.entries(rotationAreas)) {
             if (pointInBox(localMouse, point.x - s, point.y - s, s*2, s*2)) {
                 hoverState.type = "rotate";
                 hoverState.corner = corner;
+                mouse.setCursor("alias");
                 return;
             }
         }
@@ -478,15 +485,26 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         if (pointInBox(localMouse, element.x, element.y, element.w, element.h)) {
             hoverState.type = "move";
             hoverState.corner = null;
-            hoverState.cursor = "move";
+            mouse.setCursor("move");
+        }
+    }
+
+    function getWorldMousePosition(mouseState) {
+        const zoom = graphics.getZoom();
+        const translate = graphics.getTranslate();
+
+        return {
+            x: Math.round(mouseState.x / zoom - translate.x),
+            y: Math.round(mouseState.y / zoom - translate.y),
         }
     }
 
     function onMouseDown(mouseState) {
-        updateHover(mouseState);
+        const mousePosition = getWorldMousePosition(mouseState)
+        updateHover(mousePosition);
 
-        if (translateState.active) {
-            startTranslateDrag(mouseState);
+        if (translateState.active && !translateState.dragging) {
+            startTranslateDrag(mousePosition, mouseState);
             return;
         }
 
@@ -495,25 +513,26 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         if (element) {
             switch (hoverState.type) {
                 case "resize":
-                    startResize(element, mouseState, hoverState.corner);
+                    startResize(element, mousePosition, hoverState.corner);
                     return;
                 
                 case "rotate": 
-                    startRotate(element, mouseState);
+                    startRotate(element, mousePosition);
                     return;
                 
                 case "move":
-                    startMove(element, mouseState);
+                    startMove(element, mousePosition);
                     return;
             }
         }
 
-        if (selectElement(mouseState)) {
-            startMove(state.getCurrentElement(), mouseState);
+        if (selectElement(mousePosition)) {
+            startMove(state.getCurrentElement(), mousePosition);
         }
     }
 
     function onMouseUp(mouseState) {
+        const mousePosition = getWorldMousePosition(mouseState)
         if (translateState.dragging) {
             endTranslateDrag();
         }
@@ -530,22 +549,21 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
             endMove();
         }
 
-        updateHover();
+        updateHover(mousePosition);
     }
 
-
     function onMouseMove(mouseState) {
-        updateHover(mouseState);
+        const mousePosition = getWorldMousePosition(mouseState)
+        updateHover(mousePosition);
 
-        translate(mouseState);
-        resize(state.getCurrentElement(), mouseState);
-        rotate(state.getCurrentElement(), mouseState);
-        move(state.getCurrentElement(), mouseState);
-
-        mouse.setCursor(hoverState.cursor);
+        translate(mousePosition, mouseState);
+        resize(state.getCurrentElement(), mousePosition);
+        rotate(state.getCurrentElement(), mousePosition);
+        move(state.getCurrentElement(), mousePosition);
     }
 
     function initializeInput() {
+        console.log("Connecting Inputs...");
         // Keyboard 
         keyboard.registerCommand("w", "keydown", false, bumpUp);
         keyboard.registerCommand("s", "keydown", false, bumpDown);

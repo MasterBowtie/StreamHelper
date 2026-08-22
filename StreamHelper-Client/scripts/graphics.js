@@ -72,10 +72,6 @@ MyDraw.graphics = (function() {
 
     function setTranslate(value) {
         translate = value;
-        
-        if (onTranslateChange) {
-            onTranslateChange(value);
-        }
     }
 
     function setOnTranslateChange(callback) {

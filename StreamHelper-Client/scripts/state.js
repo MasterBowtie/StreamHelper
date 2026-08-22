@@ -58,6 +58,7 @@ MyDraw.state = (function (graphics) {
 
     function setCurrentElement(id) {
         currentElement = elements.find(element => element.id === id) || null;
+        render();
     }
 
     function updateElement(id, changes) {
@@ -144,6 +145,8 @@ MyDraw.state = (function (graphics) {
         }
         element.properties = properties;
         elements.push(element);
+
+        render();
         return element.id;
     }
 
@@ -181,7 +184,7 @@ MyDraw.state = (function (graphics) {
         [element.order, next.order] = [next.order, element.order];
     }
 
-    function shiftBackward(element) {
+    function shiftBackward(id) {
         const element = elements.find(element => element.id === id);
 
         if (!element) return;
@@ -215,41 +218,44 @@ MyDraw.state = (function (graphics) {
     }
 
     function render() {
-        graphics.drawGrid(grid);
+        graphics.clear();
 
-        const renderElements = [...elements].sort((a,b) => a.order - b.order);
+        console.log(`RENDER: ${graphics.getTranslate().x}, ${graphics.getTranslate().y}`)
+        // graphics.drawGrid(grid);
 
-        for (const element of renderElements) {
-            switch(element.type) {
-                case "box":
-                    graphics.drawRectangle(element)
-                    break;
+        // const renderElements = [...elements].sort((a,b) => a.order - b.order);
 
-                case "circle":
-                    graphics.drawEllipse(element);
-                    break;
+        // for (const element of renderElements) {
+        //     switch(element.type) {
+        //         case "box":
+        //             graphics.drawRectangle(element)
+        //             break;
 
-                case "text":
-                    graphics.drawText(element);
-                    break;
+        //         case "circle":
+        //             graphics.drawEllipse(element);
+        //             break;
 
-                case "textbox":
-                    graphics.drawTextbox(element);
-                    break;
+        //         case "text":
+        //             graphics.drawText(element);
+        //             break;
+
+        //         case "textbox":
+        //             graphics.drawTextbox(element);
+        //             break;
                 
-                case "image":
-                    graphics.drawImage(element);
-                    break;
+        //         case "image":
+        //             graphics.drawImage(element);
+        //             break;
 
-                case "video":
-                    graphics.drawVideo(element);
-                    break;
-            }
-        }
+        //         case "video":
+        //             graphics.drawVideo(element);
+        //             break;
+        //     }
+        // }
         
-        if (currentElement) {
-            graphics.objectBoundary(currentElement);
-        }
+        // if (currentElement) {
+        //     graphics.objectBoundary(currentElement);
+        // }
 
         graphics.drawBoundary();
     }
@@ -294,6 +300,8 @@ MyDraw.state = (function (graphics) {
         render,
 
     }
+
+    render();
 
     return api;
 }(MyDraw.graphics));

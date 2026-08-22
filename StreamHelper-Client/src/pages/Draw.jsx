@@ -16,7 +16,7 @@ export default function Draw() {
             await import("../../scripts/mouse.js")
             await import("../../scripts/state.js")
             await import("../../scripts/logic.js")
-            await import("../../scripts/driver.js")
+            // await import("../../scripts/driver.js")
 
             setInitialized(true);
         }
@@ -26,7 +26,14 @@ export default function Draw() {
     return (
         <div className="page draw">
             <canvas id="canvas-main"></canvas>
-            <div id="input-section"></div>
+            <div id="input-section">
+                <button onClick={() => {
+                    const id = MyDraw.state.addElement("box");
+                    MyDraw.state.setCurrentElement(id);
+                    }}>
+                    Add Box
+                </button>
+            </div>
         </div>
     )
 }
