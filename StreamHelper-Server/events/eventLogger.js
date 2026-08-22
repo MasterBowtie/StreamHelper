@@ -10,7 +10,7 @@ export function buildEventLogger({eventRepository, streamRepository}) {
             eventType: message.payload.subscription.type,
             twitchId: message.payload.event.user_id ?? null,
             streamId: streamId,
-            occurredAt: message.payload.subscription.created_at,
+            occurredAt: new Date(message.payload.subscription.created_at),
             metadata: message
         }
 
