@@ -220,42 +220,41 @@ MyDraw.state = (function (graphics) {
     function render() {
         graphics.clear();
 
-        console.log(`RENDER: ${graphics.getTranslate().x}, ${graphics.getTranslate().y}`)
-        // graphics.drawGrid(grid);
+        graphics.drawGrid(grid);
 
-        // const renderElements = [...elements].sort((a,b) => a.order - b.order);
+        const renderElements = [...elements].sort((a,b) => a.order - b.order);
 
-        // for (const element of renderElements) {
-        //     switch(element.type) {
-        //         case "box":
-        //             graphics.drawRectangle(element)
-        //             break;
+        for (const element of renderElements) {
+            switch(element.type) {
+                case "box":
+                    graphics.drawRectangle(element)
+                    break;
 
-        //         case "circle":
-        //             graphics.drawEllipse(element);
-        //             break;
+                case "circle":
+                    graphics.drawEllipse(element);
+                    break;
 
-        //         case "text":
-        //             graphics.drawText(element);
-        //             break;
+                case "text":
+                    graphics.drawText(element);
+                    break;
 
-        //         case "textbox":
-        //             graphics.drawTextbox(element);
-        //             break;
+                case "textbox":
+                    graphics.drawTextbox(element);
+                    break;
                 
-        //         case "image":
-        //             graphics.drawImage(element);
-        //             break;
+                case "image":
+                    graphics.drawImage(element);
+                    break;
 
-        //         case "video":
-        //             graphics.drawVideo(element);
-        //             break;
-        //     }
-        // }
+                case "video":
+                    graphics.drawVideo(element);
+                    break;
+            }
+        }
         
-        // if (currentElement) {
-        //     graphics.objectBoundary(currentElement);
-        // }
+        if (currentElement) {
+            graphics.objectBoundary(currentElement);
+        }
 
         graphics.drawBoundary();
     }

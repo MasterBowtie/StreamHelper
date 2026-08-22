@@ -9,6 +9,12 @@ MyDraw.graphics = (function() {
     
     var canvas = document.getElementById('canvas-main');
     var context = canvas.getContext('2d');
+
+    const observer = new ResizeObserver(entries => {
+        resize()
+    });
+
+    observer.observe(canvas);
     
     function resize() {
         canvas = document.getElementById('canvas-main');
