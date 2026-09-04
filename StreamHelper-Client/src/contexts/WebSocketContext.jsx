@@ -16,6 +16,7 @@ export function useWebSocket() {
 export function WebSocketProvider({ children }) {
     const websocketRef = useRef();
     const [messages, setMessages] = useState([]);
+    const [connected, setConnected] = useState(false);
 
     useEffect(()=> {
         websocketRef.current = new WebSocketClient("ws://localhost:3141")
@@ -38,10 +39,13 @@ export function WebSocketProvider({ children }) {
         websocketRef.current.on("*", callback);
         websocketRef.current.connect()
 
+        setConnected(true);
+
         return () => {
             websocketRef.current.off("*", callback);
             websocketRef.current.disconnect();
             websocketRef.current = null;
+            setConnected(false);
         }
     }, [])
 
@@ -61,7 +65,7 @@ export function WebSocketProvider({ children }) {
     }), []);
 
     return (
-        <WebSocketContext.Provider value={{websocket, messages}}>
+        <WebSocketContext.Provider value={{websocket, messages, connected}}>
             {children}
         </WebSocketContext.Provider>
     )
