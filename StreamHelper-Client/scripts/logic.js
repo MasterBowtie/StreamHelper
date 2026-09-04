@@ -144,7 +144,7 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         const increment = zoom * 0.1 * value;
 
         
-        console.log(value,zoom + increment);
+        // console.log(value,zoom + increment);
         graphics.setZoom(zoom + increment);
         state.render()
     }
@@ -215,7 +215,7 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
     }
 
     function startResize(element, corner) {
-        console.log(`START RESIZE:`, corner)
+        // console.log(`START RESIZE:`, corner)
         const fixedCorner = cornerData[corner].oppositeCorner;
         const localPoint = getCorner(element, fixedCorner);
         const fixedPoint = graphics.transformPoint(localPoint, element, false);
@@ -254,6 +254,7 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
             // TODO
             w = element.w;
             h = element.h;
+            text_size = element.properties.text_size;
 
             const targetWidth =
                 Math.round(
@@ -266,7 +267,7 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
                 w = measured.w;
                 h = measured.h;
             }
-
+            
             while (Math.round(w) > targetWidth && text_size > 0) {
                 text_size  -= 1;
                 const measured = graphics.measureText({...element.properties, text_size});
@@ -379,7 +380,7 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
     }
 
     function selectElement(mousePosition) {
-        console.log("SELECT ELEMENT:");
+        // console.log("SELECT ELEMENT:");
         const elements = state.getElements();
 
         for (let i = elements.length - 1; i >= 0; i--) {
@@ -476,11 +477,6 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
             }
         }
 
-
-
-
-
-
         // Element Body
         if (pointInBox(localMouse, element.x, element.y, element.w, element.h)) {
             hoverState.type = "move";
@@ -564,7 +560,7 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         move(state.getCurrentElement(), mousePosition);
     }
 
-    function initializeInput() {
+    function initialize() {
         console.log("Connecting Inputs...");
         // Keyboard 
         keyboard.registerCommand("w", "keydown", false, bumpUp);
@@ -591,13 +587,13 @@ MyDraw.logic = (function (graphics, state, mouse, keyboard) {
         mouse.registerCommand("mousemove", null, (_, mouseState) => onMouseMove(mouseState))
         mouse.registerCommand("mouseup", 0, (_, mouseState) => onMouseUp(mouseState))
         mouse.registerCommand("wheel", null, (e, mouseState) => zoom(-Math.round(e.deltaY/100)))
+        
 
+        state.render();
     }
 
-    initializeInput();
-
     const api = {
-
+        initialize,
     }
 
     return api;

@@ -3,8 +3,8 @@ import { MyDraw } from "./objects.js";
 MyDraw.keyboard = (function() {
     'use strict';
 
-    var previousState = {};
-    var commandEntries = {};
+    let previousState = {};
+    let commandEntries = {};
 
     window.addEventListener("keydown", (event) => {
         if (document.activeElement.tagName == "BODY") {
@@ -49,9 +49,15 @@ MyDraw.keyboard = (function() {
         previousState[event.key] = event.type === "keydown" ? false : true;
     }
 
+    function initialize() {
+        commandEntries = {};
+        previousState = {};
+    }
+
     const api = {
         update,
         registerCommand,
+        initialize,
     }
 
     return api;

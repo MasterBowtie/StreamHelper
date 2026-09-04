@@ -1,56 +1,45 @@
+@import "tailwindcss";
+
 .draw {
     display: flex;
-    flex-direction: row;
+    flex: 1;
     box-sizing: border-box;
-    padding-inline: .75em;
+    padding-inline: 0;
     height: 100%;
-}
-
-label {
-    vertical-align: top;
+    width: calc(100% + (2 * var(--page-padding)));
+    margin-inline: calc(-1 * var(--page-padding));
+    overflow: hidden;
 }
 
 #canvas-main {
+    display: block;
     border: 2px solid black;
     width: 100%;
+    flex: 1;
 }
 
-#input-section {
-    display: flex;
-    flex-direction: column;
-    margin-left: 10px;
-    padding-inline: 2px;
-    border: 2px solid black;
+.sidebar {
+    @apply bg-[#ffffff88] text-white;
+    width: 0;
+    height: 100%;
+    transition: width 0.25s ease;
+
+}
+
+.sidebar.open {
+    width: 300px;
+}
+
+.sidebar-toggle {
+    position: relative;
+    margin-left: -70px;
+    height: fit-content;
+    z-index: 1;
+    background-color: #ff0000;
+}
+
+aside {
     overflow-y: scroll;
+    height: inherit;
 }
 
-.collapsible {
-    background-color: #777;
-    color: white;
-    cursor: pointer;
-    padding: 18px;
-    border: none;
-    text-align: left;
-    outline: none;
-    font-size: 15px;
-}
-
-.active,
-.collapsible:hover {
-    background-color: #555;
-}
-
-.content {
-    display: flex;
-    flex-direction: column;
-    padding: 0 18px;
-    max-height: 0;
-    min-height: 0;
-    overflow: hidden;
-    transition: max-height 0.2s ease-out;
-    transition: min-height 0.2s ease-out;
-}
-
-.indent {
-    margin-left: 20px;
-}

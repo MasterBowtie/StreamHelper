@@ -40,7 +40,9 @@ function buildTwitchApiClient({
     async function getCurrentUser() {
         const data = await request('/users');
 
-        return data.data[0]
+        console.log("Current User:" ,data);
+
+        return data.data[0] ?? null
     }
 
     async function createEventSubSubscription({
@@ -77,12 +79,15 @@ function buildTwitchApiClient({
     async function getStream(userId) {
         const data = await request(`/stream?user_id=${userId}`);
 
+        console.log("getStream:" ,data);
+
         return data.data[0] ?? null;
     }
 
     async function getChannelInformation(userId) {
         const data = await request(`/channels?broadcaster_id=${userId}`);
 
+        console.log("Channel Info:" , data);
         return data.data[0] ?? null;
     }
 

@@ -3,33 +3,16 @@ import { MyDraw } from "./objects.js";
 MyDraw.mouse = (function() {
     'use strict';
 
-    const canvas = document.getElementById("canvas-main");
+    let canvas = null;
   
-    const mouseState = {
+    let mouseState = {
         x: 0,
         y: 0,
         cursor: "auto",
         buttons: [],
     }
 
-    const commandEntries = [];
-
-    canvas.addEventListener("mousedown", event => {
-        update(event);
-    })
-
-    canvas.addEventListener("mousemove", event => {
-        update(event);
-    })
-
-    canvas.addEventListener("mouseup", event => {
-        update(event);
-    })
-
-    canvas.addEventListener("wheel", event => {
-        event.preventDefault();
-        update(event);
-    })
+    let commandEntries = [];
 
     function registerCommand(type, button, callback) {
         commandEntries.push({
@@ -76,11 +59,41 @@ MyDraw.mouse = (function() {
         mouseState.cursor = value;
     }
 
+    function initialize(canvasElement) {
+
+        canvas = canvasElement;
+        mouseState = {
+            x: 0,
+            y: 0,
+            cursor: "auto",
+            buttons: [],
+        }
+        commandEntries = [];
+
+        canvas.addEventListener("mousedown", event => {
+            update(event);
+        })
+
+        canvas.addEventListener("mousemove", event => {
+            update(event);
+        })
+
+        canvas.addEventListener("mouseup", event => {
+            update(event);
+        })
+
+        canvas.addEventListener("wheel", event => {
+            event.preventDefault();
+            update(event);
+        })
+    }
+
     const api = {
         update,
         registerCommand,
         getState,
         setCursor,
+        initialize,
     }
 
     return api;

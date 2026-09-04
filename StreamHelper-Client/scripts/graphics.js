@@ -7,14 +7,29 @@ MyDraw.graphics = (function() {
     // Canvas
     // ---------------------------------
     
-    var canvas = document.getElementById('canvas-main');
-    var context = canvas.getContext('2d');
+    let canvas = null;
+    let context = null;
 
-    const observer = new ResizeObserver(entries => {
-        resize()
-    });
+    let observer = null; 
 
-    observer.observe(canvas);
+    function initialize(canvasElement) {
+        canvas = canvasElement;
+        context = canvas.getContext('2d');
+
+        observer = new ResizeObserver(() => {
+            resize()
+            MyDraw?.state?.render();
+        });
+
+        observer.observe(canvas);
+    }
+
+    function destroy() {
+        observer?.disconnect();
+        observer = null;
+        canvas = null;
+        context = null;
+    }
     
     function resize() {
         canvas = document.getElementById('canvas-main');
@@ -28,17 +43,17 @@ MyDraw.graphics = (function() {
     // View State
     // ---------------------------------
     
-    var zoom = 1;
-    var boundary = {h: 600, w: 600}
-    var translate = {x: 100, y: 100}
+    let zoom = 1;
+    let boundary = {h: 600, w: 600}
+    let translate = {x: 100, y: 100}
     
     // ---------------------------------
     // View State API
     // ---------------------------------
 
-    var onZoomChange = null;
-    var onBoundaryChange = null;
-    var onTranslateChange = null;
+    let onZoomChange = null;
+    let onBoundaryChange = null;
+    let onTranslateChange = null;
 
         function getZoom() {
         return zoom;
@@ -396,6 +411,7 @@ MyDraw.graphics = (function() {
     }
 
     function measureText({ font, text_size, content }) {
+        // console.log("MEASURE TEXT");
         context.font = `${text_size}px ${font}`;
 
         return {
@@ -410,6 +426,8 @@ MyDraw.graphics = (function() {
     let api = {
         // Canvas
         resize,
+        destroy,
+        initialize,
 
         // View State
         getZoom,
@@ -438,6 +456,9 @@ MyDraw.graphics = (function() {
         drawTextbox,
         drawVideo,
         objectBoundary,
+
+        // Extra
+        measureText,
     }
 
     return api;

@@ -5,7 +5,7 @@ export default function Layout() {
     return (
         <>
             <Navigation/>
-            <main className="px-[clamp(1em,3vw,2em)]">
+            <main>
                 <Outlet/>
             </main>
         </>

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+:root {
+  --page-padding: clamp(1em,3vw,2em);
+}
+
 html,
 body,
 #root {
@@ -13,6 +17,7 @@ main {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  padding-inline: var(--page-padding);
 }
 
 body {

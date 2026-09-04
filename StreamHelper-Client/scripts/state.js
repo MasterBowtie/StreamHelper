@@ -2,16 +2,16 @@ import { MyDraw } from "./objects.js";
 
 MyDraw.state = (function (graphics) {
     // Document State
-    const elements = [];
+    let elements = [];
+    let input = null;
     
     // Editor State
-    var currentElement = null;
-    var nextId = 0;
-    var nextOrder = 0;
+    let currentElement = null;
+    let nextId = 0;
+    let nextOrder = 0;
 
-    var grid = 1;
-    var onGridChange = null;
-    var nextId = 0;
+    let grid = 1;
+    let onGridChange = null;
 
     function getGrid() {
         return grid;
@@ -41,8 +41,27 @@ MyDraw.state = (function (graphics) {
         }));
     }
 
+    function getElement(id) {
+        const element = elements.find(element => element.id === id) || null;
+        if (element) {
+            return {
+            id: element.id,
+            order: element.order,
+            type: element.type,
+            x: element.x,
+            y: element.y,
+            w: element.w,
+            h: element.h,
+            rotation: element.rotation,
+            properties: {...element.properties}
+        }
+        }
+    }
+
     function getCurrentElement() {
         if (!currentElement) return;
+
+        
 
         return {
             id: currentElement.id,
@@ -53,6 +72,7 @@ MyDraw.state = (function (graphics) {
             w: currentElement.w,
             h: currentElement.h,
             rotation: currentElement.rotation,
+            properties: {...currentElement.properties}
         }
     }
 
@@ -77,6 +97,8 @@ MyDraw.state = (function (graphics) {
         }
 
         normalizeElement(element)
+        input?.updateReact(element);
+        
         render();
         return true;
     }
@@ -159,7 +181,7 @@ MyDraw.state = (function (graphics) {
          
         elements.splice(index, 1);
         
-        for (const elements of elements) {
+        for (const element of elements) {
             if (element.order > deleteOrder) {
                 element.order--;
             }
@@ -168,6 +190,11 @@ MyDraw.state = (function (graphics) {
         if (currentElement?.id === id) {
             currentElement = null;
         }
+
+
+        input?.updateDelete(id);
+
+        render();
     }
 
     function shiftForward(id) {
@@ -182,6 +209,7 @@ MyDraw.state = (function (graphics) {
         currentElement = element;
 
         [element.order, next.order] = [next.order, element.order];
+        render();
     }
 
     function shiftBackward(id) {
@@ -196,6 +224,7 @@ MyDraw.state = (function (graphics) {
         currentElement = element;
 
         [element.order, next.order] = [next.order, element.order];
+        render();
     }
 
     function normalizeElement(element) {
@@ -214,6 +243,26 @@ MyDraw.state = (function (graphics) {
         if (element.h < 0) {
             element.y += element.h;
             element.h = -element.h;
+        }
+
+        if (element.properties?.radii < 0) {
+            element.properties.radii = 0;
+        }
+        if (element.type === "text") {
+            const targetWidth = element.w;
+            let measured = graphics.measureText({...element.properties, text_size: element.properties.text_size});
+
+            while (Math.round(measured.w) < targetWidth) {
+                element.properties.text_size += 1;
+                measured = graphics.measureText({...element.properties, text_size: element.properties.text_size});
+                element.h = measured.h;
+            }
+            
+            while (Math.round(measured.w) > targetWidth && element.properties.text_size > 0) {
+                element.properties.text_size  -= 1;
+                measured = graphics.measureText({...element.properties, text_size: element.properties.text_size});
+                element.h = measured.h;
+            }
         }
     }
 
@@ -277,6 +326,16 @@ MyDraw.state = (function (graphics) {
         return JSON.stringify(newElements);
     }
 
+    function initialize(MyInput) {
+        elements = [];
+        input = null;
+        currentElement = null;
+        nextId = 0;
+        nextOrder = elements.length;
+        input = MyInput;
+        render();
+    }
+
     const api = {
         // Grid
         getGrid,
@@ -285,6 +344,7 @@ MyDraw.state = (function (graphics) {
 
         // Elements
         getElements,
+        getElement,
         getCurrentElement,
         setCurrentElement,
         updateElement,
@@ -297,10 +357,8 @@ MyDraw.state = (function (graphics) {
         // Extra
         exportElements,
         render,
-
+        initialize,
     }
-
-    render();
 
     return api;
 }(MyDraw.graphics));
