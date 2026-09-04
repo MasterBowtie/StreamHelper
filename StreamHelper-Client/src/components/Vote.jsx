@@ -1,38 +1,46 @@
 import { useEffect, useState } from 'react';
-import { io } from "socket.io-client";
+import { useWebSocket } from '../contexts/WebSocketContext';
 
 function Vote() {
-    const [socket, setSocket] = useState();
+    const {websocket, connected} = useWebSocket();
     const [votes, setVotes] = useState({});
     const [options, setOptions] = useState([]);
     const [currentTime, setTime] = useState();
     const [endTime, setEnd] = useState();
+    const [pollActive, setPollActive] = useState(false);
 
     // TODO: Switch setInterval to setTimeout
     useEffect(()=> {
-        setInterval(()=> {
+        setTimeout(()=> {
             setTime(Date.now())
         }, 1000);
     },[])
 
     useEffect(() => {
-        if(!socket) return;
-        socket.on("channel.chat.vote", (data)=> {
-            let newVote = data.vote.split(" ")
-            let newVotes = votes;
-            for (let i of newVote) {
-                if (i.startsWith("!") && i != "!vote") {
-                    let index = parseInt(i.replaceAll("!", "")) - 1;
-                    if (Number.isInteger(index) && index < options.length) {
-                        // console.log("INDEX:", index);
-                        newVotes[data.user] = index; 
-                    }
-                }
+        if(!connected || !pollActive)  {
+            return;
+        }
+
+        const callback = (data) => {
+            const {message, chatter_user_id} = data.payload;
+            const {text} = message;
+
+            if (!text.startsWith("!vote")) return;
+
+            const vote = text.split(" ")[1];
+            const index = parseInt(vote);
+            if (Number.isInteger(index) && index > 0 && index <= options.length) {
+                setVotes(current => ({
+                    ...current, [chatter_user_id]: index
+                }));
             }
-            setVotes(newVotes);
-        })
-        
-    },[socket])
+        };
+
+        websocket.on("twitch.chat.message", callback);
+        return () => {
+            websocket.off("twitch.chat.message", callback);
+        }
+    }, [pollActive])
 
 
     useEffect(() => {
@@ -45,8 +53,7 @@ function Vote() {
                 announce.hidden = true;
                 reset.removeAttribute("hidden");
                 setEnd(undefined);
-                socket.disconnect();
-                // setSocket(undefined);
+                setPollActive(false);
 
                 let counts = []
                 let total = 0;
@@ -90,10 +97,6 @@ function Vote() {
 
     function startPoll(event) {
         setVotes({});
-        let s = io()
-        setSocket(s);
-        s.emit("create", "socket");
-
         setEnd(Date.now() + (60000 * 2));
         let headers = Array.from(document.getElementsByClassName("vote_title"));
         let deletes = Array.from(document.getElementsByClassName("del_button"));
@@ -111,7 +114,7 @@ function Vote() {
 
         add_div.style.height = "0px";
         start.hidden = true;
-        
+        setPollActive(true);
     }
     
     function reset(event) {
@@ -147,7 +150,7 @@ function Vote() {
         let input = event.target;
         let height = parseInt(input.style.height.replace("px", ""));
         
-        console.log(input, height, input.scrollHeight);
+        // console.log(input, height, input.scrollHeight);
         if (input.scrollHeight - 14 > height || isNaN(height)) {
             input.style.height = `${input.scrollHeight}px`;
         }

@@ -12,12 +12,16 @@ import { WebSocketProvider } from './contexts/WebSocketContext.jsx'
 import { Settings } from './pages/Settings.jsx'
 import Layout from './pages/Layout.jsx'
 import Draw from './pages/Draw.jsx'
+import { Vote } from './components/Vote.jsx'
 
 const router = createHashRouter([
     {path: "/", element: <Layout/>, children: [
         {index: true, element: <MainDashboard/>},
         {path: "settings", element: <Settings/>},
         {path: "draw", element: <Draw/>},
+    ]}, 
+    {path: "/testing", children: [
+        {path: "vote", element: <Vote/>}
     ]}
     // {path: "scripture", element: <Scripture/>, children: [
     //     {path: "crud", element: <ScriptureCrud/>},
