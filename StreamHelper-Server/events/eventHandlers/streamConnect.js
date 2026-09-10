@@ -3,6 +3,7 @@ import { EVENTS } from "../../websocket/events.js";
 function buildStreamOnlineHandler({twitch, db, websocket}) {
     async function handler(event) {
         const stream = await twitch.twitchApiClient.getStream(event.broadcaster_user_id);
+        console.log("HANDLER:", stream);
 
         var activeStream = await db.streamRepository.findActive();
         if (!activeStream) {
@@ -21,7 +22,7 @@ function buildStreamOnlineHandler({twitch, db, websocket}) {
 function buildStreamOfflineHandler({db, websocket}) {
     async function handler(event) {
         var stream = await db.streamRepository.findActive();
-        var ended = await db.streamRepository.endStream(stream.id);
+        var ended = await db.streamRepository.endStream(stream?.id ?? null);
         
         if (ended) {
             stream = await db.streamRepository.getLatest();

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useWebSocket } from '../contexts/WebSocketContext';
+import "../css/vote.css";
 
 function Vote() {
     const {websocket, connected} = useWebSocket();
@@ -46,9 +47,11 @@ function Vote() {
     useEffect(() => {
         if (endTime) {
             let reset = document.getElementById("reset_button");
-            let announce = document.getElementById("announce")
+            let announce = document.getElementById("announce");
+
             if (endTime < currentTime && !(endTime + 10000 < currentTime)) {
                 announce.removeAttribute("hidden");
+
             } else if (endTime + 10000 < currentTime) {
                 announce.hidden = true;
                 reset.removeAttribute("hidden");
@@ -101,6 +104,8 @@ function Vote() {
         let headers = Array.from(document.getElementsByClassName("vote_title"));
         let deletes = Array.from(document.getElementsByClassName("del_button"));
         let add_div = document.getElementById("add_div");
+        let vote_title = document.getElementById("vote_title");
+        vote_title.disabled = true;
         
         let start = event.target;
 
@@ -119,8 +124,6 @@ function Vote() {
     
     function reset(event) {
         setVotes({});
-        socket.disconnect();
-        setSocket(undefined);
         setEnd(undefined);
         setOptions([]);
         let headers = Array.from(document.getElementsByClassName("vote_title"));
@@ -134,6 +137,7 @@ function Vote() {
         add_div.style.height = "";
         add_input.value = "";
         vote_title.value = "";
+        vote_title.removeAttribute("disabled");
 
         headers.forEach(element => {
           element.removeAttribute("disabled");  
@@ -150,7 +154,6 @@ function Vote() {
         let input = event.target;
         let height = parseInt(input.style.height.replace("px", ""));
         
-        // console.log(input, height, input.scrollHeight);
         if (input.scrollHeight - 14 > height || isNaN(height)) {
             input.style.height = `${input.scrollHeight}px`;
         }
@@ -167,7 +170,7 @@ function Vote() {
             <div className='vote_options_container'>
               {options.map((option, index)=> {
                 return (
-                <div key={`o_${index}`} style={{display: "flex", transform: "rotate(0)", backgroundColor:"rgba(255, 255, 255, 0.5)", borderRadius: "10px"}}>
+                <div className='vote option' key={`o_${index}`}>
                     <label className='vote'>!{index + 1}: </label><input className='vote_option' value={`${option}`} disabled/>
                       <button className='del_button' onClick={(event) => {
                           let newOptions = options.slice(0, index).concat(options.slice(index + 1))

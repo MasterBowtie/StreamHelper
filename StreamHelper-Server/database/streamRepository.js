@@ -35,8 +35,11 @@ export class StreamRepository {
         return rows[0] ?? null;
     }
 
-    // Twitch does NOT give and end time for stream.
+    // Twitch does NOT give an end time for stream.
     async endStream(id) {
+        if (!id) {
+            return;
+        }
         const[result] = await this.pool.execute(
                 `UPDATE streams
                 SET end_at = NOW()
@@ -47,7 +50,7 @@ export class StreamRepository {
         return result.affectedRows === 1;
     }
 
-    async getLatest() {
+    async getStream() {
         const [rows] = await this.pool.execute(
             `SELECT * FROM streams
             ORDER BY start_at DESC

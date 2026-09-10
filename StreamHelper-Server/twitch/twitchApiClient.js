@@ -8,7 +8,7 @@ function buildTwitchApiClient({
         const token = await tokenManager.getValidAccessToken();
         const clientId = await services.settingService.get("clientId", "twitch");
 
-        if (!token && token.success === false) {
+        if (!token || token.success === false) {
             console.error("Error:", token.message);
             return {success: false, message: "No Access Token"};
         }
@@ -19,7 +19,7 @@ function buildTwitchApiClient({
                 headers: {
                     'Authorization': `Bearer ${token.data.accessToken}`,
                     'Client-Id': clientId.data,
-                    'Content-Type': 'application.json',
+                    'Content-Type': 'application/json',
                     ...options.headers
                 }
             }
@@ -29,6 +29,10 @@ function buildTwitchApiClient({
 
         if (!response.ok) {
             console.error("Twitch API Error:", data)
+            return {
+                success: false,
+                ...data,
+            }
             // throw new Error(`Twitch API Error: ${response.status} ${JSON.stringify(error)}`);
         }
         return {
@@ -38,11 +42,11 @@ function buildTwitchApiClient({
     }
 
     async function getCurrentUser() {
-        const data = await request('/users');
+        const result = await request('/users');
 
-        console.log("Current User:" ,data);
+        console.log("Current User:" , result);
 
-        return data.data[0] ?? null
+        return result.data[0] ?? null
     }
 
     async function createEventSubSubscription({
@@ -77,18 +81,19 @@ function buildTwitchApiClient({
     }
 
     async function getStream(userId) {
-        const data = await request(`/stream?user_id=${userId}`);
+        // FIXME
+        const result = await request(`/stream?user_id=${userId}`);
 
-        console.log("getStream:" ,data);
+        console.log("getStream:" , result);
 
-        return data.data[0] ?? null;
+        return result.data[0] ?? null;
     }
 
     async function getChannelInformation(userId) {
-        const data = await request(`/channels?broadcaster_id=${userId}`);
+        const result = await request(`/channels?broadcaster_id=${userId}`);
 
-        console.log("Channel Info:" , data);
-        return data.data[0] ?? null;
+        console.log("Channel Info:" , result);
+        return result.data[0] ?? null;
     }
 
     return {

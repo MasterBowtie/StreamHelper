@@ -18,11 +18,14 @@ const router = createHashRouter([
     {path: "/", element: <Layout/>, children: [
         {index: true, element: <MainDashboard/>},
         {path: "settings", element: <Settings/>},
-        {path: "draw", element: <Draw/>},
-    ]}, 
-    {path: "/testing", children: [
+        {path: "widgets", children: [
+            {path: "draw", element: <Draw/>},
+            {path: "vote", element: <Vote/>}
+        ]}
+    ]},
+    {path: "/stream", children: [
         {path: "vote", element: <Vote/>}
-    ]}
+    ]} 
     // {path: "scripture", element: <Scripture/>, children: [
     //     {path: "crud", element: <ScriptureCrud/>},
     //     {path: "view", element: <ScriptureView/>}
@@ -30,7 +33,6 @@ const router = createHashRouter([
     // {path: "start", element: <Start/>},
     // {path: "house", element: <StyleHouse/>},
     // {path: "intermission", element: <Intermission/>},
-
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(

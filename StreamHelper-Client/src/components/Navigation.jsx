@@ -12,9 +12,13 @@ export default function Navigation() {
                 <NavLink to={"/settings"} className={({ isActive }) => isActive? "font-bold text-green-500 pointer-events-none": "text-grey-300 hover:font-bold"}>
                     Settings
                 </NavLink>
-                <NavLink to={"/draw"} className={({ isActive }) => isActive? "font-bold text-green-500 pointer-events-none": "text-grey-300 hover:font-bold"}>
-                    Draw
-                </NavLink>
+                {/* TODO: Make Dropdown Menu */}
+                <label>Widgets</label>
+                <div className="dropdown">
+                    <NavLink to={"/widgets/draw"} className={({ isActive }) => isActive? "font-bold text-green-500 pointer-events-none": "text-grey-300 hover:font-bold"}>Draw</NavLink>
+                    <NavLink to={"/widgets/vote"} className={({ isActive }) => isActive? "font-bold text-green-500 pointer-events-none": "text-grey-300 hover:font-bold"}>Vote</NavLink>
+                </div>
+                    
             </div>
         </nav>
     )
