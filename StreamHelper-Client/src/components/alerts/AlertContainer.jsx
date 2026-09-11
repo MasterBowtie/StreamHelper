@@ -20,7 +20,7 @@ export default function AlertContainer() {
                     sound = new Audio("I Like Your Style.mp3");
                     duration = 5000;
                     break;
-                case "twitch.subscribed":
+                case "twitch.subscribe":
                     sound = new Audio("Thank You For Your Participation.mp3");
                     duration = 7000;
                     break;
@@ -51,13 +51,13 @@ export default function AlertContainer() {
         };
 
         websocket.on("twitch.follow", callback);
-        websocket.on("twitch.subscribed", callback);
+        websocket.on("twitch.subscribe", callback);
         websocket.on("twitch.raid", callback);
         websocket.on("twitch.chat.message", testCallback);
         
         return () => {
             websocket.off("twitch.follow", callback);
-            websocket.off("twitch.subscribed", callback);
+            websocket.off("twitch.subscribe", callback);
             websocket.off("twitch.raid", callback);
             websocket.off("twitch.chat.message", testCallback);
         }
@@ -67,7 +67,7 @@ export default function AlertContainer() {
     switch (currentAlert?.type) {
         case "twitch.follow":
             return <BasicAlert alert={currentAlert} type={"followed"}/>
-        case "twitch.subscribed":
+        case "twitch.subscribe":
             return <BasicAlert alert={currentAlert} type={"subscribed"}/>
         case "twitch.raid":
             return <BasicAlert alert={currentAlert} type={"raided"}/>

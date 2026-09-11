@@ -43,9 +43,33 @@ export function buildTwitchRouter(components, authRouter, eventSubRouter) {
         res.send({follows});
     })
 
-    router.get("/stream", async(req, res) => {
+    router.get("/subscribers", async(req, res) => {
+        const broadcaster = components.twitch.getStatus().broadcaster;
+        let cursor = null;
+        let subs = [];
 
-        res.send({data: "testing"})
+        const fakeMessage = {
+            subscription: {
+                type: "channel.subscribe"
+            }
+        }
+
+        do {
+            const result = await components.twitch.twitchApiClient.getSubscribers(broadcaster.twitchId, cursor);
+            for (let followData of result.data) {
+                subs.push(followData)
+                fakeMessage.subscription.created_at = new Date().toISOString();
+                fakeMessage.event = {...followData};
+                // subs.push(fakeMessage);
+
+                await components.events.eventDispatcher.dispatch({payload: fakeMessage});
+            }
+
+            cursor = result.pagination?.cursor ?? null;
+        } while (cursor);
+
+        // console.log(components.twitch.twitchApiClient.getFollowers()
+        res.send({subs});
     })
     
     return router;

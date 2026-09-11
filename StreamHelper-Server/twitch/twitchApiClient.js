@@ -106,6 +106,16 @@ function buildTwitchApiClient({
         return await request(endpoint);
     }
 
+    async function getSubscribers(broadcasterId, cursor=null) {
+        let endpoint = `/subscriptions?broadcaster_id=${broadcasterId}`;
+
+        if (cursor) {
+            endpoint += `&after=${cursor}`;
+        }
+
+        return await request(endpoint);
+    }
+
     return {
         getCurrentUser,
         createEventSubSubscription,
@@ -113,6 +123,7 @@ function buildTwitchApiClient({
         getStream,
         getChannelInformation,
         getFollowers,
+        getSubscribers,
     }
 }
 

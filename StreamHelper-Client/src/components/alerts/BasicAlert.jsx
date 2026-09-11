@@ -4,8 +4,10 @@ import { useEffect } from "react";
 export function BasicAlert({alert, type}) {
 
     useEffect(() => {
+        console.log(alert);
         alert?.sound?.play();
     }, [alert])
+
 
     return (
         <div className="alert">

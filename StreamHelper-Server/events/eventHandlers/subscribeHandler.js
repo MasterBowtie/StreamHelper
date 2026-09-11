@@ -10,6 +10,7 @@ function buildSubscriptionHandler({db, services, websocket}) {
             tier: event.tier,
             isGift: event.is_gift,
             verified: new Date(),
+            isSubscribed: true,
         }
 
         const result = await db.subscriptionRepository.getSubscriberById(sub.twitchId);
@@ -21,7 +22,7 @@ function buildSubscriptionHandler({db, services, websocket}) {
         }
 
         console.log(`Twitch Alert: ${event.user_name} Subscribed!`);
-        websocket.notifier.notify(EVENTS.TWITCH.ALERTS.SUBSCRIBE, {displayName: event.user_name, isGift: event.is_gift, tier: event.tier});
+        websocket.notifier.notify(EVENTS.TWITCH.ALERTS.SUBSCRIBE, event);
     }
     return handler;
 }
