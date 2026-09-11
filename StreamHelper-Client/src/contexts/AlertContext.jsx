@@ -36,7 +36,8 @@ export function AlertProvider({children}) {
 
         const timer = setTimeout(()=> {
             nextAlert();
-        }, ALERT_DURATION);
+            // console.log(currentAlert?.duration ?? "No Duration");
+        }, currentAlert?.duration ?? ALERT_DURATION);
 
         return () => clearTimeout(timer);
     }, [currentAlert, nextAlert]);

@@ -13,6 +13,9 @@ import { Settings } from './pages/Settings.jsx'
 import Layout from './pages/Layout.jsx'
 import Draw from './pages/Draw.jsx'
 import { Vote } from './components/Vote.jsx'
+import AlertContainer from './components/alerts/AlertContainer.jsx'
+import { AlertProvider } from './contexts/AlertContext.jsx'
+import { BasicAlert } from './components/alerts/BasicAlert.jsx'
 
 const router = createHashRouter([
     {path: "/", element: <Layout/>, children: [
@@ -24,8 +27,11 @@ const router = createHashRouter([
         ]}
     ]},
     {path: "/stream", children: [
-        {path: "vote", element: <Vote/>}
+        {path: "vote", element: <Vote/>},
+        {path: "alert", element: <AlertProvider><AlertContainer/></AlertProvider>},
+        {path: "follow", element: <BasicAlert/>}
     ]} 
+
     // {path: "scripture", element: <Scripture/>, children: [
     //     {path: "crud", element: <ScriptureCrud/>},
     //     {path: "view", element: <ScriptureView/>}
