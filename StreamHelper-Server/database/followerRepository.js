@@ -3,7 +3,7 @@ export class FollowerRepository {
         this.pool = pool;
     }
 
-    async createFollower({twitchId, eventId}) {
+    async createFollowerByEvent({twitchId, eventId}) {
         const [result] = await this.pool.execute(
             `INSERT INTO follows
             (twitch_id, event_id) VALUES (?, ?)`,
@@ -15,7 +15,7 @@ export class FollowerRepository {
 
     async findByTwitchId(twitchId) {
         const [rows] = await this.pool.execute(
-            `SELECT f.twitch_id, u.display_name, e.occurred_at
+            `SELECT f.twitch_id, u.display_name, e.occurred_at, f.is_following
             FROM follows f
             JOIN twitch_users u ON u.twitch_id = f.twitch_id
             JOIN events e ON e.event_id = f.event_id

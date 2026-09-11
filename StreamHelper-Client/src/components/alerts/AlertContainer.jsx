@@ -16,15 +16,15 @@ export default function AlertContainer() {
             let duration
 
             switch (data.type) {
-                case "twitch.channel.follow":
+                case "twitch.follow":
                     sound = new Audio("I Like Your Style.mp3");
                     duration = 5000;
                     break;
-                case "twitch.channel.subscribed":
+                case "twitch.subscribed":
                     sound = new Audio("Thank You For Your Participation.mp3");
                     duration = 7000;
                     break;
-                case "twitch.channel.raid":
+                case "twitch.raid":
                     sound = new Audio("I Like Your Style.mp3");
                     duration = 5000;
                     break;
@@ -50,26 +50,26 @@ export default function AlertContainer() {
             };
         };
 
-        websocket.on("twitch.channel.follow", callback);
-        websocket.on("twitch.channel.subscribed", callback);
-        websocket.on("twitch.channel.raid", callback);
+        websocket.on("twitch.follow", callback);
+        websocket.on("twitch.subscribed", callback);
+        websocket.on("twitch.raid", callback);
         websocket.on("twitch.chat.message", testCallback);
         
         return () => {
-            websocket.off("twitch.channel.follow", callback);
-            websocket.off("twitch.channel.subscribed", callback);
-            websocket.off("twitch.channel.raid", callback);
+            websocket.off("twitch.follow", callback);
+            websocket.off("twitch.subscribed", callback);
+            websocket.off("twitch.raid", callback);
             websocket.off("twitch.chat.message", testCallback);
         }
     }, [connected])
 
     // TODO: Make Better Alerts
     switch (currentAlert?.type) {
-        case "twitch.channel.follow":
+        case "twitch.follow":
             return <BasicAlert alert={currentAlert} type={"followed"}/>
-        case "twitch.channel.subscribed":
+        case "twitch.subscribed":
             return <BasicAlert alert={currentAlert} type={"subscribed"}/>
-        case "twitch.channel.raid":
+        case "twitch.raid":
             return <BasicAlert alert={currentAlert} type={"raided"}/>
         case "twitch.chat.message":
             return <BasicAlert alert={currentAlert} type={""}/>

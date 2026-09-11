@@ -96,12 +96,23 @@ function buildTwitchApiClient({
         return result.data[0] ?? null;
     }
 
+    async function getFollowers(broadcasterId, cursor=null) {
+        let endpoint = `/channels/followers?broadcaster_id=${broadcasterId}`;
+
+        if (cursor) {
+            endpoint += `&after=${cursor}`;
+        }
+
+        return await request(endpoint);
+    }
+
     return {
         getCurrentUser,
         createEventSubSubscription,
         getEventSubSubscriptions,
         getStream,
         getChannelInformation,
+        getFollowers,
     }
 }
 

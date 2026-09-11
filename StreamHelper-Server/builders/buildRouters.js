@@ -5,8 +5,7 @@ import { buildTwitchRouter } from "../routers/twitch/twitchRouter.js";
 import { buildEventSubRouter } from "../routers/twitch/eventSubRouter.js";
 
 export function buildRouters(components) {
-    const authRouter = buildAuthRouter(components)
-
+    const authRouter = buildAuthRouter(components);
     const eventSubRouter = buildEventSubRouter(components);
 
     const twitchRouter = buildTwitchRouter(components, authRouter, eventSubRouter);
@@ -14,6 +13,8 @@ export function buildRouters(components) {
     const settingsRouter = buildSettingsRouter(components);
 
     const mainRouter = buildMainRouter(components);
+
+
 
     return {
         eventSubRouter,

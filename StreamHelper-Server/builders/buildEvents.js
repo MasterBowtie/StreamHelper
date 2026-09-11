@@ -13,7 +13,8 @@ export function buildEvents({twitch, db, services, websocket}) {
 
     const eventLogger = buildEventLogger({
         eventRepository: db.eventRepository,
-        streamRepository: db.streamRepository
+        streamRepository: db.streamRepository,
+        twitchUserRepository: db.twitchUserRepository
     });
 
     const eventDispatcher = buildEventDispatcher({eventLogger});

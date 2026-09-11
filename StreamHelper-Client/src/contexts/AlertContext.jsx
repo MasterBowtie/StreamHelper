@@ -11,23 +11,26 @@ export function AlertProvider({children}) {
     const queue = useRef([]);
 
     const nextAlert = useCallback(()=> {
-        if (queue.current.length === 0) {
+        const next = queue.current.shift();
+        
+        if (!next) {
             setCurrentAlert(null);
             return;
         }
-
-        const next = queue.current.shift();
         setCurrentAlert(next);
     }, []);
 
     const addAlert = useCallback((alert)=> {
         queue.current.push(alert);
 
-        if (!currentAlert) {
-            nextAlert();
-        }
+        setCurrentAlert(current => {
+            if (current !== null) {
+                return current;
+            }
+            return queue.current.shift() ?? null;
+        });
 
-    }, [currentAlert, nextAlert]);
+    }, []);
 
     useEffect(()=> {
         if (!currentAlert) {
@@ -36,7 +39,6 @@ export function AlertProvider({children}) {
 
         const timer = setTimeout(()=> {
             nextAlert();
-            // console.log(currentAlert?.duration ?? "No Duration");
         }, currentAlert?.duration ?? ALERT_DURATION);
 
         return () => clearTimeout(timer);

@@ -6,7 +6,11 @@ export function buildFollowHandler({db, services, websocket}) {
 
         // Check for previous follow
         const result = await db.followerRepository.findByTwitchId(event.user_id);
+        
         if (result !== null) {
+            if (result.is_following) {
+                return;
+            }
             await db.followerRepository.updateFollower({
                 twitchId: event.user_id,
                 eventId: eventId,
@@ -14,7 +18,7 @@ export function buildFollowHandler({db, services, websocket}) {
                 isFollowing: true
             });
         } else {
-            await db.followerRepository.createFollower({
+            await db.followerRepository.createFollowerByEvent({
                 twitchId: event.user_id,
                 eventId: eventId
             })
@@ -24,7 +28,7 @@ export function buildFollowHandler({db, services, websocket}) {
             displayName: event.user_name
         });
 
-        console.log(`Twitch ALert: ${event.user_name} Followed!`);
+        console.log(`Twitch Alert: ${event.user_name} Followed!`);
         websocket.notifier.notify(EVENTS.TWITCH.ALERTS.FOLLOW, event);
     }
 
