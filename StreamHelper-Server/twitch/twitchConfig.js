@@ -25,5 +25,6 @@ export const twitchConfig = {
         'channel:read:redemptions',
         'user:read:chat',
         'user:write:chat',
+        'channel:read:redemptions'
     ]
 }

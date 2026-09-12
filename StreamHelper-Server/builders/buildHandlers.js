@@ -1,5 +1,6 @@
 import { buildChatHandler, buildChatNotificationHandler } from "../events/eventHandlers/chatHandler.js";
 import { buildFollowHandler } from "../events/eventHandlers/followHandler.js";
+import { buildPointHandler } from "../events/eventHandlers/pointHandler.js";
 import { buildRaidHandler } from "../events/eventHandlers/raidHandler.js";
 import { buildStreamOfflineHandler, buildStreamOnlineHandler } from "../events/eventHandlers/streamConnect.js";
 import { buildSubscriptionHandler } from "../events/eventHandlers/subscribeHandler.js";
@@ -18,5 +19,6 @@ export function buildHandlers({eventDispatcher, services, db, twitch, websocket}
     eventDispatcher.registerHandler("channel.chat.message", buildChatHandler({websocket}), false);
 
     eventDispatcher.registerHandler("channel.chat.notification", buildChatNotificationHandler({db, websocket}), false);
-    
+
+    eventDispatcher.registerHandler("channel.channel_points_custom_reward_redemption.add", buildPointHandler({websocket}), false);
 }

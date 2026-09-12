@@ -47,6 +47,13 @@ export function getSubscriptions(broadcaster) {
                 broadcaster_user_id: broadcaster.twitch_id,
                 user_id: broadcaster.twitch_id
             }
+        }, 
+        {
+            type: "channel.channel_points_custom_reward_redemption.add",
+            version: "1",
+            condition: {
+                broadcaster_user_id: broadcaster.twitch_id, 
+            }
         }
     ]
 }
