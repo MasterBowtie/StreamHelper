@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useWebSocket } from "../../contexts/WebSocketContext";
 import { useAlerts } from "../../contexts/AlertContext";
 import { BasicAlert } from "./BasicAlert";
+import { SoundAlert } from "./SoundAlert";
 
 export default function AlertContainer() {
     const { currentAlert, addAlert } = useAlerts();
@@ -28,8 +29,13 @@ export default function AlertContainer() {
                     sound = new Audio("I Like Your Style.mp3");
                     duration = 5000;
                     break;
-            } 
-            sound.preload = "auto";
+                case "twitch.point.redeem":
+                    duration = 5000;
+                    break;
+            }
+            if (sound) {
+                sound.preload = "auto";
+            }
             addAlert({
                 type: data.type,
                 data,
@@ -54,12 +60,14 @@ export default function AlertContainer() {
         websocket.on("twitch.subscribe", callback);
         websocket.on("twitch.raid", callback);
         websocket.on("twitch.chat.message", testCallback);
+        websocket.on("twitch.point.redeem", callback);
         
         return () => {
             websocket.off("twitch.follow", callback);
             websocket.off("twitch.subscribe", callback);
             websocket.off("twitch.raid", callback);
             websocket.off("twitch.chat.message", testCallback);
+            websocket.off("twitch.point.redeem", callback);
         }
     }, [connected])
 
@@ -73,6 +81,9 @@ export default function AlertContainer() {
             return <BasicAlert alert={currentAlert} type={"raided"}/>
         case "twitch.chat.message":
             return <BasicAlert alert={currentAlert} type={""}/>
+        case "twitch.point.redeem":
+            return <SoundAlert alert={currentAlert}/>
+
     }
 
 }
