@@ -10,15 +10,22 @@ export function buildHandlers({eventDispatcher, services, db, twitch, websocket}
 
     eventDispatcher.registerHandler("stream.offline", buildStreamOfflineHandler({db, websocket}), true,);
 
+    // Big Alerts
     eventDispatcher.registerHandler("channel.follow", buildFollowHandler({db, services, websocket}), true);
-
     eventDispatcher.registerHandler("channel.subscribe", buildSubscriptionHandler({db, services, websocket}), true);
-
     eventDispatcher.registerHandler("channel.raid", buildRaidHandler({db, services, websocket}), true)
 
-    eventDispatcher.registerHandler("channel.chat.message", buildChatHandler({websocket}), false);
-
+    
+    // Chat Handlers
+    const chatHandler = buildChatHandler({websocket});
+    eventDispatcher.registerHandler("channel.chat.message", chatHandler.messageHandler, false);
+    eventDispatcher.registerHandler("channel.chat.message_delete", chatHandler.deleteHandler, false);
+    eventDispatcher.registerHandler("channel.chat.clear", chatHandler.clearHandler, false);
+    eventDispatcher.registerHandler("automod.message.hold", chatHandler.holdHandler, false);
+    eventDispatcher.registerHandler("automod.message.update", chatHandler.updateHandler, false);
+    eventDispatcher.registerHandler("channel.chat.clear_user_messages", chatHandler.clearUserHandler, false);
     eventDispatcher.registerHandler("channel.chat.notification", buildChatNotificationHandler({db, websocket}), false);
 
+    // Channel Points
     eventDispatcher.registerHandler("channel.channel_points_custom_reward_redemption.add", buildPointHandler({websocket}), false);
 }

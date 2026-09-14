@@ -7,6 +7,9 @@ export const EVENTS = {
             SUBSCRIBE: "twitch.subscribe",
             RAID: "twitch.raid",
             CHAT: "twitch.chat.message",
+            DELETE: "twitch.chat.delete",
+            CLEAR: "twitch.chat.clear",
+            CLEAR_USER: 'twitch.chat.clear_user',
             NOTIFICATION: 'twitch.chat.notification',
             POINTS: 'twitch.point.redeem',
 
