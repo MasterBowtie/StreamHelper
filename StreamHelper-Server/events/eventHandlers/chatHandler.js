@@ -1,14 +1,69 @@
 import { EVENTS } from "../../websocket/events.js";
 
-function buildChatHandler({websocket}) {
+function buildChatHandler({websocket, twitch}) {
     const pendingMessages = new Map();
     const heldMessages = new Map();
+    const badgeCache = new Map();
+    const emoteCache = new Map();
 
+    async function initialize() {
+        const broadcasterId = await twitch.getStatus()?.broadcaster?.twitchId;
+        if (broadcasterId === null) return;
+
+        let badges = await twitch.twitchApiClient.getBadges(broadcasterId);
+        for (const badge of badges) {
+            for (const version of badge.versions) {
+                badgeCache.set(`${badge.set_id}:${version.id}`, 
+                    {
+                        url1x: version.image_url_1x,
+                        url2x: version.image_url_2x,
+                        url4x: version.image_url_4x,
+                    });
+            }
+        }
+
+        let emotes = await twitch.twitchApiClient.getEmotes(broadcasterId);
+
+        for (const emote of emotes) {
+            emoteCache.set(emote.id, {
+                url1x: emote.images.url_1x,
+                url2x: emote.images.url_2x,
+                url4x: emote.images.url_4x,
+            })
+        }
+    }
+
+    // WebSocket Handlers
     async function messageHandler(event) {
         const messageId = event.message_id;
 
+        const badges = event.badges.map(badge => ({
+            ...badge, url: badgeCache.get(`${badge.set_id}:${badge.id}`)?.url2x ?? "/assets/emotes/missing.svg"
+        }));
+
+        const fragments = event.message.fragments.map(fragment => {
+            if (fragment.type === "emote") {
+                return {
+                    type: "emote",
+                    text: fragment.text,
+                    url: emoteCache.get(fragment.emote.id)?.url2x ?? "/assets/emotes/missing.svg"
+                }
+            }
+            return {
+                type: "text",
+                text: fragment.text
+            }
+        })
+
         const message = {
-            event,
+            event: {
+                message_id: event.message_id,
+                chatter_user_id: event.chatter_user_id,
+                chatter_user_name: event.chatter_user_name,
+                color: event.color,
+                badges,
+                fragments,                
+            },
             approved: null,
         };
 
@@ -22,6 +77,7 @@ function buildChatHandler({websocket}) {
             pendingMessages.delete(messageId);
 
             if (pending.approved !== false) {
+
                 websocket.notifier.notify(EVENTS.TWITCH.ALERTS.CHAT, pending.event);
             }
         }, 1000);
@@ -92,6 +148,7 @@ function buildChatHandler({websocket}) {
     }
 
     return {
+        initialize,
         messageHandler,
         holdHandler,
         updateHandler,

@@ -48,8 +48,8 @@ export function buildEvents({twitch, db, services, websocket}) {
                 status.subscriptions.push({type: sub.data, connected: true});
                 websocket.notifier.notify(EVENTS.APP.EVENTSUB.SUBSCRIBED, sub.data);
             } else {
-                console.warn("EventSub Error:", sub.message);
-                status.subscriptions.push({sub_type: sub.data, sub_connected: false});
+                console.warn("EventSub Error:",sub.data, sub.message);
+                status.subscriptions.push({type: sub.data, connected: false});
                 websocket.notifier.notify(EVENTS.TWITCH.STATUS.STATUS_CHANGE);
                 websocket.notifier.notify(EVENTS.TWITCH.STATUS.AUTH_REQUIRED);
             }

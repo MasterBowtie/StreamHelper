@@ -17,7 +17,8 @@ export function buildHandlers({eventDispatcher, services, db, twitch, websocket}
 
     
     // Chat Handlers
-    const chatHandler = buildChatHandler({websocket});
+    const chatHandler = buildChatHandler({websocket, twitch});
+    chatHandler.initialize();
     eventDispatcher.registerHandler("channel.chat.message", chatHandler.messageHandler, false);
     eventDispatcher.registerHandler("channel.chat.message_delete", chatHandler.deleteHandler, false);
     eventDispatcher.registerHandler("channel.chat.clear", chatHandler.clearHandler, false);

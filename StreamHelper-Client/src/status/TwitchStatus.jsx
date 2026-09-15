@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react"
-import { useApi } from "../../utils/api.js";
-import { useWebSocket } from "../../contexts/WebSocketContext.jsx";
-import Button from "../Button.jsx";
+import { useApi } from "../utils/api.js";
+import { useWebSocket } from "../contexts/WebSocketContext.jsx";
+import Button from "../components/Button.jsx";
 
 export default function TwitchStatus() {
     const [status, setStatus] = useState();

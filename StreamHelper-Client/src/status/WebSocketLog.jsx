@@ -1,6 +1,6 @@
 import { useEffectEvent } from "react";
 import { useEffect, useState } from "react";
-import { useWebSocket } from "../../contexts/WebSocketContext";
+import { useWebSocket } from "../contexts/WebSocketContext";
 
 export default function WebSocketLog({className, style}) {
     const {messages} = useWebSocket();

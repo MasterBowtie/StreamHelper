@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import { useApi } from "../../utils/api.js";
-import { useWebSocket } from "../../contexts/WebSocketContext.jsx";
+import { useApi } from "../utils/api.js";
+import { useWebSocket } from "../contexts/WebSocketContext.jsx";
 
 export default function EventSubStatus({className, style}) {
     const [subs, setSubs] = useState([]);

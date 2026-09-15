@@ -1,5 +1,4 @@
 import { ScriptureView } from "../components/Scripture"
-import Chat from "../components/Chat"
 import Title from "../components/Title"
 
 function Intermission() {

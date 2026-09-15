@@ -89,10 +89,12 @@ function buildEventSubService({
             const data = await twitch.twitchApiClient.createEventSubSubscription({...sub, sessionId});
             
             if (data.success === false) {
-                result.push(data)
+                // result.push(data)
+                result.push({success: false, data: sub.type, message: data.message})
+            } else {
+                result.push({success: true, data: sub.type});
             }
         
-            result.push({success: true, data: sub.type});
         }
 
         return {

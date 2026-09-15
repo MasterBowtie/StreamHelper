@@ -116,6 +116,30 @@ function buildTwitchApiClient({
         return await request(endpoint);
     }
 
+    async function getBadges(broadcasterId) {
+        const global = await request(
+            "/chat/badges/global"
+        );
+
+        const channel = await request(
+                `/chat/badges?broadcaster_id=${broadcasterId}`
+            );
+
+        return [...global.data, ...channel.data];
+    }
+
+    async function getEmotes(broadcasterId) {
+        const global = await request(
+            "/chat/emotes/global"
+        );
+
+        const channel = await request(
+            `/chat/emotes?broadcaster_id=${broadcasterId}`
+        )
+
+        return [...global.data, ...channel.data];
+    }
+
     return {
         getCurrentUser,
         createEventSubSubscription,
@@ -124,6 +148,8 @@ function buildTwitchApiClient({
         getChannelInformation,
         getFollowers,
         getSubscribers,
+        getBadges,
+        getEmotes,
     }
 }
 

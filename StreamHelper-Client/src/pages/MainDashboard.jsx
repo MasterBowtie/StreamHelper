@@ -1,6 +1,6 @@
-import EventSubStatus from "../components/status/EventSubStatus";
-import TwitchStatus from "../components/status/TwitchStatus";
-import WebSocketLog from "../components/status/WebSocketLog";
+import EventSubStatus from "../status/EventSubStatus";
+import TwitchStatus from "../status/TwitchStatus";
+import WebSocketLog from "../status/WebSocketLog";
 
 export default function MainDashboard() {
 
