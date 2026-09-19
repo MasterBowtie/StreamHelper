@@ -6,7 +6,7 @@ export function buildEventLogger({eventRepository, streamRepository, twitchUserR
             streamId = stream.stream_id;
         }
 
-        console.log("EVENT LOGGER", message);
+        // console.log("EVENT LOGGER", message);
 
         // const user = await twitchUserRepository.findByTwitchId(message.payload.event.user_id);
 

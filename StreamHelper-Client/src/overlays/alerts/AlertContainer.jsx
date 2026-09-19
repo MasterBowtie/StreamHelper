@@ -30,7 +30,15 @@ export default function AlertContainer() {
                     duration = 5000;
                     break;
                 case "twitch.point.redeem":
-                    duration = 5000;
+                    console.log("POINT REDEEM!", data);
+                    switch (data.payload) {
+                        case "Unmute!":
+                            sound = new Audio("WakeUp.mp3");
+                            break;
+                        case "Hydrate!":
+                            console.log("HYDRATE REDEEM!")
+                            break;
+                    }
                     break;
             }
             if (sound) {
@@ -45,14 +53,14 @@ export default function AlertContainer() {
         }
 
         const testCallback = (data) => {
-            const {message, chatter_user_id} = data.payload;
-            const {text} = message;
+            const {message, fragments} = data.payload;
+            console.log(fragments[0]?.text);
 
-            if (text.startsWith("!alert")) {
-                const [alert, ...name] = text.split(" ");
+
+            if (fragments[0]?.text === "!alert") {
                 const audio = new Audio("You're Doing Fine.mp3")
                 audio.preload = "auto";
-                addAlert({type: "twitch.chat.message", data: {...data, payload: {user_name: name.join(" ")}}, duration: 3000, sound: audio});
+                addAlert({type: "twitch.chat.message", duration: 3000, sound: audio});
             };
         };
 
@@ -80,7 +88,7 @@ export default function AlertContainer() {
         case "twitch.raid":
             return <BasicAlert alert={currentAlert} type={"raided"}/>
         case "twitch.chat.message":
-            return <BasicAlert alert={currentAlert} type={""}/>
+            return <SoundAlert alert={currentAlert}/>
         case "twitch.point.redeem":
             return <SoundAlert alert={currentAlert}/>
 

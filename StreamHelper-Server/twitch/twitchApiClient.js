@@ -82,18 +82,18 @@ function buildTwitchApiClient({
 
     async function getStream(userId) {
         // FIXME
-        const result = await request(`/stream?user_id=${userId}`);
+        const result = await request(`/streams?user_id=${userId}`);
 
         console.log("getStream:" , result);
 
-        return result.data[0] ?? null;
+        return result?.data[0] ?? null;
     }
 
     async function getChannelInformation(userId) {
-        const result = await request(`/channels?broadcaster_id=${userId}`);
+        // const result = await request(`/channels?broadcaster_id=${userId}`);
 
-        console.log("Channel Info:" , result);
-        return result.data[0] ?? null;
+        // console.log("Channel Info:" , result);
+        // return result.data[0] ?? null;
     }
 
     async function getFollowers(broadcasterId, cursor=null) {

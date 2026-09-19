@@ -1,5 +1,7 @@
 export function ChatMessage({message}) {
     // TODO: Ignore !commands
+    if (message.fragments[0].text.startsWith("!")) return;
+
     return (
         <div className="flex gap-2 px-3 py-1 break-words">
             <div className="flex items-start gap-1">
