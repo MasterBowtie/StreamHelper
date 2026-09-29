@@ -1,5 +1,4 @@
 export function ChatMessage({message}) {
-    // TODO: Ignore !commands
     if (message.fragments[0].text.startsWith("!")) return;
 
     return (

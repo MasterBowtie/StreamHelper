@@ -16,7 +16,7 @@ export function buildDatabase() {
 
         try {
             await connection.query("SELECT 1");
-            console.log("Database connected");
+            console.log("MySql database connected");
         } finally {
             connection.release();
         }
