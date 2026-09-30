@@ -50,7 +50,7 @@ export class TwitchUserRepository {
         const [rows] = await this.pool.execute(`
             SELECT * 
             FROM twitch_users
-            WHERE id = 1 LIMIT 1`);
+            WHERE id = 1`);
         
         return rows[0] || null;
     }

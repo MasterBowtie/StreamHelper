@@ -7,7 +7,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "server": "nodemon --exec \"node --experimental-sqlite\" index.js",
+    "server": "nodemon index.js",
     "test": "vitest"
   },
   "author": "MasterBowtie",
