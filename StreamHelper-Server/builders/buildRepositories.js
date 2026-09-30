@@ -9,6 +9,7 @@ import { SettingRepository as MySqlSettingRepository } from "../database/mysql/s
 import { buildDatabase as SQLiteBuildDB } from "../database/sqlite/connection.js";
 import { SettingRepository as SQLiteSettingRepository } from "../database/sqlite/settingRepository.js";
 import { TwitchUserRepository as SQLiteTwitchUserRepository } from "../database/sqlite/twitchUserRepository.js";
+import { StreamRepository as SQLiteStreamRepository } from "../database/sqlite/streamRepository.js";
 
 export async function buildRepositories() {
     if (process.env.DB_TYPE === "sqlite") {
@@ -50,6 +51,7 @@ async function buildSqliteDatabase() {
     const db = SQLiteBuildDB();
     const settingRepository = new SQLiteSettingRepository(db.db);
     const twitchUserRepository = new SQLiteTwitchUserRepository(db.db);
+    const streamRepository = new SQLiteStreamRepository(db.db);
 
     async function initialize() {
         db.initialize();
@@ -60,7 +62,7 @@ async function buildSqliteDatabase() {
         initialize,
         settingRepository,
         twitchUserRepository,
-        // streamRepository,
+        streamRepository,
         // eventRepository,
         // followerRepository,
         // subscriptionRepository,
