@@ -59,11 +59,11 @@ export class FollowerRepository {
         return rows[0] ?? null;
     }
 
-    async gainedFollowers(streamId, isFollowing=true) {
+    async gainedFollowers({streamId, isFollowing=true}={}) {
         let query = `
             SELECT COUNT(DISTINCT f.twitch_id) as follower_count
             FROM follows f
-            JOIN events e ON e.events_id = f.event_id
+            JOIN events e ON e.event_id = f.event_id
             WHERE f.is_following = ?`
         const values = [isFollowing];
 
@@ -99,11 +99,11 @@ export class FollowerRepository {
             updates.push("is_following = ?");
         }
         
-        if (updates.length > 0) {
-            query += updates.join(", ");
-        } else {
-            throw new Error("updateFollower(): Called with no fields to update.");
+        if (updates.length === 0) {
+            console.error("updateFollower(): Called with no fields to update");
+            return false
         }
+        query += updates.join(", ");
         query += " WHERE twitch_id = ?"
         values.push(twitchId);
 
@@ -111,13 +111,3 @@ export class FollowerRepository {
         return result.affectedRows === 1;
     }
 }
-
-// follow_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-// twitch_id VARCHAR(50),
-// event_id INT,
-// last_verified_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-// is_following BOOLEAN DEFAULT TRUE,
-
-// FOREIGN KEY (twitch_id) REFERENCES twitch_users(twitch_id),
-// FOREIGN KEY (event_id) REFERENCES events(event_id),
-// INDEX idx_follows_twitch_id (twitch_id)
