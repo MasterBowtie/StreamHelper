@@ -10,7 +10,7 @@ export function buildPrivateTwitchAuthService({services}) {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-            client_id: clientId,
+            client_id: clientId.value,
             client_secret: twitchConfig.clientSecret,
             code,
             grant_type: "authorization_code",
@@ -41,7 +41,7 @@ export function buildPrivateTwitchAuthService({services}) {
         const clientId = await services.settingService.get("clientId", "twitch");
 
         const params = new URLSearchParams ({
-            client_id: clientId.data,
+            client_id: clientId.value,
             redirect_uri: twitchConfig.redirectUri,
             response_type: 'code',
             scope: twitchConfig.scopes.join(' ')

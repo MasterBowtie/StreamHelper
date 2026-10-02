@@ -19,6 +19,10 @@ describe("Logger", ()=>{
         streamRepo = {
             findActive: vi.fn()
         }
+        twitchRepo = {
+            findByTwitchId: vi.fn(),
+            createTwitchUser: vi.fn()
+        }
 
         logger = buildEventLogger({eventRepository: eventRepo, streamRepository: streamRepo})
     });
