@@ -102,16 +102,12 @@ export function buildTwitchAuthService({db, publicTwitchAuth, privateTwitchAuth,
                 });
         
         if (clientType.data === AUTH_CLIENT_TYPES.PRIVATE) {
-<<<<<<< Updated upstream
-            params.append("client_secret", await services.settingService.get("clientSecret", "twitch"));
-=======
             let secret = await services.settingService.get("clientSecret", "twitch");
 
             if (secret.success === false) {
                 return secret;
             }
             params.append("client_secret", secret.data);
->>>>>>> Stashed changes
         }
 
 
