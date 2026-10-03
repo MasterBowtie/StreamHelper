@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { FollowerRepository } from "../../server/database/followerRepository.js";
+import { FollowerRepository } from "../../database/followerRepository.js";
 
 let mockPool;
 let repository;
@@ -23,7 +23,7 @@ describe("createFollow", ()=>{
             {insertId: 68}
         ]);
 
-        const result = await repository.createFollower(follower);
+        const result = await repository.createFollowerByEvent(follower);
 
         expect(mockPool.execute).toHaveBeenCalled();
         expect(result).toBe(68);
@@ -148,6 +148,10 @@ describe("updateFollower", ()=>{
     });
 
     it("throws an error when nothing is passed in", async()=>{
+            const consoleError = vi
+            .spyOn(console, "error")
+            .mockImplementation(() => {});
+
         await expect(repository.updateFollower())
         .rejects.toThrow("updateFollower(): Called with no fields to update.");
     })

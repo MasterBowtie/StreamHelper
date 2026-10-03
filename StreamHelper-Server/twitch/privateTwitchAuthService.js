@@ -48,7 +48,7 @@ export function buildPrivateTwitchAuthService({services}) {
         if (clientId.success === false) return clientId;
 
         const params = new URLSearchParams ({
-            client_id: clientId.data,
+            client_id: clientId.value,
             redirect_uri: twitchConfig.redirectUri,
             response_type: 'code',
             scope: twitchConfig.scopes.join(' ')

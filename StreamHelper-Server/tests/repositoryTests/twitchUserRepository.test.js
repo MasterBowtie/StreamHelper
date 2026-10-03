@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { TwitchUserRepository } from "../../server/database/twitchUserRepository.js"
+import { TwitchUserRepository } from "../../database/twitchUserRepository.js"
 
 let mockPool;
 let repository;

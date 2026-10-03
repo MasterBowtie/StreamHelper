@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { buildEventDispatcher } from "../../server/events/eventDispatcher.js";
-import { buildEventLogger } from "../../server/events/eventHandlers/eventLogger.js";
+import { buildEventDispatcher } from "../../events/eventDispatcher.js";
+import { buildEventLogger } from "../../events/eventLogger.js";
 
 // Test messages
 import json_badEvent from "../fixtures/json_badEvent.js";
@@ -8,31 +8,40 @@ import json_streamonline from "../fixtures/json_streamonline.js";
 
 let dispatcher;
 let logger;
-let eventRepo;
-let streamRepo;
+let db;
+
+
+beforeEach(()=> {
+    db = {
+        eventRepository: {
+            createEvent: vi.fn(),
+        },
+        streamRepository: {
+            findActive: vi.fn(),
+        },
+        twitchUserRepository: {
+            createTwitchUser: vi.fn(),
+            findByTwitchId: vi.fn(),
+        }
+    }
+
+})
 
 describe("Logger", ()=>{
     beforeEach(()=>{
-        eventRepo = {
-            createEvent: vi.fn()
-        }
-        streamRepo = {
-            findActive: vi.fn()
-        }
-
-        logger = buildEventLogger({eventRepository: eventRepo, streamRepository: streamRepo})
+        logger = buildEventLogger(db);
     });
 
-    it("logs and event", async()=>{
-        streamRepo.findActive.mockResolvedValue([
+    it("logs an event", async()=>{
+        db.streamRepository.findActive.mockResolvedValue([
             {stream_id: 5}
         ]);
-        eventRepo.createEvent.mockResolvedValue(5);
+        db.eventRepository.createEvent.mockResolvedValue(5);
         
         const result = await logger(json_streamonline);
 
-        expect(streamRepo.findActive).toHaveBeenCalled();
-        expect(eventRepo.createEvent).toHaveBeenCalled();
+        expect(db.streamRepository.findActive).toHaveBeenCalled();
+        expect(db.eventRepository.createEvent).toHaveBeenCalled();
         expect(result).toBe(5);
     })
 })
@@ -71,7 +80,7 @@ describe("Dispatch", ()=>{
         await dispatcher.dispatch(json_badEvent);
 
         expect(mockHandler).toHaveBeenCalled();
-        expect(logger).toHaveBeenCalledTimes(0);
+        expect(logger).not.toHaveBeenCalled();
     });
 });
 

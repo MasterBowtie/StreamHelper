@@ -8,15 +8,15 @@ export function buildEventLogger({eventRepository, streamRepository, twitchUserR
 
         // console.log("EVENT LOGGER", message);
 
-        // const user = await twitchUserRepository.findByTwitchId(message.payload.event.user_id);
+        const user = await twitchUserRepository.findByTwitchId(message.payload.event.user_id);
 
-        // if (!user) {
-        //     await twitchUserRepository.createTwitchUser({
-        //         twitchId: message.payload.event.user_id, 
-        //         login: message.payload.event.user_login, 
-        //         displayName: message.payload.event.user_name
-        //     });
-        // }
+        if (!user) {
+            await twitchUserRepository.createTwitchUser({
+                twitchId: message.payload.event.user_id, 
+                login: message.payload.event.user_login, 
+                displayName: message.payload.event.user_name
+            });
+        }
 
         const event = {
             eventType: message.payload.subscription.type,
