@@ -1,12 +1,8 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest"; 
-import { buildTwitchAuthService } from "../../twitch/twitchAuthService.js";
 import { twitchConfig } from "../../twitch/twitchConfig.js";
-import { buildPublicTwitchAuthService } from "../../twitch/publicTwitchAuthService.js"
 import { buildPrivateTwitchAuthService } from "../../twitch/privateTwitchAuthService.js";
-import { SETTINGS_DEFAULTS } from "../../server/constants.js";
 
-let twitchAuthService;
-let publicTwitchAuth;
+
 let privateTwitchAuth;
 let components;
 
@@ -21,6 +17,7 @@ afterEach(()=> {
     vi.restoreAllMocks();
 })
 beforeEach(()=>{
+    global.fetch = vi.fn();
     components = {
         db: vi.fn(),
         services: {
@@ -30,104 +27,181 @@ beforeEach(()=>{
         },
         websocket: vi.fn(),
     }
-    publicTwitchAuth = buildPublicTwitchAuthService(components);
     privateTwitchAuth = buildPrivateTwitchAuthService(components);
-    twitchAuthService = buildTwitchAuthService(components);
 
-    components.services.settingService.get.mockImplementation(async (key, section) => {
-    const settings = {
-        "twitch.clientId": {
-                key: 'clientId',
-                section: "twitch",
-                value: '1234thisisatest',
-                type: "string",
-                description: "Twitch application client ID"
-            },
-        "twitch.clientType": {
-                key: "clientType",
-                section: "twitch",
-                value: "private",
-                type: "string",
-                description: "Twitch"
-            },
-    };
+    components.services.settingService.get.mockImplementation(
+        async (key, section) => {
+            const settings = {
+                "twitch.clientId": "1234thisisatest",
+                "twitch.clientType": "public",
+                "twitch.clientSecret": "thisisatest1234"
+            };
 
-    return settings[`${section}.${key}`];
-});
+            return {
+                success: true,
+                data: settings[`${section}.${key}`]
+            };
+        }
+    );
 })
 
-describe("GetLoginURL", () => {
-    it("return a valid URL", async () => {
-        const url = await privateTwitchAuth.getLoginUrl();
 
-        // Basic Test
-        expect(()=> new URL(url)).not.toThrow();
-    });
+describe("PrivateTwitchAuth", ()=> {
+    describe("GetLoginURL", () => {
+        it("returns a the Twitch login URL", async () => {
+            const result = await privateTwitchAuth.getLoginUrl();
 
-    it("uses the Twitch authorization endpoint", async () => {
-        const url = new URL(await privateTwitchAuth.getLoginUrl());
+            expect(components.services.settingService.get)
+                .toHaveBeenCalledWith("clientId", "twitch");
 
-        expect(url.origin + url.pathname).toBe(twitchConfig.oauth.authUrl)
-    });
+            const url = new URL(result);
 
-    it("includes the configured client id", async () => {
-        const url = new URL(await privateTwitchAuth.getLoginUrl());
-        let clientId = await components.services.settingService.get("clientId", "twitch");
-        
-        expect(url.searchParams.get("client_id")).toBe(clientId.value);
-    })
+            expect(url.origin + url.pathname)
+                .toBe(twitchConfig.oauth.authUrl);
 
-    it("includes the redirect URI", async () => {
-        const url = new URL(await privateTwitchAuth.getLoginUrl());
+            expect(url.searchParams.get("client_id"))
+                .toBe("1234thisisatest");
 
-        expect(url.searchParams.get("redirect_uri")).toBe(twitchConfig.redirectUri);
-    })
+            expect(url.searchParams.get("redirect_uri"))
+                .toBe(twitchConfig.redirectUri);
 
-    it("requests an authorization code", async () => {
-        const url = new URL(await privateTwitchAuth.getLoginUrl());
+            expect(url.searchParams.get("response_type"))
+                .toBe("code");
 
-        expect(url.searchParams.get("response_type")).toBe("code");
-    })
-
-    it("includes all configured scopes", async () => {
-        const url = new URL(await privateTwitchAuth.getLoginUrl());
-
-        expect(url.searchParams.get("scope")).toBe(twitchConfig.scopes.join(" "));
-    })
-})
-
-describe("ExchangeCodeForToken", () => {
-    it("return token data from Twitch", async () => {
-        mockFetch(true, {
-            access_token: "access123",
-            refresh_token: "refresh123",
-            expires_in: 3600
-            })
-        const result = await privateTwitchAuth.exchangeCodeForToken("test-code");
-
-        expect(fetch).toHaveBeenCalledWith(
-            twitchConfig.oauth.tokenUrl,
-            expect.objectContaining({
-                method: "POST"
-            })
-        );
-
-        expect(result.data).toEqual({
-            accessToken: "access123",
-            refreshToken: "refresh123",
-            expiresIn: 3600
-        });
-    });
-
-    it("thows when Twitch rejects the code", async()=> {
-        mockFetch(false, {
-            status: 400,
-            message: "Invalid authorization code"
+            expect(url.searchParams.get("scope"))
+                .toBe(twitchConfig.scopes.join(" "));
         });
 
-        let result = await privateTwitchAuth.exchangeCodeForToken("bad-code")
+        it("returns a setting error", async () => {
+            components.services.settingService.get.mockResolvedValue({
+                success: false,
+                message: "Failed to get client ID"
+            });
 
-        expect(result.success).toEqual(false);
-    });
+            const result = await privateTwitchAuth.getLoginUrl();
+
+            expect(components.services.settingService.get)
+                .toHaveBeenCalledWith("clientId", "twitch");
+
+            expect(result).toEqual({
+                success: false,
+                message: "Failed to get client ID"
+            });
+        });
+
+    })
+
+    describe("ExchangeCodeForToken", () => {
+        it("exchanges the authorization code for a token", async () => {
+            mockFetch(true, {
+                access_token: "access-token-123",
+                refresh_token: "refresh-token-123",
+                expires_in: 3600
+            });
+
+            const result = await privateTwitchAuth.exchangeCodeForToken(
+                "auth-code-123"
+            );
+
+            expect(components.services.settingService.get)
+                .toHaveBeenCalledWith("clientId", "twitch");
+
+            expect(components.services.settingService.get)
+                .toHaveBeenCalledWith("clientSecret", "twitch");
+
+            expect(fetch).toHaveBeenCalledWith(
+                twitchConfig.oauth.tokenUrl,
+                expect.objectContaining({
+                    method: "POST"
+                })
+            );
+
+            expect(result).toEqual({
+                success: true,
+                data: {
+                    accessToken: "access-token-123",
+                    refreshToken: "refresh-token-123",
+                    expiresIn: 3600
+                }
+            });
+        });
+
+        it("returns a Twitch error", async () => {
+            mockFetch(false, {
+                message: "Invalid authorization code"
+            });
+
+            const result = await privateTwitchAuth.exchangeCodeForToken(
+                "bad-auth-code"
+            );
+
+            expect(fetch).toHaveBeenCalledWith(
+                twitchConfig.oauth.tokenUrl,
+                expect.objectContaining({
+                    method: "POST"
+                })
+            );
+
+            expect(result).toEqual({
+                success: false,
+                message: "Private Auth: Failed to exchange code for token",
+                data: JSON.stringify({
+                    message: "Invalid authorization code"
+                })
+            });
+        });
+
+        it("returns a client ID setting error", async () => {
+            components.services.settingService.get.mockImplementationOnce(
+                async () => ({
+                    success: false,
+                    message: "Failed to get client ID"
+                })
+            );
+
+            const result = await privateTwitchAuth.exchangeCodeForToken(
+                "auth-code-123"
+            );
+
+            expect(components.services.settingService.get)
+                .toHaveBeenCalledWith("clientId", "twitch");
+
+            expect(fetch).not.toHaveBeenCalled();
+
+            expect(result).toEqual({
+                success: false,
+                message: "Failed to get client ID"
+            });
+        });
+
+        it("returns a client secret setting error", async () => {
+            components.services.settingService.get
+                .mockImplementationOnce(async () => ({
+                    success: true,
+                    data: "1234thisisatest"
+                }))
+                .mockImplementationOnce(async () => ({
+                    success: false,
+                    message: "Failed to get client secret"
+                }));
+
+            const result = await privateTwitchAuth.exchangeCodeForToken(
+                "auth-code-123"
+            );
+
+            expect(components.services.settingService.get)
+                .toHaveBeenNthCalledWith(1, "clientId", "twitch");
+
+            expect(components.services.settingService.get)
+                .toHaveBeenNthCalledWith(2, "clientSecret", "twitch");
+
+            expect(fetch).not.toHaveBeenCalled();
+
+            expect(result).toEqual({
+                success: false,
+                message: "Failed to get client secret"
+            });
+        });
+    })
+    
 })
-

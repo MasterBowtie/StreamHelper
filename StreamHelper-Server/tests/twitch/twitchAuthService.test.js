@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest"; 
 
 import { buildTwitchAuthService } from "../../twitch/twitchAuthService.js";
-import { buildPublicTwitchAuthService } from "../../twitch/publicTwitchAuthService.js"
-import { buildPrivateTwitchAuthService } from "../../twitch/privateTwitchAuthService.js";
 import { twitchConfig } from "../../twitch/twitchConfig.js";
 
 let twitchAuthService;
@@ -17,11 +15,9 @@ function mockFetch(ok, body) {
     });
 }
 
-afterEach(()=> {
-    vi.restoreAllMocks();
-})
+beforeEach(() => {
+    global.fetch = vi.fn();
 
-beforeEach(()=>{
     components = {
         db: {
             twitchUserRepository: {
@@ -30,45 +26,41 @@ beforeEach(()=>{
         },
         services: {
             settingService: {
-                get: vi.fn()
+                get: vi.fn().mockImplementation(async (key, section) => {
+                    const settings = {
+                        "twitch.clientId": "1234thisisatest",
+                        "twitch.clientType": "public",
+                        "twitch.clientSecret": "thisisatest1234"
+                    };
+
+                    return {
+                        success: true,
+                        data: settings[`${section}.${key}`]
+                    };
+                })
             }
         },
-        websocket: vi.fn(),
-    }
-
-
-    components.services.settingService.get.mockImplementation(async (key, section) => {
-    const settings = {
-        "twitch.clientId": {
-                key: 'clientId',
-                section: "twitch",
-                value: '1234thisisatest',
-                type: "string",
-                description: "Twitch application client ID"
-            },
-        "twitch.clientType": {
-                key: "clientType",
-                section: "twitch",
-                value: "public",
-                type: "string",
-                description: "Twitch"
-            },
-        "twitch.clientSecret": {
-                key: "clientSecret",
-                section: "twitch",
-                value: "thisisatest1234",
-                type: "password",
-                description: "Private Twitch application client secret"
-            }
+        websocket: vi.fn()
     };
 
-    return settings[`${section}.${key}`];
-    });
+    publicTwitchAuth = {
+        pollDeviceToken: vi.fn()
+    };
 
-    publicTwitchAuth = buildPublicTwitchAuthService(components);
-    privateTwitchAuth = buildPrivateTwitchAuthService(components);
-    twitchAuthService = buildTwitchAuthService({...components, publicTwitchAuth, privateTwitchAuth});
-})
+    privateTwitchAuth = {
+        exchangeCodeForToken: vi.fn()
+    };
+
+    twitchAuthService = buildTwitchAuthService({
+        ...components,
+        publicTwitchAuth,
+        privateTwitchAuth
+    });
+});
+
+afterEach(() => {
+    vi.restoreAllMocks();
+});
 
 
 describe("TwitchAuthService", ()=>{
@@ -206,15 +198,15 @@ describe("TwitchAuthService", ()=>{
                     const settings = {
                         clientType: {
                             success: true,
-                            value: "private"
+                            data: "private"
                         },
                         clientId: {
                             success: true,
-                            value: "1234thisisatest"
+                            data: "1234thisisatest"
                         },
                         clientSecret: {
                             success: true,
-                            value: "thisisatest1234"
+                            data: "thisisatest1234"
                         }
                     };
                 
@@ -246,15 +238,15 @@ describe("TwitchAuthService", ()=>{
                     const settings = {
                         "twitch.clientType": {
                             success: true,
-                            value: "public"
+                            data: "public"
                         },
                         "twitch.clientId": {
                             success: true,
-                            value: "1234thisisatest"
+                            data: "1234thisisatest"
                         },
                         "twitch.clientSecret": {
                             success: true,
-                            value: "thisisatest1234"
+                            data: "thisisatest1234"
                         }
                     };
                 
@@ -312,32 +304,227 @@ describe("TwitchAuthService", ()=>{
             });
 
             it("returns the token error", async () => {
-            });
+                publicTwitchAuth.pollDeviceToken = vi.fn().mockResolvedValue({
+                    success: false,
+                    message: "Invalid device code"
+                });
 
+                const authRequest = {
+                    type: "public",
+                    deviceCode: "bad-device-code"
+                };
+
+                const result =
+                    await twitchAuthService.authenticateBroadcaster(authRequest);
+
+                expect(publicTwitchAuth.pollDeviceToken)
+                    .toHaveBeenCalledWith("bad-device-code");
+
+                expect(fetch).not.toHaveBeenCalled();
+
+                expect(result).toEqual({
+                    success: false,
+                    message: "Invalid device code"
+                });
+            });
         });
 
 
         describe("private authentication", () => {
-
             it("exchanges the authorization code", async () => {
+                privateTwitchAuth.exchangeCodeForToken = vi.fn().mockResolvedValue({
+                    success: true,
+                    data: {
+                        accessToken: "access321",
+                        refreshToken: "refresh321",
+                        expiresIn: 3600
+                    }
+                });
+
+
+                mockFetch(true, {
+                    data: [{
+                        id: "141981764",
+                        login: "mctesterson",
+                        display_name: "McTesterson"
+                    }]
+                });
+
+                const authRequest = {
+                    type: "private",
+                    code: "test-auth-code"
+                };
+
+                await twitchAuthService.authenticateBroadcaster(authRequest);
+
+                expect(privateTwitchAuth.exchangeCodeForToken)
+                    .toHaveBeenCalledWith("test-auth-code");
             });
 
             it("returns the token error", async () => {
-            });
+                privateTwitchAuth.exchangeCodeForToken.mockResolvedValue({
+                    success: false,
+                    message: "Invalid authorization code"
+                });
 
+                const authRequest = {
+                    type: "private",
+                    code: "bad-auth-code"
+                };
+
+                const result =
+                    await twitchAuthService.authenticateBroadcaster(authRequest);
+
+                expect(privateTwitchAuth.exchangeCodeForToken)
+                    .toHaveBeenCalledWith("bad-auth-code");
+
+                expect(fetch).not.toHaveBeenCalled();
+
+                expect(result).toEqual({
+                    success: false,
+                    message: "Invalid authorization code"
+                });
+            });
         });
 
-
         it("returns an error for an unsupported authentication type", async () => {
+            const authRequest = {
+                type: "magic",
+            };
+
+            const result =
+                await twitchAuthService.authenticateBroadcaster(authRequest);
+
+            expect(publicTwitchAuth.pollDeviceToken)
+                .not.toHaveBeenCalled();
+
+            expect(privateTwitchAuth.exchangeCodeForToken)
+                .not.toHaveBeenCalled();
+
+            expect(result).toEqual({
+                success: false,
+                message: "Twitch Auth: Unsupported authentication type magic"
+            });
         });
 
         it("returns the Twitch user error", async () => {
+            publicTwitchAuth.pollDeviceToken.mockResolvedValue({
+                success: true,
+                data: {
+                    accessToken: "access321",
+                    refreshToken: "refresh321",
+                    expiresIn: 3600
+                }
+            });
+
+            mockFetch(false, {
+                message: "Failed to fetch Twitch user"
+            });
+
+            const authRequest = {
+                type: "public",
+                deviceCode: "test-device-code"
+            };
+
+            const result =
+                await twitchAuthService.authenticateBroadcaster(authRequest);
+
+            expect(publicTwitchAuth.pollDeviceToken)
+                .toHaveBeenCalledWith("test-device-code");
+
+            expect(fetch).toHaveBeenCalled();
+
+            expect(
+                components.db.twitchUserRepository.updateBroadcaster
+            ).not.toHaveBeenCalled();
+
+            expect(result).toEqual({
+                success: false,
+                message: "Failed to fetch Twitch user"
+            });
         });
 
         it("updates the broadcaster in the database", async () => {
+            publicTwitchAuth.pollDeviceToken.mockResolvedValue({
+                success: true,
+                data: {
+                    accessToken: "access321",
+                    refreshToken: "refresh321",
+                    expiresIn: 3600
+                }
+            });
+
+            mockFetch(true, {
+                data: [{
+                    id: "141981764",
+                    login: "mctesterson",
+                    display_name: "McTesterson"
+                }]
+            });
+
+            const authRequest = {
+                type: "public",
+                deviceCode: "test-device-code"
+            };
+
+            await twitchAuthService.authenticateBroadcaster(authRequest);
+
+            expect(components.db.twitchUserRepository.updateBroadcaster)
+                .toHaveBeenCalledWith({
+                    twitchUser: {
+                        twitchId: "141981764",
+                        login: "mctesterson",
+                        displayName: "McTesterson"
+                    },
+                    token: {
+                        accessToken: "access321",
+                        refreshToken: "refresh321",
+                        expiresIn: 3600
+                    }
+                });
         });
 
         it("returns the authenticated broadcaster data", async () => {
+            publicTwitchAuth.pollDeviceToken.mockResolvedValue({
+                success: true,
+                data: {
+                    accessToken: "access321",
+                    refreshToken: "refresh321",
+                    expiresIn: 3600
+                }
+            });
+
+            mockFetch(true, {
+                data: [{
+                    id: "141981764",
+                    login: "mctesterson",
+                    display_name: "McTesterson"
+                }]
+            });
+
+            const authRequest = {
+                type: "public",
+                deviceCode: "test-device-code"
+            };
+
+            const result =
+                await twitchAuthService.authenticateBroadcaster(authRequest);
+
+            expect(result).toEqual({
+                success: true,
+                data: {
+                    twitchUser: {
+                        twitchId: "141981764",
+                        login: "mctesterson",
+                        displayName: "McTesterson"
+                    },
+                    token: {
+                        accessToken: "access321",
+                        refreshToken: "refresh321",
+                        expiresIn: 3600
+                    }
+                }
+            });
         });
     })
 })
