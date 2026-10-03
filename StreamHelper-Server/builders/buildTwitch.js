@@ -74,7 +74,7 @@ export async function buildTwitch({ db, services, websocket }) {
             const result = await publicTwitchAuth.startDeviceAuth();
         
             if (!result.success) {
-                console.error("Public Connect Error:", result.data);
+                console.error("Public Connect Error:", result.message);
                 websocket.notifier.notify(EVENTS.ERRORS.TWITCH_CONNECT, {payload: result.data});
                 return;
             }
@@ -87,7 +87,7 @@ export async function buildTwitch({ db, services, websocket }) {
 
             return result;
         } else if (state.clientType === "private") {
-            console.error("Private Connect Error:", result.data);
+            console.error("Private Connect Error:");
             const url = await privateTwitchAuth.getLoginUrl();
 
             state.authentication = {
