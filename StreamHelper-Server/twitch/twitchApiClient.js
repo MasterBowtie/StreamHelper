@@ -85,6 +85,9 @@ function buildTwitchApiClient({
         const result = await request(`/streams?user_id=${userId}`);
 
         console.log("getStream:" , result);
+        if (result.success === false) {
+            return result;
+        }
 
         return result?.data[0] ?? null;
     }

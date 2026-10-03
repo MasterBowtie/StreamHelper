@@ -47,8 +47,9 @@ export function buildPrivateTwitchAuthService({services}) {
         const clientId = await services.settingService.get("clientId", "twitch");
         if (clientId.success === false) return clientId;
 
+
         const params = new URLSearchParams ({
-            client_id: clientId.value,
+            client_id: clientId.data,
             redirect_uri: twitchConfig.redirectUri,
             response_type: 'code',
             scope: twitchConfig.scopes.join(' ')
