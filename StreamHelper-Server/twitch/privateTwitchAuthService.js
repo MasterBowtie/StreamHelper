@@ -4,14 +4,20 @@ export function buildPrivateTwitchAuthService({services}) {
 
     async function exchangeCodeForToken(code) {
         const clientId = await services.settingService.get("clientId", "twitch");
+        if (clientId.success === false) return clientId;
+
+        const clientSecret = await services.settingService.get("clientSecret", "twitch");
+        if (clientSecret.success === false) return clientSecret;
+
+
         const response = await fetch(twitchConfig.oauth.tokenUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-            client_id: clientId,
-            client_secret: twitchConfig.clientSecret,
+            client_id: clientId.data,
+            client_secret: clientSecret.data,
             code,
             grant_type: "authorization_code",
             redirect_uri: twitchConfig.redirectUri
@@ -30,15 +36,16 @@ export function buildPrivateTwitchAuthService({services}) {
         return{
             success: true,
             data: {
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token,
-            expiresIn: data.expires_in
+                accessToken: data.access_token,
+                refreshToken: data.refresh_token,
+                expiresIn: data.expires_in
             },
         }
     }
 
     async function getLoginUrl() {
         const clientId = await services.settingService.get("clientId", "twitch");
+        if (clientId.success === false) return clientId;
 
         const params = new URLSearchParams ({
             client_id: clientId.data,
@@ -49,8 +56,6 @@ export function buildPrivateTwitchAuthService({services}) {
 
         return `${twitchConfig.oauth.authUrl}?${params}`;
     }
-
-    
 
     return {
         getLoginUrl,

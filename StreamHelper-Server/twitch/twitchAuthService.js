@@ -49,12 +49,16 @@ export function buildTwitchAuthService({db, publicTwitchAuth, privateTwitchAuth,
     async function fetchTwitchUser(accessToken) {
         const clientId = await services.settingService.get("clientId", "twitch");
 
+        if (clientId.success === false) {
+            return clientId;
+        }
+
         const response = await fetch(
             `${twitchConfig.helix.baseUrl}/users`,
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
-                    'Client-Id': clientId
+                    'Client-Id': clientId.data
                 }
             }
         );
@@ -98,7 +102,16 @@ export function buildTwitchAuthService({db, publicTwitchAuth, privateTwitchAuth,
                 });
         
         if (clientType.data === AUTH_CLIENT_TYPES.PRIVATE) {
+<<<<<<< Updated upstream
             params.append("client_secret", await services.settingService.get("clientSecret", "twitch"));
+=======
+            let secret = await services.settingService.get("clientSecret", "twitch");
+
+            if (secret.success === false) {
+                return secret;
+            }
+            params.append("client_secret", secret.data);
+>>>>>>> Stashed changes
         }
 
 

@@ -5,7 +5,7 @@ export function buildPublicTwitchAuthService({db, services}) {
     async function startDeviceAuth() {
         const clientId = await services.settingService.get("clientId", "twitch");
 
-        if (!clientId.success) {
+        if (clientId.success === false) {
             return clientId;
         }
 
@@ -47,7 +47,7 @@ export function buildPublicTwitchAuthService({db, services}) {
     async function pollDeviceToken(deviceCode) {
         const clientId = await services.settingService.get("clientId", "twitch");
 
-        if (!clientId.success) {
+        if (clientId.success === false) {
             return clientId;
         }
 
