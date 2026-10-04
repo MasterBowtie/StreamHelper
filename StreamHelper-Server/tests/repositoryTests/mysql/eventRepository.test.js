@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { EventRepository } from "../../database/eventRepository";
+import { EventRepository } from "../../../database/mysql/eventRepository.js";
+import { EventRepository as SqliteEventRepository } from "../../../database/sqlite/eventRepository.js";
 
 let mockPool;
 let repository;
