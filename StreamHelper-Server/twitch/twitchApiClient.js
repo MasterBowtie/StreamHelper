@@ -8,6 +8,8 @@ function buildTwitchApiClient({
         const token = await tokenManager.getValidAccessToken();
         const clientId = await services.settingService.get("clientId", "twitch");
 
+        if (clientId.success === false) return clientId;
+
         if (!token || token.success === false) {
             console.error("Error:", token.message);
             return {success: false, message: "No Access Token"};
@@ -81,12 +83,9 @@ function buildTwitchApiClient({
     }
 
     async function getStream(userId) {
-        // FIXME
         const result = await request(`/streams?user_id=${userId}`);
 
-        console.log("getStream:" , result);
-
-        return result?.data[0] ?? null;
+        return result;
     }
 
     async function getChannelInformation(userId) {

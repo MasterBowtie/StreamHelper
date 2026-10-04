@@ -49,24 +49,34 @@ export function buildTwitchAuthService({db, publicTwitchAuth, privateTwitchAuth,
     async function fetchTwitchUser(accessToken) {
         const clientId = await services.settingService.get("clientId", "twitch");
 
+        if (clientId.success === false) {
+            return clientId;
+        }
+
         const response = await fetch(
             `${twitchConfig.helix.baseUrl}/users`,
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
-                    'Client-Id': clientId
+                    'Client-Id': clientId.data
                 }
             }
         );
 
         if (!response.ok) {
-            throw new Error("Failed to fetch Twitch user");
+            return {
+                success: false,
+                message: "Failed to fetch Twitch user"
+            }
         }
 
         const data = await response.json();
 
         if (data.data.length === 0) {
-            throw new Error("User not found");
+            return {
+                success: false,
+                message: "User not found"
+            }
         }
 
         return {
@@ -84,10 +94,10 @@ export function buildTwitchAuthService({db, publicTwitchAuth, privateTwitchAuth,
         const clientId = await services.settingService.get("clientId", "twitch");
 
         if (clientType.success === false) {
-            console.log("Twitch Auth Error:", clientType.message);
+            console.error("Twitch Auth Error:", clientType.message);
             return clientType;
         } else if (clientId.success === false) {
-            console.log("Twitch Auth Error:", clientId.message);
+            console.error("Twitch Auth Error:", clientId.message);
             return clientId;
         }
 
@@ -98,9 +108,14 @@ export function buildTwitchAuthService({db, publicTwitchAuth, privateTwitchAuth,
                 });
         
         if (clientType.data === AUTH_CLIENT_TYPES.PRIVATE) {
-            params.append("client_secret", await services.settingService.get("clientSecret", "twitch"));
-        }
+            let secret = await services.settingService.get("clientSecret", "twitch");
 
+            console.log("refreshAccessToken:", secret);
+            if (secret.success === false) {
+                return secret;
+            }
+            params.append("client_secret", secret.data);
+        }
 
         const response = await fetch(
             twitchConfig.oauth.tokenUrl,
@@ -116,7 +131,6 @@ export function buildTwitchAuthService({db, publicTwitchAuth, privateTwitchAuth,
         const tokenData = await response.json();
 
         if (!response.ok) {
-                // console.log("refreshAccessToken", tokenData)
                 return {
                     success: false,
                     message: `RefreshAccessToken: ${tokenData.message}`

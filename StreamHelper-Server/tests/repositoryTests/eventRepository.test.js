@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { EventRepository } from "../../server/database/eventRepository";
+import { EventRepository } from "../../database/eventRepository";
 
 let mockPool;
 let repository;
@@ -73,10 +73,19 @@ describe("getEventById", ()=>{
 })
 
 describe("getEvents", ()=> {
-    it("Throw an error when no conditions are given", async()=>{
-        await expect(repository.getEvents())
-            .rejects.toThrow("getEvents(): No conditions were given");
-    })
+    it("returns an empty array when no conditions are given", async () => {
+        const consoleError = vi
+            .spyOn(console, "error")
+            .mockImplementation(() => {});
+
+        const result = await repository.getEvents();
+
+        expect(consoleError).toHaveBeenCalledWith(
+            "getEvents(): No conditions were given"
+        );
+
+        expect(result).toEqual([]);
+    });
 
     it("get events by type", async()=>{
         mockPool.execute.mockResolvedValue([
@@ -133,29 +142,29 @@ describe("getEvents", ()=> {
         expect(events.length).toBe(3);
     })
 
-    it("throw errors for bad limit params", async()=>{
-        await expect(repository.getEvents({eventType: "test", limit: 0}))
-            .rejects.toThrow("getEvents(): limit must be a positive integer");
+    it("return empty array with bad limit param", async()=>{
+        const consoleError = vi
+            .spyOn(console, "error")
+            .mockImplementation(() => {});
+
+        await repository.getEvents({eventType: "test", limit: "aaa"});
+
+        expect(consoleError).toHaveBeenCalledWith("getEvents(): limit must be a positive integer");
+
+        expect(await repository.getEvents({eventType: "test", limit: 0})).toEqual([])
             
-        await expect(repository.getEvents({eventType: "test", limit: "abc"}))
-            .rejects.toThrow("getEvents(): limit must be a positive integer");
+        expect(await repository.getEvents({eventType: "test", limit: "abc"})).toEqual([])
             
-        await expect(repository.getEvents({eventType: "test", limit: "5"}))
-            .rejects.toThrow("getEvents(): limit must be a positive integer");
+        expect(await repository.getEvents({eventType: "test", limit: "5"})).toEqual([])
 
-        await expect(repository.getEvents({eventType: "test", limit: null}))
-            .rejects.toThrow("getEvents(): limit must be a positive integer");
+        expect(await repository.getEvents({eventType: "test", limit: null})).toEqual([])
 
-        await expect(repository.getEvents({eventType: "test", limit: -1}))
-            .rejects.toThrow("getEvents(): limit must be a positive integer");
+        expect(await repository.getEvents({eventType: "test", limit: -1})).toEqual([])
 
-        await expect(repository.getEvents({eventType: "test", limit: 5.5}))
-            .rejects.toThrow("getEvents(): limit must be a positive integer");
+        expect(await repository.getEvents({eventType: "test", limit: 5.5})).toEqual([])
 
-        await expect(repository.getEvents({eventType: "test", limit: NaN}))
-            .rejects.toThrow("getEvents(): limit must be a positive integer");
+        expect(await repository.getEvents({eventType: "test", limit: NaN})).toEqual([])
 
-        await expect(repository.getEvents({eventType: "test", limit: isFinite}))
-            .rejects.toThrow("getEvents(): limit must be a positive integer");
+        expect(await repository.getEvents({eventType: "test", limit: isFinite})).toEqual([])
     })
 })

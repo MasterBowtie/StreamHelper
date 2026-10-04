@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { SubscriptionRepository } from "../../server/database/subscriptionRepository.js";
+import { SubscriptionRepository } from "../../database/subscriptionRepository.js";
 
 let mockPool;
 let repository;
