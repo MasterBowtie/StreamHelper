@@ -7,7 +7,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "server": "nodemon index.js"
+    "server": "nodemon index.js",
+    "test": "vitest"
   },
   "author": "MasterBowtie",
   "license": "ISC",
