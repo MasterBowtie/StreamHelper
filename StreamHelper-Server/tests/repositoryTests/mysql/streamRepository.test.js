@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { StreamRepository } from "../../database/streamRepository.js";
+import { StreamRepository } from "../../../database/streamRepository.js";
 import { create } from "express-handlebars";
 import json_streamonline from "../../fixtures/json_streamonline.js";
 

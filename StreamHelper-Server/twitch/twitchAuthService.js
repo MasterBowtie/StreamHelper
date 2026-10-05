@@ -102,7 +102,7 @@ export function buildTwitchAuthService({db, publicTwitchAuth, privateTwitchAuth,
         }
 
         const params = new URLSearchParams({
-                    client_id: clientId.value,
+                    client_id: clientId.data,
                     grant_type: 'refresh_token',
                     refresh_token: refreshToken
                 });
@@ -110,6 +110,7 @@ export function buildTwitchAuthService({db, publicTwitchAuth, privateTwitchAuth,
         if (clientType.data === AUTH_CLIENT_TYPES.PRIVATE) {
             let secret = await services.settingService.get("clientSecret", "twitch");
 
+            console.log("refreshAccessToken:", secret);
             if (secret.success === false) {
                 return secret;
             }

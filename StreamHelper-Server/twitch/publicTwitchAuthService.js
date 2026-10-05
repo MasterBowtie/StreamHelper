@@ -16,7 +16,7 @@ export function buildPublicTwitchAuthService({db, services}) {
                     "Content-Type": 'application/x-www-form-urlencoded'
                 },
                 body: new URLSearchParams({
-                    client_id: clientId.value,
+                    client_id: clientId.data,
                     scopes: twitchConfig.scopes.join(" ")
                 })
             }
@@ -59,7 +59,7 @@ export function buildPublicTwitchAuthService({db, services}) {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
                 body: new URLSearchParams({
-                    client_id: clientId.value,
+                    client_id: clientId.data,
                     device_code: deviceCode,
                     grant_type: "urn:ietf:params:oauth:grant-type:device_code"
                 })
