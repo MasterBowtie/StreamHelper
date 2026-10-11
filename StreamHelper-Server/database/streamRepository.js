@@ -52,7 +52,7 @@ export class StreamRepository {
         return result.affectedRows === 1;
     }
 
-    async getStream() {
+    async getLatest() {
         const [rows] = await this.pool.execute(
             `SELECT * FROM streams
             ORDER BY start_at DESC

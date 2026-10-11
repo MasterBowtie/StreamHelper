@@ -71,6 +71,16 @@ export function buildTwitchRouter(components, authRouter, eventSubRouter) {
         // console.log(components.twitch.twitchApiClient.getFollowers()
         res.send({subs});
     })
+
+    router.get("/stream", async (req, res) => {
+        const clientId = await components.services.settingService.get("clientId", "twitch");
+        
+        if (clientId.success === false) {
+            res.send(clientId);
+        }
+        
+        res.send(await components.twitch.twitchApiClient.getStream(clientId.data));
+    })
     
     return router;
 }
