@@ -3,11 +3,12 @@ import { EVENTS } from "../../websocket/events.js";
 function buildStreamOnlineHandler({twitch, db, websocket}) {
     async function handler(event) {
         const stream = await twitch.twitchApiClient.getStream(event.broadcaster_user_id);
-        console.log("HANDLER:", stream);
+        console.log("HANDLER Stream:", stream);
+        console.log("HANDLER Event:", event);
 
         var activeStream = await db.streamRepository.findActive();
         if (!activeStream) {
-            await db.streamRepository.startStream(new Date(event.started_at));
+            await db.streamRepository.startStream(stream);
             console.log("Hello! Stream is online!");
             await websocket.notifier.notify(EVENTS.TWITCH.ALERTS.ONLINE);
         } else {

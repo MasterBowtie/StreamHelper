@@ -14,12 +14,14 @@ export class StreamRepository {
     }
 
     // Uses Twitch stream start time
-    async startStream({start_at}) {
+    async startStream({started_at}) {
+        console.log("Start Repo", started_at);
+
         const [result] = await this.pool.execute(
             `INSERT INTO streams
             (start_at)
             VALUES (?)`,
-            [start_at]
+            [new Date(started_at)]
         )
 
         return result.insertId
