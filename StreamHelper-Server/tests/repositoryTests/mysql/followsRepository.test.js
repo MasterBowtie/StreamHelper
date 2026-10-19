@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { FollowerRepository } from "../../database/followerRepository.js";
+import { FollowerRepository } from "../../../database/followerRepository.js";
 
 let mockPool;
 let repository;

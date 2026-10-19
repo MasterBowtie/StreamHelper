@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { EventRepository } from "../../database/eventRepository";
+import { EventRepository } from "../../../database/eventRepository";
 
 let mockPool;
 let repository;

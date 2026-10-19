@@ -73,13 +73,19 @@ export function buildTwitchRouter(components, authRouter, eventSubRouter) {
     })
 
     router.get("/stream", async (req, res) => {
-        const clientId = await components.services.settingService.get("clientId", "twitch");
+        const clientId = components.twitch.getStatus().broadcaster;
+        console.log("ROUTER", clientId.twitchId);
         
-        if (clientId.success === false) {
-            res.send(clientId);
+        const stream = await components.twitch.twitchApiClient.getStream(clientId.twitchId);
+        res.send(stream);
+
+        var activeStream = await components.db.streamRepository.findActive();
+        console.log("GET ACTIVE", activeStream)
+        if (!activeStream) {
+            // await components.db.streamRepository.startStream(stream);
+            console.log("Hello! Stream is online!");
+            // await websocket.notifier.notify(EVENTS.TWITCH.ALERTS.ONLINE);
         }
-        
-        res.send(await components.twitch.twitchApiClient.getStream(clientId.data));
     })
     
     return router;
