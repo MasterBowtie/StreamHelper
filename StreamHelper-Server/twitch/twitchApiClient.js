@@ -28,6 +28,7 @@ function buildTwitchApiClient({
         );
 
         const data = await response.json();
+        // console.log(data);
 
         if (!response.ok) {
             console.error("Twitch API Error:", data)
@@ -83,6 +84,7 @@ function buildTwitchApiClient({
     }
 
     async function getStream(userId) {
+        // console.log("GET STREAM", userId);
         const result = await request(`/streams?user_id=${userId}`);
 
         return result;

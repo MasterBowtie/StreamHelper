@@ -15,7 +15,7 @@ export class StreamRepository {
 
     // Uses Twitch stream start time
     async startStream({started_at}) {
-        console.log("Start Repo", started_at);
+        // console.log("Start Repo", started_at);
 
         const [result] = await this.pool.execute(
             `INSERT INTO streams
@@ -65,7 +65,7 @@ export class StreamRepository {
     async updateStream({id, startAt, endAt}) {
         const [result] = await this.pool.execute(
             `UPDATE streams
-            SET start_at = ?,
+            SET started_at = ?,
             end_at = ?
             WHERE stream_id = ?`,
             [startAt, endAt, id]
