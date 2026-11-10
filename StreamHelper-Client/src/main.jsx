@@ -17,6 +17,7 @@ import AlertContainer from './overlays/alerts/AlertContainer.jsx'
 import { AlertProvider } from './contexts/AlertContext.jsx'
 import { BasicAlert } from './overlays/alerts/BasicAlert.jsx'
 import Chat from './overlays/Chat.jsx'
+import AdBreak from './overlays/AdBreak.jsx'
 
 const router = createHashRouter([
     {path: "/", element: <Layout/>, children: [
@@ -31,7 +32,8 @@ const router = createHashRouter([
         {path: "vote", element: <Vote/>},
         {path: "alert", element: <AlertProvider><AlertContainer/></AlertProvider>},
         {path: "follow", element: <BasicAlert/>},
-        {path: "chat", element: <Chat/>}
+        {path: "chat", element: <Chat/>},
+        {path: "ad", element: <AdBreak/>},
     ]} 
 
     // {path: "scripture", element: <Scripture/>, children: [

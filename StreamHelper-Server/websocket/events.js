@@ -12,6 +12,7 @@ export const EVENTS = {
             CLEAR_USER: 'twitch.chat.clear_user',
             NOTIFICATION: 'twitch.chat.notification',
             POINTS: 'twitch.point.redeem',
+            ADS: 'twitch.ad.start',
 
         },
         STATUS: {

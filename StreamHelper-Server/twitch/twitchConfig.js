@@ -27,5 +27,6 @@ export const twitchConfig = {
         'user:write:chat',
         'channel:read:redemptions',
         'moderator:manage:automod',
+        'channel.read.ads',
     ]
 }
