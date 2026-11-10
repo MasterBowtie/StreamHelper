@@ -32,7 +32,7 @@ function buildStreamOfflineHandler({db, websocket}) {
         
         if (ended) {
             stream = await db.streamRepository.getLatest();
-            const streamStart = new Date(stream.started_at);
+            const streamStart = new Date(stream.start_at);
             const streamEnd = new Date(stream.end_at);
             console.log(`Stream duration: ${streamEnd - streamStart}`);
 

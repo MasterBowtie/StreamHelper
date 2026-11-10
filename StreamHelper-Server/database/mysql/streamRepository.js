@@ -65,7 +65,7 @@ export class StreamRepository {
     async updateStream({id, startAt, endAt}) {
         const [result] = await this.pool.execute(
             `UPDATE streams
-            SET started_at = ?,
+            SET start_at = ?,
             end_at = ?
             WHERE stream_id = ?`,
             [startAt, endAt, id]
