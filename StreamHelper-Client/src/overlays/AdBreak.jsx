@@ -1,4 +1,4 @@
-import { useState, useEffect} from "react";
+import { useState, useEffect, useRef } from "react";
 import { useWebSocket } from "../contexts/WebSocketContext";
 
 export default function AdBreak() {
@@ -12,7 +12,7 @@ export default function AdBreak() {
     const timeout = useRef(null);
 
     useEffect(()=> {
-        alert.current(new Audio("No Wait Wait!.mp3"))
+        alert.current = new Audio("No Wait Wait!.mp3");
         alert.current.preload = "auto";
     }, [])
 
@@ -60,7 +60,7 @@ export default function AdBreak() {
         }
     },[connected, websocket]);
 
-    const remaining = endTime ? Math.max(0, Math.ceil((endTime = currentTime) / 1000)) : 0;
+    const remaining = endTime ? Math.max(0, Math.ceil((endTime - currentTime) / 1000)) : 0;
 
     return (
     <div id="adTimer" hidden={!adRunning}>
