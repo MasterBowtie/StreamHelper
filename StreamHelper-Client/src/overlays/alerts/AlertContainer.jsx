@@ -40,6 +40,21 @@ export default function AlertContainer() {
                             break;
                     }
                     break;
+                case 'twitch.bit.use':
+                    console.log("BIT REDEEM!", data);
+                    switch (data.payload.type) {
+                        case "cheer":
+                            break;
+                        case "custom_power_up":
+                            switch (data.payload.custom_power_up.title) {
+                                case "Creeper Scare":
+                                    sound = new Audio("Creeper_fuse.ogg");
+                                    duration = 2000;
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
             }
             if (sound) {
                 sound.preload = "auto";
@@ -69,6 +84,7 @@ export default function AlertContainer() {
         websocket.on("twitch.raid", callback);
         websocket.on("twitch.chat.message", testCallback);
         websocket.on("twitch.point.redeem", callback);
+        websocket.on("twitch.bits.use", callback);
         
         return () => {
             websocket.off("twitch.follow", callback);
@@ -76,6 +92,7 @@ export default function AlertContainer() {
             websocket.off("twitch.raid", callback);
             websocket.off("twitch.chat.message", testCallback);
             websocket.off("twitch.point.redeem", callback);
+            websocket.off("twitch.bits.use", callback);
         }
     }, [connected])
 
@@ -91,6 +108,8 @@ export default function AlertContainer() {
             return <SoundAlert alert={currentAlert}/>
         case "twitch.point.redeem":
             return <SoundAlert alert={currentAlert}/>
+        case 'twitch.bits.use':
+            return <BasicAlert alert={currentAlert} type={"is mean"}/>
 
     }
 

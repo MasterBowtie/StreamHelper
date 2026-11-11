@@ -28,5 +28,6 @@ export const twitchConfig = {
         'channel:read:redemptions',
         'moderator:manage:automod',
         'channel.read.ads',
+        'bits:read',
     ]
 }

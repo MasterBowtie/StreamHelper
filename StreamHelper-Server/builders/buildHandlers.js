@@ -1,3 +1,5 @@
+import { buildAdHandler } from "../events/eventHandlers/adHandler.js";
+import { buildBitHandler } from "../events/eventHandlers/bitsHandler.js";
 import { buildChatHandler, buildChatNotificationHandler } from "../events/eventHandlers/chatHandler.js";
 import { buildFollowHandler } from "../events/eventHandlers/followHandler.js";
 import { buildPointHandler } from "../events/eventHandlers/pointHandler.js";
@@ -14,7 +16,7 @@ export function buildHandlers({eventDispatcher, services, db, twitch, websocket}
     eventDispatcher.registerHandler("channel.follow", buildFollowHandler({db, services, websocket}), true);
     eventDispatcher.registerHandler("channel.subscribe", buildSubscriptionHandler({db, services, websocket}), true);
     eventDispatcher.registerHandler("channel.raid", buildRaidHandler({db, services, websocket}), true)
-
+    eventDispatcher.registerHandler("channel.ad_break.begin", buildAdHandler({websocket}), false);
     
     // Chat Handlers
     const chatHandler = buildChatHandler({websocket, twitch});
@@ -27,6 +29,7 @@ export function buildHandlers({eventDispatcher, services, db, twitch, websocket}
     eventDispatcher.registerHandler("channel.chat.clear_user_messages", chatHandler.clearUserHandler, false);
     eventDispatcher.registerHandler("channel.chat.notification", buildChatNotificationHandler({db, websocket}), false);
 
-    // Channel Points
+    // Channel Points & Bits
     eventDispatcher.registerHandler("channel.channel_points_custom_reward_redemption.add", buildPointHandler({websocket}), false);
+    eventDispatcher.registerHandler("channel.bits.use", buildBitHandler({websocket}), false);
 }

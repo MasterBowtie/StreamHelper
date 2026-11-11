@@ -1,6 +1,6 @@
 import { EVENTS } from "../../websocket/events.js";
 
-function buildAdHandler ({websocket, twitch}) {
+export function buildAdHandler ({websocket}) {
     var lastAd;
     var adDuration;
 
@@ -14,4 +14,6 @@ function buildAdHandler ({websocket, twitch}) {
 
         websocket.notifier.notify(EVENTS.TWITCH.ALERTS.ADS, event);
     }
+
+    return handler;
 }

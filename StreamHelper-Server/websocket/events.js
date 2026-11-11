@@ -13,7 +13,7 @@ export const EVENTS = {
             NOTIFICATION: 'twitch.chat.notification',
             POINTS: 'twitch.point.redeem',
             ADS: 'twitch.ad.start',
-
+            BITS: 'twitch.bit.use',
         },
         STATUS: {
             STATUS_CHANGE: "twitch.status.changed",
